@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qing.expert.mapper.FavoriteMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="FavoriteVOMap" type="com.qing.expert.vo.favorite.FavoriteVO">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="favorite_type" property="favoriteType"/>
+        <result column="target_id" property="targetId"/>
+        <result column="create_time" property="createTime"/>
+
+        <!-- 服务信息 -->
+        <association property="service" javaType="com.qing.expert.vo.favorite.FavoriteVO$ServiceInfo">
+            <result column="service_id" property="id"/>
+            <result column="service_title" property="title"/>
+            <result column="service_description" property="description"/>
+            <result column="service_price" property="price"/>
+            <result column="service_images" property="images" javaType="java.lang.String"/>
+            <result column="service_expert_name" property="expertName"/>
+            <result column="service_expert_avatar" property="expertAvatar"/>
+            <result column="service_rating" property="rating"/>
+            <result column="service_order_count" property="orderCount"/>
+        </association>
+
+        <!-- 达人信息 -->
+        <association property="expert" javaType="com.qing.expert.vo.favorite.FavoriteVO$ExpertInfo">
+            <result column="expert_id" property="id"/>
+            <result column="expert_name" property="name"/>
+            <result column="expert_description" property="description"/>
+            <result column="expert_avatar" property="avatar"/>
+            <result column="expert_rating" property="rating"/>
+            <result column="expert_order_count" property="orderCount"/>
+            <result column="expert_complete_count" property="completeCount"/>
+            <result column="expert_category_name" property="categoryName"/>
+        </association>
+    </resultMap>
+
+    <!-- 分页查询用户收藏列表 -->
+    <select id="selectUserFavoritePage" resultMap="FavoriteVOMap">
+        SELECT
+            f.id,
+            f.user_id,
+            f.favorite_type,
+            f.target_id,
+            f.create_time,
+
+                                                                                                            <!-- 服务信息 -->
+            CASE WHEN f.favorite_type = 'service' THEN s.id END as service_id,
+            CASE WHEN f.favorite_type = 'service' THEN s.name END as service_title,
+            CASE WHEN f.favorite_type = 'service' THEN s.description END as service_description,
+            CASE WHEN f.favorite_type = 'service' THEN s.price END as service_price,
+            CASE WHEN f.favorite_type = 'service' THEN s.images END as service_images,
+            CASE WHEN f.favorite_type = 'service' THEN e1.expert_name END as service_expert_name,
+            CASE WHEN f.favorite_type = 'service' THEN u1.avatar END as service_expert_avatar,
+            CASE WHEN f.favorite_type = 'service' THEN s.rating END as service_rating,
+            CASE WHEN f.favorite_type = 'service' THEN s.order_count END as service_order_count,
+
+                                                                                                            <!-- 达人信息 -->
+            CASE WHEN f.favorite_type = 'expert' THEN e2.id END as expert_id,
+            CASE WHEN f.favorite_type = 'expert' THEN e2.expert_name END as expert_name,
+            CASE WHEN f.favorite_type = 'expert' THEN e2.description END as expert_description,
+            CASE WHEN f.favorite_type = 'expert' THEN u2.avatar END as expert_avatar,
+            CASE WHEN f.favorite_type = 'expert' THEN e2.rating END as expert_rating,
+            CASE WHEN f.favorite_type = 'expert' THEN e2.order_count END as expert_order_count,
+            CASE WHEN f.favorite_type = 'expert' THEN e2.complete_count END as expert_complete_count,
+            CASE WHEN f.favorite_type = 'expert' THEN c.name END as expert_category_name
+
+        FROM favorites f
+        LEFT JOIN services s ON f.favorite_type = 'service' AND f.target_id = s.id
+        LEFT JOIN experts e1 ON s.expert_id = e1.id
+        LEFT JOIN users u1 ON e1.user_id = u1.id
+        LEFT JOIN experts e2 ON f.favorite_type = 'expert' AND f.target_id = e2.id
+        LEFT JOIN users u2 ON e2.user_id = u2.id
+        LEFT JOIN categories c ON e2.category_id = c.id
+
+        WHERE f.user_id = #{userId}
+        <if test="favoriteType != null and favoriteType != ''">
+            AND f.favorite_type = #{favoriteType}
+        </if>
+
+        ORDER BY f.create_time DESC
+    </select>
+
+    <!-- 检查用户是否已收藏 -->
+    <select id="checkUserFavorite" resultType="int">
+        SELECT COUNT(1)
+        FROM favorites
+        WHERE user_id = #{userId}
+        AND favorite_type = #{favoriteType}
+        AND target_id = #{targetId}
+    </select>
+
+    <!-- 获取用户收藏统计 -->
+    <select id="getUserFavoriteStatistics" resultType="map">
+        SELECT
+            COUNT(*) as totalCount,
+            COUNT(CASE WHEN favorite_type = 'service' THEN 1 END) as serviceCount,
+            COUNT(CASE WHEN favorite_type = 'expert' THEN 1 END) as expertCount
+        FROM favorites
+        WHERE user_id = #{userId}
+    </select>
+
+    <!-- 获取服务的收藏数量 -->
+    <select id="getServiceFavoriteCount" resultType="long">
+        SELECT COUNT(*)
+        FROM favorites
+        WHERE favorite_type = 'service'
+        AND target_id = #{serviceId}
+    </select>
+
+    <!-- 获取达人的收藏数量 -->
+    <select id="getExpertFavoriteCount" resultType="long">
+        SELECT COUNT(*)
+        FROM favorites
+        WHERE favorite_type = 'expert'
+        AND target_id = #{expertId}
+    </select>
+
+    <!-- 批量删除用户收藏 -->
+    <delete id="batchDeleteUserFavorites">
+        DELETE FROM favorites
+        WHERE user_id = #{userId}
+        <if test="favoriteType != null and favoriteType != ''">
+            AND favorite_type = #{favoriteType}
+        </if>
+    </delete>
+
+    <!-- 删除用户的收藏记录（验证用户权限） -->
+    <delete id="deleteUserFavorite">
+        DELETE FROM favorites
+        WHERE id = #{favoriteId}
+        AND user_id = #{userId}
+    </delete>
+
+    <!-- 获取热门收藏的服务列表 -->
+    <select id="selectHotFavoriteServices" resultMap="FavoriteVOMap">
+        SELECT
+            s.id as service_id,
+            s.name as service_title,
+            s.description as service_description,
+            s.price as service_price,
+            s.images as service_images,
+            e.expert_name as service_expert_name,
+            u.avatar as service_expert_avatar,
+            s.rating as service_rating,
+            s.order_count as service_order_count,
+            COUNT(f.id) as favorite_count
+        FROM services s
+        LEFT JOIN favorites f ON f.favorite_type = 'service' AND f.target_id = s.id
+        LEFT JOIN experts e ON s.expert_id = e.id
+        LEFT JOIN users u ON e.user_id = u.id
+        WHERE s.status = 1
+        GROUP BY s.id
+        ORDER BY favorite_count DESC, s.order_count DESC
+        <if test="limit != null">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+    <!-- 获取热门收藏的达人列表 -->
+    <select id="selectHotFavoriteExperts" resultMap="FavoriteVOMap">
+        SELECT
+            e.id as expert_id,
+            e.expert_name as expert_name,
+            e.description as expert_description,
+            u.avatar as expert_avatar,
+            e.rating as expert_rating,
+            e.order_count as expert_order_count,
+            e.complete_count as expert_complete_count,
+            c.name as expert_category_name,
+            COUNT(f.id) as favorite_count
+        FROM experts e
+        LEFT JOIN favorites f ON f.favorite_type = 'expert' AND f.target_id = e.id
+        LEFT JOIN users u ON e.user_id = u.id
+        LEFT JOIN categories c ON e.category_id = c.id
+        WHERE e.audit_status = 1 AND e.status = 1
+        GROUP BY e.id
+        ORDER BY favorite_count DESC, e.order_count DESC
+        <if test="limit != null">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+</mapper>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qing.expert.mapper.UserMapper">
+
+    <!-- 分页查询用户列表 -->
+    <select id="selectUserPage" resultType="com.qing.expert.entity.User">
+        SELECT id, openid, unionid, nickname, avatar, gender, phone, real_name, 
+               balance, total_recharge, total_consume, status, is_expert, 
+               register_time, last_login_time, create_time, update_time
+        FROM users
+        WHERE deleted = 0
+        <if test="keyword != null and keyword != ''">
+            AND (nickname LIKE CONCAT('%', #{keyword}, '%') 
+                 OR phone LIKE CONCAT('%', #{keyword}, '%')
+                 OR real_name LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        <if test="status != null">
+            AND status = #{status}
+        </if>
+        <if test="isExpert != null">
+            AND is_expert = #{isExpert}
+        </if>
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 根据openid查询用户 -->
+    <select id="selectByOpenid" resultType="com.qing.expert.entity.User">
+        SELECT id, openid, unionid, nickname, avatar, gender, phone, real_name, 
+               balance, total_recharge, total_consume, status, is_expert, 
+               register_time, last_login_time, create_time, update_time
+        FROM users
+        WHERE openid = #{openid} AND deleted = 0
+        LIMIT 1
+    </select>
+
+    <!-- 获取用户统计信息 -->
+    <select id="getUserStatistics" resultType="com.qing.expert.vo.UserStatisticsVO">
+        SELECT 
+            COUNT(*) as totalUsers,
+            COUNT(CASE WHEN DATE(register_time) = CURDATE() THEN 1 END) as todayNewUsers,
+            COUNT(CASE WHEN is_expert = 1 THEN 1 END) as totalExperts,
+            COUNT(CASE WHEN last_login_time >= DATE_SUB(NOW(), INTERVAL 30 MINUTE) THEN 1 END) as onlineUsers,
+            COUNT(CASE WHEN last_login_time >= DATE_SUB(NOW(), INTERVAL 7 DAY) THEN 1 END) as activeUsers,
+            COALESCE(SUM(balance), 0) as totalBalance,
+            COALESCE(SUM(total_recharge), 0) as totalRecharge,
+            COALESCE(SUM(total_consume), 0) as totalConsume
+        FROM users
+        WHERE deleted = 0 AND status = 1
+    </select>
+
+    <!-- 获取在线用户数量 -->
+    <select id="getOnlineUserCount" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM users
+        WHERE deleted = 0 
+          AND status = 1
+          AND last_login_time >= DATE_SUB(NOW(), INTERVAL #{minutes} MINUTE)
+    </select>
+
+    <!-- 获取新增用户数量 -->
+    <select id="getNewUserCount" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM users
+        WHERE deleted = 0
+          AND register_time >= #{startTime}
+          AND register_time &lt;= #{endTime}
+    </select>
+
+    <!-- 批量更新用户状态 -->
+    <update id="batchUpdateStatus">
+        UPDATE users
+        SET status = #{status}, update_time = NOW()
+        WHERE id IN
+        <foreach collection="userIds" item="userId" open="(" separator="," close=")">
+            #{userId}
+        </foreach>
+        AND deleted = 0
+    </update>
+
+</mapper>

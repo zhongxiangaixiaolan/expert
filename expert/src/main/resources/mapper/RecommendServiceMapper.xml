@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qing.expert.mapper.RecommendServiceMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="RecommendServiceVOMap" type="com.qing.expert.vo.RecommendServiceVO">
+        <id column="id" property="id"/>
+        <result column="service_id" property="serviceId"/>
+        <result column="service_name" property="serviceName"/>
+        <result column="price" property="price"/>
+        <result column="description" property="description"/>
+        <result column="images" property="images"/>
+        <result column="expert_id" property="expertId"/>
+        <result column="expert_name" property="expertName"/>
+        <result column="expert_avatar" property="expertAvatar"/>
+        <result column="expert_rating" property="expertRating"/>
+        <result column="category_id" property="categoryId"/>
+        <result column="category_name" property="categoryName"/>
+        <result column="recommend_type" property="recommendType"/>
+        <result column="recommend_type_desc" property="recommendTypeDesc"/>
+        <result column="sort_order" property="sortOrder"/>
+        <result column="recommend_reason" property="recommendReason"/>
+        <result column="status" property="status"/>
+        <result column="status_desc" property="statusDesc"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="creator" property="creator"/>
+        <result column="updater" property="updater"/>
+    </resultMap>
+
+    <!-- 基础查询SQL -->
+    <sql id="selectRecommendServiceVo">
+        SELECT
+            rs.id,
+            rs.service_id,
+            s.name as service_name,
+            s.price,
+            s.description,
+            s.images,
+            s.expert_id,
+            e.name as expert_name,
+            u.avatar as expert_avatar,
+            e.rating as expert_rating,
+            s.category_id,
+            c.name as category_name,
+            rs.recommend_type,
+            CASE rs.recommend_type
+                WHEN 'HOT' THEN '热门推荐'
+                WHEN 'FEATURED' THEN '精选推荐'
+                WHEN 'NEW' THEN '新品推荐'
+                WHEN 'DISCOUNT' THEN '优惠推荐'
+                ELSE '未知类型'
+            END as recommend_type_desc,
+            rs.sort_order,
+            rs.recommend_reason,
+            rs.status,
+            CASE rs.status
+                WHEN 0 THEN '禁用'
+                WHEN 1 THEN '启用'
+                ELSE '未知状态'
+            END as status_desc,
+            rs.start_time,
+            rs.end_time,
+            rs.create_time,
+            rs.update_time,
+            rs.creator,
+            rs.updater
+        FROM recommend_services rs
+        LEFT JOIN services s ON rs.service_id = s.id AND s.deleted = 0
+        LEFT JOIN experts e ON s.expert_id = e.id AND e.deleted = 0
+        LEFT JOIN users u ON e.user_id = u.id AND u.deleted = 0
+        LEFT JOIN categories c ON s.category_id = c.id AND c.deleted = 0
+        WHERE rs.deleted = 0
+    </sql>
+
+    <!-- 分页查询推荐服务列表 -->
+    <select id="selectRecommendServicePage" resultMap="RecommendServiceVOMap">
+        <include refid="selectRecommendServiceVo"/>
+        <where>
+            <if test="serviceId != null">
+                AND rs.service_id = #{serviceId}
+            </if>
+            <if test="recommendType != null and recommendType != ''">
+                AND rs.recommend_type = #{recommendType}
+            </if>
+            <if test="status != null">
+                AND rs.status = #{status}
+            </if>
+            <if test="expertName != null and expertName != ''">
+                AND e.name LIKE CONCAT('%', #{expertName}, '%')
+            </if>
+            <if test="serviceName != null and serviceName != ''">
+                AND s.name LIKE CONCAT('%', #{serviceName}, '%')
+            </if>
+        </where>
+        ORDER BY rs.sort_order DESC, rs.create_time DESC
+    </select>
+
+    <!-- 根据ID查询推荐服务详情 -->
+    <select id="selectRecommendServiceById" resultMap="RecommendServiceVOMap">
+        <include refid="selectRecommendServiceVo"/>
+        AND rs.id = #{id}
+    </select>
+
+    <!-- 查询推荐服务列表 -->
+    <select id="selectRecommendServiceList" resultMap="RecommendServiceVOMap">
+        <include refid="selectRecommendServiceVo"/>
+        <where>
+            <if test="recommendType != null and recommendType != ''">
+                AND rs.recommend_type = #{recommendType}
+            </if>
+            <if test="status != null">
+                AND rs.status = #{status}
+            </if>
+            <if test="status == null">
+                AND rs.status = 1
+                AND (rs.start_time IS NULL OR rs.start_time &lt;= NOW())
+                AND (rs.end_time IS NULL OR rs.end_time &gt;= NOW())
+            </if>
+        </where>
+        ORDER BY rs.sort_order DESC, rs.create_time DESC
+        <if test="limit != null and limit > 0">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+    <!-- 检查服务是否已被推荐 -->
+    <select id="checkServiceRecommended" resultType="int">
+        SELECT COUNT(1)
+        FROM recommend_services
+        WHERE deleted = 0
+        AND service_id = #{serviceId}
+        AND recommend_type = #{recommendType}
+        <if test="excludeId != null">
+            AND id != #{excludeId}
+        </if>
+    </select>
+
+    <!-- 获取最大排序权重 -->
+    <select id="getMaxSortOrder" resultType="java.lang.Integer">
+        SELECT COALESCE(MAX(sort_order), 0)
+        FROM recommend_services
+        WHERE deleted = 0
+        <if test="recommendType != null and recommendType != ''">
+            AND recommend_type = #{recommendType}
+        </if>
+    </select>
+
+</mapper>

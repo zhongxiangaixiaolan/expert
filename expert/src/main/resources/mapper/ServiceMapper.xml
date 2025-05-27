@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qing.expert.mapper.ServiceMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.qing.expert.entity.ServiceEntity">
+        <id column="id" property="id" />
+        <result column="expert_id" property="expertId" />
+        <result column="category_id" property="categoryId" />
+        <result column="name" property="name" />
+        <result column="description" property="description" />
+        <result column="price" property="price" />
+        <result column="images" property="images" />
+        <result column="tags" property="tags" />
+        <result column="is_hot" property="isHot" />
+        <result column="is_recommend" property="isRecommend" />
+        <result column="sort_order" property="sortOrder" />
+        <result column="status" property="status" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+        <result column="deleted" property="deleted" />
+    </resultMap>
+
+    <!-- 服务VO映射结果 -->
+    <resultMap id="ServiceVOResultMap" type="com.qing.expert.vo.ServiceVO">
+        <id column="id" property="id" />
+        <result column="expert_id" property="expertId" />
+        <result column="expert_name" property="expertName" />
+        <result column="expert_avatar" property="expertAvatar" />
+        <result column="category_id" property="categoryId" />
+        <result column="category_name" property="categoryName" />
+        <result column="name" property="name" />
+        <result column="description" property="description" />
+        <result column="price" property="price" />
+        <result column="images" property="images" />
+        <result column="tags" property="tags" />
+        <result column="is_hot" property="isHot" />
+        <result column="is_recommend" property="isRecommend" />
+        <result column="sort_order" property="sortOrder" />
+        <result column="status" property="status" />
+        <result column="status_text" property="statusText" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+    </resultMap>
+
+    <!-- 分页查询服务列表 -->
+    <select id="selectServicePage" resultMap="ServiceVOResultMap">
+        SELECT 
+            s.id,
+            s.expert_id,
+            e.real_name as expert_name,
+            e.avatar as expert_avatar,
+            s.category_id,
+            c.name as category_name,
+            s.name,
+            s.description,
+            s.price,
+            s.images,
+            s.tags,
+            s.is_hot,
+            s.is_recommend,
+            s.sort_order,
+            s.status,
+            CASE s.status 
+                WHEN 0 THEN '下架'
+                WHEN 1 THEN '上架'
+                ELSE '未知'
+            END as status_text,
+            s.create_time,
+            s.update_time
+        FROM services s
+        LEFT JOIN experts e ON s.expert_id = e.id
+        LEFT JOIN categories c ON s.category_id = c.id
+        WHERE s.deleted = 0
+        <if test="expertId != null">
+            AND s.expert_id = #{expertId}
+        </if>
+        <if test="categoryId != null">
+            AND s.category_id = #{categoryId}
+        </if>
+        <if test="name != null and name != ''">
+            AND s.name LIKE CONCAT('%', #{name}, '%')
+        </if>
+        <if test="status != null">
+            AND s.status = #{status}
+        </if>
+        <if test="isHot != null">
+            AND s.is_hot = #{isHot}
+        </if>
+        <if test="isRecommend != null">
+            AND s.is_recommend = #{isRecommend}
+        </if>
+        ORDER BY s.sort_order DESC, s.create_time DESC
+    </select>
+
+    <!-- 根据ID查询服务详情 -->
+    <select id="selectServiceById" resultMap="ServiceVOResultMap">
+        SELECT 
+            s.id,
+            s.expert_id,
+            e.real_name as expert_name,
+            e.avatar as expert_avatar,
+            s.category_id,
+            c.name as category_name,
+            s.name,
+            s.description,
+            s.price,
+            s.images,
+            s.tags,
+            s.is_hot,
+            s.is_recommend,
+            s.sort_order,
+            s.status,
+            CASE s.status 
+                WHEN 0 THEN '下架'
+                WHEN 1 THEN '上架'
+                ELSE '未知'
+            END as status_text,
+            s.create_time,
+            s.update_time
+        FROM services s
+        LEFT JOIN experts e ON s.expert_id = e.id
+        LEFT JOIN categories c ON s.category_id = c.id
+        WHERE s.id = #{id} AND s.deleted = 0
+    </select>
+
+    <!-- 获取达人的服务列表 -->
+    <select id="selectServicesByExpertId" resultMap="ServiceVOResultMap">
+        SELECT 
+            s.id,
+            s.expert_id,
+            e.real_name as expert_name,
+            e.avatar as expert_avatar,
+            s.category_id,
+            c.name as category_name,
+            s.name,
+            s.description,
+            s.price,
+            s.images,
+            s.tags,
+            s.is_hot,
+            s.is_recommend,
+            s.sort_order,
+            s.status,
+            CASE s.status 
+                WHEN 0 THEN '下架'
+                WHEN 1 THEN '上架'
+                ELSE '未知'
+            END as status_text,
+            s.create_time,
+            s.update_time
+        FROM services s
+        LEFT JOIN experts e ON s.expert_id = e.id
+        LEFT JOIN categories c ON s.category_id = c.id
+        WHERE s.expert_id = #{expertId} AND s.deleted = 0
+        <if test="status != null">
+            AND s.status = #{status}
+        </if>
+        ORDER BY s.sort_order DESC, s.create_time DESC
+    </select>
+
+    <!-- 获取分类下的服务列表 -->
+    <select id="selectServicesByCategoryId" resultMap="ServiceVOResultMap">
+        SELECT 
+            s.id,
+            s.expert_id,
+            e.real_name as expert_name,
+            e.avatar as expert_avatar,
+            s.category_id,
+            c.name as category_name,
+            s.name,
+            s.description,
+            s.price,
+            s.images,
+            s.tags,
+            s.is_hot,
+            s.is_recommend,
+            s.sort_order,
+            s.status,
+            CASE s.status 
+                WHEN 0 THEN '下架'
+                WHEN 1 THEN '上架'
+                ELSE '未知'
+            END as status_text,
+            s.create_time,
+            s.update_time
+        FROM services s
+        LEFT JOIN experts e ON s.expert_id = e.id
+        LEFT JOIN categories c ON s.category_id = c.id
+        WHERE s.category_id = #{categoryId} AND s.deleted = 0
+        <if test="status != null">
+            AND s.status = #{status}
+        </if>
+        ORDER BY s.sort_order DESC, s.create_time DESC
+        <if test="limit != null">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+    <!-- 获取热门服务列表 -->
+    <select id="selectHotServices" resultMap="ServiceVOResultMap">
+        SELECT 
+            s.id,
+            s.expert_id,
+            e.real_name as expert_name,
+            e.avatar as expert_avatar,
+            s.category_id,
+            c.name as category_name,
+            s.name,
+            s.description,
+            s.price,
+            s.images,
+            s.tags,
+            s.is_hot,
+            s.is_recommend,
+            s.sort_order,
+            s.status,
+            CASE s.status 
+                WHEN 0 THEN '下架'
+                WHEN 1 THEN '上架'
+                ELSE '未知'
+            END as status_text,
+            s.create_time,
+            s.update_time
+        FROM services s
+        LEFT JOIN experts e ON s.expert_id = e.id
+        LEFT JOIN categories c ON s.category_id = c.id
+        WHERE s.is_hot = 1 AND s.status = 1 AND s.deleted = 0
+        ORDER BY s.sort_order DESC, s.create_time DESC
+        <if test="limit != null">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+    <!-- 获取推荐服务列表 -->
+    <select id="selectRecommendServices" resultMap="ServiceVOResultMap">
+        SELECT 
+            s.id,
+            s.expert_id,
+            e.real_name as expert_name,
+            e.avatar as expert_avatar,
+            s.category_id,
+            c.name as category_name,
+            s.name,
+            s.description,
+            s.price,
+            s.images,
+            s.tags,
+            s.is_hot,
+            s.is_recommend,
+            s.sort_order,
+            s.status,
+            CASE s.status 
+                WHEN 0 THEN '下架'
+                WHEN 1 THEN '上架'
+                ELSE '未知'
+            END as status_text,
+            s.create_time,
+            s.update_time
+        FROM services s
+        LEFT JOIN experts e ON s.expert_id = e.id
+        LEFT JOIN categories c ON s.category_id = c.id
+        WHERE s.is_recommend = 1 AND s.status = 1 AND s.deleted = 0
+        ORDER BY s.sort_order DESC, s.create_time DESC
+        <if test="limit != null">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+    <!-- 检查服务名称是否存在 -->
+    <select id="checkNameExists" resultType="int">
+        SELECT COUNT(1)
+        FROM services
+        WHERE name = #{name} 
+        AND expert_id = #{expertId}
+        AND deleted = 0
+        <if test="excludeId != null">
+            AND id != #{excludeId}
+        </if>
+    </select>
+
+    <!-- 获取最大排序权重 -->
+    <select id="getMaxSortOrder" resultType="java.lang.Integer">
+        SELECT COALESCE(MAX(sort_order), 0)
+        FROM services
+        WHERE expert_id = #{expertId} AND deleted = 0
+    </select>
+
+</mapper>

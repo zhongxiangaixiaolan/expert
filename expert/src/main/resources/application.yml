@@ -1,0 +1,193 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: expert
+
+  # 数据库配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/expert_db?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+    username: root
+    password: 1234
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  # Redis配置
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+      database: 0
+      timeout: 10000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-wait: -1ms
+          max-idle: 8
+          min-idle: 0
+
+  # 文件上传配置
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 100MB
+
+  # JSON配置
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    default-property-inclusion: non_null
+
+# MyBatis Plus配置
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+    call-setters-on-nulls: true
+    jdbc-type-for-null: "null"
+    # log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 关闭MyBatis控制台SQL日志
+  global-config:
+    db-config:
+      id-type: ASSIGN_ID
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  mapper-locations: classpath*:mapper/**/*Mapper.xml
+
+# Swagger配置
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  packages-to-scan: com.qing.expert.controller
+
+# 日志配置 - 极简控制台输出
+logging:
+  level:
+    root: error # 根日志只显示错误
+    com.qing.expert: info # 应用程序日志保持info
+    # 框架日志完全关闭或只显示错误
+    org.springframework: "off"
+    org.springframework.boot: error
+    org.springframework.boot.logging: "off" # 关闭Spring Boot日志系统的日志
+    org.apache.catalina: "off"
+    org.apache.tomcat: "off"
+    org.hibernate: "off"
+    com.baomidou.mybatisplus: "off"
+    org.mybatis: "off"
+    com.zaxxer.hikari: "off"
+    com.mysql.cj: "off"
+    io.lettuce: "off"
+    io.netty: "off"
+    ch.qos.logback: "off" # 关闭Logback自身日志
+    org.slf4j: "off"
+  pattern:
+    # 极简控制台日志格式
+    console: "%clr(%d{HH:mm:ss}){faint} %clr(%5p){bold,red} %clr(%logger{15}){cyan} %clr(%m){green}%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+  file:
+    name: logs/expert.log
+
+# 自定义配置
+app:
+  # 日志文件开关
+  log:
+    file-enabled: false # 设置为false可禁用日志文件生成
+  logback:
+    rollingpolicy:
+      max-file-size: 100MB
+      max-history: 30
+      total-size-cap: 3GB
+
+# 自定义配置
+expert:
+  # 日志配置
+  log:
+    # 是否启用文件日志 (true: 生成日志文件, false: 仅控制台输出)
+    file-enabled: false
+    # 日志文件路径
+    file-path: logs/
+    # 是否启用SQL日志文件
+    sql-file-enabled: false
+    # 是否启用错误日志文件
+    error-file-enabled: false
+    # 日志文件最大大小
+    max-file-size: 100MB
+    # 日志文件保留天数
+    max-history: 30
+    # 日志总大小限制
+    total-size-cap: 3GB
+
+  # JWT配置
+  jwt:
+    secret: expert-jwt-secret-key-2024-secure-256-bit-hmac-sha-algorithm-compatible
+    expiration: 86400000 # 24小时
+    header: Authorization
+    prefix: Bearer
+
+  # 文件存储配置
+  file:
+    upload-path: src/main/resources/static/
+    max-size: 10485760 # 10MB
+    allowed-types: jpg,jpeg,png,gif,pdf,doc,docx
+
+  # 微信小程序配置（默认值，可通过数据库动态配置覆盖）
+  wechat:
+    miniapp:
+      app-id: wxc9b98294ace36519
+      app-secret: 34887a584a83a6a53b010ae59ccc9f19
+    pay:
+      mch-id:
+      api-key:
+      cert-path:
+      notify-url: ${server.servlet.context-path}/wechat/pay/notify
+
+  # 阿里云OSS配置（默认值，可通过数据库动态配置覆盖）
+  oss:
+    endpoint:
+    access-key-id:
+    access-key-secret:
+    bucket-name:
+    domain:
+
+---
+# 开发环境配置
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    url: jdbc:mysql://localhost:3306/expert_db?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=GMT%2B8
+
+logging:
+  level:
+    root: info
+    com.qing.expert: debug
+
+---
+# 生产环境配置
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    url: jdbc:mysql://localhost:3306/expert_db?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+
+logging:
+  level:
+    root: warn
+    com.qing.expert: info
+  file:
+    name: logs/expert.log

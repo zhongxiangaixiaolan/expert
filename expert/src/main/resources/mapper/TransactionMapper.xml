@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qing.expert.mapper.TransactionMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="TransactionVOMap" type="com.qing.expert.vo.transaction.TransactionVO">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="type" property="type"/>
+        <result column="amount" property="amount"/>
+        <result column="status" property="status"/>
+        <result column="description" property="description"/>
+        <result column="order_no" property="orderNo"/>
+        <result column="payment_method" property="paymentMethod"/>
+        <result column="service_name" property="serviceName"/>
+        <result column="withdraw_account" property="withdrawAccount"/>
+        <result column="order_id" property="orderId"/>
+        <result column="create_time" property="createTime"/>
+        <result column="finish_time" property="finishTime"/>
+    </resultMap>
+
+    <!-- 分页查询用户交易记录 -->
+    <select id="selectUserTransactionPage" resultMap="TransactionVOMap">
+        SELECT 
+            id,
+            user_id,
+            type,
+            amount,
+            status,
+            description,
+            order_no,
+            payment_method,
+            service_name,
+            withdraw_account,
+            order_id,
+            create_time,
+            finish_time
+        FROM transaction_records
+        WHERE user_id = #{userId}
+        <if test="type != null and type != ''">
+            AND type = #{type}
+        </if>
+        <if test="status != null">
+            AND status = #{status}
+        </if>
+        <if test="startTime != null">
+            AND create_time >= #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND create_time &lt;= #{endTime}
+        </if>
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 获取用户交易记录详情 -->
+    <select id="selectUserTransactionDetail" resultMap="TransactionVOMap">
+        SELECT 
+            id,
+            user_id,
+            type,
+            amount,
+            status,
+            description,
+            order_no,
+            payment_method,
+            service_name,
+            withdraw_account,
+            order_id,
+            create_time,
+            finish_time
+        FROM transaction_records
+        WHERE id = #{transactionId}
+        AND user_id = #{userId}
+    </select>
+
+    <!-- 获取用户统计信息 -->
+    <select id="getUserStatistics" resultType="map">
+        SELECT 
+            COALESCE(u.balance, 0) as balance,
+            COALESCE(SUM(CASE WHEN tr.type = 'recharge' AND tr.status = 1 THEN tr.amount ELSE 0 END), 0) as totalRecharge,
+            COALESCE(SUM(CASE WHEN tr.type = 'consume' AND tr.status = 1 THEN tr.amount ELSE 0 END), 0) as totalConsume,
+            COALESCE(SUM(CASE WHEN tr.type = 'withdraw' AND tr.status = 1 THEN tr.amount ELSE 0 END), 0) as totalWithdraw,
+            COALESCE(SUM(CASE WHEN tr.status = 0 THEN tr.amount ELSE 0 END), 0) as pendingAmount
+        FROM users u
+        LEFT JOIN transaction_records tr ON u.id = tr.user_id
+        WHERE u.id = #{userId}
+        GROUP BY u.id, u.balance
+    </select>
+
+    <!-- 根据订单号查询交易记录 -->
+    <select id="selectByOrderNo" resultType="com.qing.expert.entity.TransactionRecord">
+        SELECT * FROM transaction_records
+        WHERE order_no = #{orderNo}
+    </select>
+
+    <!-- 根据第三方交易号查询 -->
+    <select id="selectByThirdPartyNo" resultType="com.qing.expert.entity.TransactionRecord">
+        SELECT * FROM transaction_records
+        WHERE third_party_no = #{thirdPartyNo}
+    </select>
+
+    <!-- 获取用户指定类型的交易总额 -->
+    <select id="getUserTransactionAmount" resultType="double">
+        SELECT COALESCE(SUM(amount), 0)
+        FROM transaction_records
+        WHERE user_id = #{userId}
+        AND type = #{type}
+        <if test="status != null">
+            AND status = #{status}
+        </if>
+    </select>
+
+    <!-- 获取用户最近的交易记录 -->
+    <select id="selectUserRecentTransactions" resultMap="TransactionVOMap">
+        SELECT 
+            id,
+            user_id,
+            type,
+            amount,
+            status,
+            description,
+            order_no,
+            payment_method,
+            service_name,
+            withdraw_account,
+            order_id,
+            create_time,
+            finish_time
+        FROM transaction_records
+        WHERE user_id = #{userId}
+        ORDER BY create_time DESC
+        <if test="limit != null">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+    <!-- 统计用户交易数量 -->
+    <select id="getUserTransactionCount" resultType="map">
+        SELECT 
+            COUNT(*) as totalCount,
+            COUNT(CASE WHEN type = 'recharge' THEN 1 END) as rechargeCount,
+            COUNT(CASE WHEN type = 'consume' THEN 1 END) as consumeCount,
+            COUNT(CASE WHEN type = 'withdraw' THEN 1 END) as withdrawCount,
+            COUNT(CASE WHEN type = 'refund' THEN 1 END) as refundCount,
+            COUNT(CASE WHEN status = 0 THEN 1 END) as pendingCount,
+            COUNT(CASE WHEN status = 1 THEN 1 END) as successCount,
+            COUNT(CASE WHEN status = 2 THEN 1 END) as failedCount
+        FROM transaction_records
+        WHERE user_id = #{userId}
+    </select>
+
+    <!-- 获取系统交易统计（管理端用） -->
+    <select id="getSystemTransactionStatistics" resultType="map">
+        SELECT 
+            COUNT(*) as totalCount,
+            COUNT(CASE WHEN type = 'recharge' THEN 1 END) as rechargeCount,
+            COUNT(CASE WHEN type = 'consume' THEN 1 END) as consumeCount,
+            COUNT(CASE WHEN type = 'withdraw' THEN 1 END) as withdrawCount,
+            COUNT(CASE WHEN type = 'refund' THEN 1 END) as refundCount,
+            COALESCE(SUM(CASE WHEN type = 'recharge' AND status = 1 THEN amount ELSE 0 END), 0) as totalRechargeAmount,
+            COALESCE(SUM(CASE WHEN type = 'consume' AND status = 1 THEN amount ELSE 0 END), 0) as totalConsumeAmount,
+            COALESCE(SUM(CASE WHEN type = 'withdraw' AND status = 1 THEN amount ELSE 0 END), 0) as totalWithdrawAmount,
+            COALESCE(SUM(CASE WHEN type = 'refund' AND status = 1 THEN amount ELSE 0 END), 0) as totalRefundAmount
+        FROM transaction_records
+        <where>
+            <if test="startTime != null">
+                AND create_time >= #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND create_time &lt;= #{endTime}
+            </if>
+        </where>
+    </select>
+
+    <!-- 更新交易状态 -->
+    <update id="updateTransactionStatus">
+        UPDATE transaction_records
+        SET status = #{status}
+        <if test="finishTime != null">
+            , finish_time = #{finishTime}
+        </if>
+        , update_time = NOW()
+        WHERE id = #{transactionId}
+    </update>
+
+</mapper>

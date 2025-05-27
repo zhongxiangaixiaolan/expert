@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qing.expert.mapper.AuditRecordMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="AuditRecordVOMap" type="com.qing.expert.vo.AuditRecordVO">
+        <id column="id" property="id"/>
+        <result column="audit_type" property="auditType"/>
+        <result column="audit_type_desc" property="auditTypeDesc"/>
+        <result column="business_id" property="businessId"/>
+        <result column="audit_title" property="auditTitle"/>
+        <result column="audit_content" property="auditContent"/>
+        <result column="audit_status" property="auditStatus"/>
+        <result column="audit_status_desc" property="auditStatusDesc"/>
+        <result column="audit_opinion" property="auditOpinion"/>
+        <result column="auditor_id" property="auditorId"/>
+        <result column="auditor_name" property="auditorName"/>
+        <result column="audit_time" property="auditTime"/>
+        <result column="submitter_id" property="submitterId"/>
+        <result column="submitter_name" property="submitterName"/>
+        <result column="submit_time" property="submitTime"/>
+        <result column="priority" property="priority"/>
+        <result column="priority_desc" property="priorityDesc"/>
+        <result column="attachments" property="attachments"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="creator" property="creator"/>
+        <result column="updater" property="updater"/>
+        <result column="processing_time" property="processingTime"/>
+    </resultMap>
+
+    <!-- 基础查询SQL -->
+    <sql id="selectAuditRecordVo">
+        SELECT 
+            ar.id,
+            ar.audit_type,
+            CASE ar.audit_type
+                WHEN 'EXPERT' THEN '达人审核'
+                WHEN 'SERVICE' THEN '服务审核'
+                WHEN 'REVIEW' THEN '评价审核'
+                WHEN 'WITHDRAW' THEN '提现审核'
+                WHEN 'CONTENT' THEN '内容审核'
+                ELSE '未知类型'
+            END as audit_type_desc,
+            ar.business_id,
+            ar.audit_title,
+            ar.audit_content,
+            ar.audit_status,
+            CASE ar.audit_status
+                WHEN 'PENDING' THEN '待审核'
+                WHEN 'APPROVED' THEN '审核通过'
+                WHEN 'REJECTED' THEN '审核拒绝'
+                ELSE '未知状态'
+            END as audit_status_desc,
+            ar.audit_opinion,
+            ar.auditor_id,
+            ar.auditor_name,
+            ar.audit_time,
+            ar.submitter_id,
+            ar.submitter_name,
+            ar.submit_time,
+            ar.priority,
+            CASE ar.priority
+                WHEN 1 THEN '低'
+                WHEN 2 THEN '中'
+                WHEN 3 THEN '高'
+                ELSE '未知'
+            END as priority_desc,
+            ar.attachments,
+            ar.create_time,
+            ar.update_time,
+            ar.creator,
+            ar.updater,
+            CASE 
+                WHEN ar.audit_time IS NOT NULL AND ar.submit_time IS NOT NULL 
+                THEN TIMESTAMPDIFF(MINUTE, ar.submit_time, ar.audit_time)
+                ELSE NULL
+            END as processing_time
+        FROM audit_records ar
+        WHERE ar.deleted = 0
+    </sql>
+
+    <!-- 分页查询审核记录列表 -->
+    <select id="selectAuditRecordPage" resultMap="AuditRecordVOMap">
+        <include refid="selectAuditRecordVo"/>
+        <where>
+            <if test="auditType != null and auditType != ''">
+                AND ar.audit_type = #{auditType}
+            </if>
+            <if test="auditStatus != null and auditStatus != ''">
+                AND ar.audit_status = #{auditStatus}
+            </if>
+            <if test="auditorName != null and auditorName != ''">
+                AND ar.auditor_name LIKE CONCAT('%', #{auditorName}, '%')
+            </if>
+            <if test="submitterName != null and submitterName != ''">
+                AND ar.submitter_name LIKE CONCAT('%', #{submitterName}, '%')
+            </if>
+            <if test="priority != null">
+                AND ar.priority = #{priority}
+            </if>
+            <if test="startTime != null">
+                AND ar.create_time &gt;= #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND ar.create_time &lt;= #{endTime}
+            </if>
+        </where>
+        ORDER BY ar.priority DESC, ar.create_time DESC
+    </select>
+
+    <!-- 根据ID查询审核记录详情 -->
+    <select id="selectAuditRecordById" resultMap="AuditRecordVOMap">
+        <include refid="selectAuditRecordVo"/>
+        AND ar.id = #{id}
+    </select>
+
+    <!-- 查询待审核记录数量 -->
+    <select id="countPendingAuditRecords" resultType="int">
+        SELECT COUNT(1)
+        FROM audit_records
+        WHERE deleted = 0
+        AND audit_status = 'PENDING'
+        <if test="auditType != null and auditType != ''">
+            AND audit_type = #{auditType}
+        </if>
+        <if test="auditorId != null">
+            AND (auditor_id = #{auditorId} OR auditor_id IS NULL)
+        </if>
+    </select>
+
+    <!-- 查询审核统计数据 -->
+    <select id="selectAuditStatistics" resultType="map">
+        SELECT 
+            audit_status,
+            COUNT(1) as count,
+            ROUND(COUNT(1) * 100.0 / SUM(COUNT(1)) OVER(), 2) as percentage
+        FROM audit_records
+        WHERE deleted = 0
+        <if test="auditType != null and auditType != ''">
+            AND audit_type = #{auditType}
+        </if>
+        <if test="startTime != null">
+            AND create_time &gt;= #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND create_time &lt;= #{endTime}
+        </if>
+        GROUP BY audit_status
+        ORDER BY count DESC
+    </select>
+
+    <!-- 查询审核人员工作量统计 -->
+    <select id="selectAuditorWorkloadStatistics" resultType="map">
+        SELECT 
+            auditor_name,
+            COUNT(1) as total_count,
+            SUM(CASE WHEN audit_status = 'APPROVED' THEN 1 ELSE 0 END) as approved_count,
+            SUM(CASE WHEN audit_status = 'REJECTED' THEN 1 ELSE 0 END) as rejected_count,
+            ROUND(AVG(CASE 
+                WHEN audit_time IS NOT NULL AND submit_time IS NOT NULL 
+                THEN TIMESTAMPDIFF(MINUTE, submit_time, audit_time)
+                ELSE NULL
+            END), 2) as avg_processing_time
+        FROM audit_records
+        WHERE deleted = 0
+        AND auditor_name IS NOT NULL
+        <if test="startTime != null">
+            AND audit_time &gt;= #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND audit_time &lt;= #{endTime}
+        </if>
+        GROUP BY auditor_name
+        ORDER BY total_count DESC
+    </select>
+
+    <!-- 查询超时未处理的审核记录 -->
+    <select id="selectOverdueAuditRecords" resultMap="AuditRecordVOMap">
+        <include refid="selectAuditRecordVo"/>
+        AND ar.audit_status = 'PENDING'
+        AND ar.create_time &lt;= DATE_SUB(NOW(), INTERVAL #{hours} HOUR)
+        ORDER BY ar.priority DESC, ar.create_time ASC
+    </select>
+
+</mapper>

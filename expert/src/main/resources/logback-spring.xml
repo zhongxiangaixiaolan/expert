@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="false" scan="false">
+    <!-- 关闭 Logback 状态日志 -->
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
+
+    <!-- 定义颜色变量 -->
+    <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter" />
+    <conversionRule conversionWord="wex" converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter" />
+    <conversionRule conversionWord="wEx" converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter" />
+
+    <!-- 使用系统属性而不是springProperty -->
+    <property name="LOG_FILE_PATH" value="${LOG_FILE:-logs/}"/>
+    <property name="MAX_FILE_SIZE" value="${LOGBACK_ROLLINGPOLICY_MAX_FILE_SIZE:-100MB}"/>
+    <property name="MAX_HISTORY" value="${LOGBACK_ROLLINGPOLICY_MAX_HISTORY:-30}"/>
+    <property name="TOTAL_SIZE_CAP" value="${LOGBACK_ROLLINGPOLICY_TOTAL_SIZE_CAP:-3GB}"/>
+
+    <!-- 控制台输出 - 极简格式，只显示关键信息 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%clr(%d{HH:mm:ss}){faint} %clr(%5p){bold,red} %clr(%logger{15}){cyan} %clr(%m){green}%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- 文件输出 -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_FILE_PATH}/expert.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_FILE_PATH}/expert.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>${MAX_FILE_SIZE}</maxFileSize>
+            <maxHistory>${MAX_HISTORY}</maxHistory>
+            <totalSizeCap>${TOTAL_SIZE_CAP}</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <!-- 错误日志单独输出 -->
+    <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_FILE_PATH}/error.log</file>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_FILE_PATH}/error.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>${MAX_HISTORY}</maxHistory>
+            <totalSizeCap>${TOTAL_SIZE_CAP}</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <!-- SQL日志单独输出 -->
+    <appender name="SQL_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_FILE_PATH}/sql.log</file>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_FILE_PATH}/sql.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <!-- 应用程序日志 - 只显示重要信息 -->
+    <springProfile name="!no-file-log">
+        <logger name="com.qing.expert" level="INFO" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE"/>
+            <appender-ref ref="ERROR_FILE"/>
+        </logger>
+
+        <!-- SQL日志 - 只记录到文件，不在控制台显示 -->
+        <logger name="com.qing.expert.mapper" level="DEBUG" additivity="false">
+            <appender-ref ref="SQL_FILE"/>
+        </logger>
+    </springProfile>
+
+    <!-- 禁用文件日志时的配置 -->
+    <springProfile name="no-file-log">
+        <logger name="com.qing.expert" level="INFO" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+        </logger>
+
+        <!-- SQL日志 - 禁用文件时也不在控制台显示 -->
+        <logger name="com.qing.expert.mapper" level="OFF" additivity="false"/>
+    </springProfile>
+
+    <!-- 严格控制框架日志 - 只显示关键错误 -->
+    <logger name="org.springframework" level="OFF"/>
+    <logger name="org.springframework.security" level="OFF"/>
+    <logger name="org.springframework.web" level="OFF"/>
+    <logger name="org.springframework.boot" level="ERROR"/>
+    <logger name="org.springframework.context" level="OFF"/>
+    <logger name="org.springframework.beans" level="OFF"/>
+    <logger name="org.springframework.core" level="OFF"/>
+    <logger name="org.springframework.data" level="OFF"/>
+    <logger name="org.springframework.aop" level="OFF"/>
+    <logger name="org.springframework.transaction" level="OFF"/>
+    <logger name="org.springframework.orm" level="OFF"/>
+    <logger name="org.springframework.jdbc" level="OFF"/>
+    <logger name="org.apache.catalina" level="OFF"/>
+    <logger name="org.apache.tomcat" level="OFF"/>
+    <logger name="org.apache.coyote" level="OFF"/>
+    <logger name="org.hibernate" level="OFF"/>
+    <logger name="com.baomidou.mybatisplus" level="OFF"/>
+    <logger name="org.mybatis" level="OFF"/>
+    <logger name="com.zaxxer.hikari" level="OFF"/>
+    <logger name="org.springframework.boot.autoconfigure" level="OFF"/>
+    <logger name="org.springframework.boot.web.embedded" level="OFF"/>
+    <logger name="org.springframework.boot.actuate" level="OFF"/>
+    <logger name="org.springframework.security.web" level="OFF"/>
+    <logger name="org.springframework.web.servlet" level="OFF"/>
+    <logger name="com.mysql.cj" level="OFF"/>
+    <logger name="io.lettuce" level="OFF"/>
+    <logger name="io.netty" level="OFF"/>
+    <logger name="org.apache.http" level="OFF"/>
+    <logger name="org.springframework.cache" level="OFF"/>
+    <logger name="ch.qos.logback" level="OFF"/>
+    <logger name="org.slf4j" level="OFF"/>
+    <logger name="com.fasterxml.jackson" level="OFF"/>
+    <logger name="org.yaml.snakeyaml" level="OFF"/>
+    <logger name="org.reflections" level="OFF"/>
+    <logger name="springfox" level="OFF"/>
+    <logger name="io.swagger" level="OFF"/>
+    <logger name="org.springdoc" level="OFF"/>
+
+    <!-- 根日志配置 - 只显示ERROR级别 -->
+    <springProfile name="!no-file-log">
+        <root level="ERROR">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE"/>
+            <appender-ref ref="ERROR_FILE"/>
+        </root>
+    </springProfile>
+
+    <!-- 禁用文件日志时的根配置 -->
+    <springProfile name="no-file-log">
+        <root level="ERROR">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+</configuration>

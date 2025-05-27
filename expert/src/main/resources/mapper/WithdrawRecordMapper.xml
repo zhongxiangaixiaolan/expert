@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qing.expert.mapper.WithdrawRecordMapper">
+
+        <!-- 基础字段 -->
+        <sql id="BaseSelectColumns">
+        wr.id,
+        wr.user_id,
+        wr.order_no,
+        wr.amount,
+        wr.fee,
+        wr.real_amount,
+        wr.bank_name,
+        wr.bank_account,
+        wr.account_name,
+        wr.status,
+        wr.apply_time,
+        wr.audit_time,
+        wr.transfer_time,
+        wr.audit_remark,
+        wr.transfer_remark,
+        wr.create_time,
+        wr.update_time
+        </sql>
+
+        <!-- 关联查询字段 -->
+        <sql id="JoinSelectColumns">
+                <include refid="BaseSelectColumns"/>
+,
+        u.nickname as user_nickname,
+        u.avatar as user_avatar,
+        u.phone as user_phone,
+        CASE wr.status
+            WHEN 0 THEN '待审核'
+            WHEN 1 THEN '审核通过'
+            WHEN 2 THEN '审核拒绝'
+            WHEN 3 THEN '转账中'
+            WHEN 4 THEN '转账成功'
+            WHEN 5 THEN '转账失败'
+            ELSE '未知'
+        END as status_desc
+        </sql>
+
+        <!-- 基础表关联 -->
+        <sql id="BaseJoins">
+        FROM withdraw_records wr
+        LEFT JOIN users u ON wr.user_id = u.id
+        </sql>
+
+        <!-- 查询条件 -->
+        <sql id="WhereConditions">
+        WHERE wr.deleted = 0
+                <if test="query != null">
+                        <if test="query.userId != null">
+                AND wr.user_id = #{query.userId}
+                        </if>
+                        <if test="query.orderNo != null and query.orderNo != ''">
+                AND wr.order_no LIKE CONCAT('%', #{query.orderNo}, '%')
+                        </if>
+                        <if test="query.status != null">
+                AND wr.status = #{query.status}
+                        </if>
+                        <if test="query.startTime != null">
+                AND wr.create_time >= #{query.startTime}
+                        </if>
+                        <if test="query.endTime != null">
+                AND wr.create_time &lt;= #{query.endTime}
+                        </if>
+                        <if test="query.keyword != null and query.keyword != ''">
+                AND (wr.order_no LIKE CONCAT('%', #{query.keyword}, '%')
+                     OR u.nickname LIKE CONCAT('%', #{query.keyword}, '%')
+                     OR wr.account_name LIKE CONCAT('%', #{query.keyword}, '%'))
+                        </if>
+                </if>
+        </sql>
+
+        <!-- 结果映射 -->
+        <resultMap id="WithdrawRecordVOMap" type="com.qing.expert.vo.withdraw.WithdrawRecordVO">
+                <id column="id" property="id"/>
+                <result column="user_id" property="userId"/>
+                <result column="order_no" property="orderNo"/>
+                <result column="amount" property="amount"/>
+                <result column="fee" property="fee"/>
+                <result column="real_amount" property="realAmount"/>
+                <result column="bank_name" property="bankName"/>
+                <result column="bank_account" property="bankAccount"/>
+                <result column="account_name" property="accountName"/>
+                <result column="status" property="status"/>
+                <result column="status_desc" property="statusDesc"/>
+                <result column="apply_time" property="applyTime"/>
+                <result column="audit_time" property="auditTime"/>
+                <result column="transfer_time" property="transferTime"/>
+                <result column="audit_remark" property="auditRemark"/>
+                <result column="transfer_remark" property="transferRemark"/>
+                <result column="create_time" property="createTime"/>
+                <result column="update_time" property="updateTime"/>
+                <result column="user_nickname" property="userNickname"/>
+                <result column="user_avatar" property="userAvatar"/>
+                <result column="user_phone" property="userPhone"/>
+        </resultMap>
+
+        <!-- 分页查询提现记录列表 -->
+        <select id="selectWithdrawRecordPage" resultMap="WithdrawRecordVOMap">
+        SELECT <include refid="JoinSelectColumns"/>
+        <include refid="BaseJoins"/>
+        <include refid="WhereConditions"/>
+        ORDER BY wr.create_time DESC
+</select>
+
+<!-- 根据ID查询提现记录详情 -->
+<select id="selectWithdrawRecordById" resultMap="WithdrawRecordVOMap">
+        SELECT <include refid="JoinSelectColumns"/>
+<include refid="BaseJoins"/>
+        WHERE wr.deleted = 0 AND wr.id = #{id}
+</select>
+
+<!-- 根据订单号查询提现记录 -->
+<select id="selectByOrderNo" resultType="com.qing.expert.entity.WithdrawRecord">
+        SELECT <include refid="BaseSelectColumns"/>
+        FROM withdraw_records wr
+        WHERE wr.deleted = 0 AND wr.order_no = #{orderNo}
+</select>
+
+<!-- 查询用户提现记录列表 -->
+<select id="selectWithdrawRecordsByUserId" resultMap="WithdrawRecordVOMap">
+        SELECT <include refid="JoinSelectColumns"/>
+<include refid="BaseJoins"/>
+        WHERE wr.deleted = 0 AND wr.user_id = #{userId}
+<if test="status != null">
+            AND wr.status = #{status}
+</if>
+        ORDER BY wr.create_time DESC
+</select>
+
+<!-- 统计提现总金额 -->
+<select id="getTotalWithdrawAmount" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(amount), 0)
+        FROM withdraw_records
+        WHERE deleted = 0 AND status IN (1, 3, 4)
+<if test="startTime != null">
+            AND create_time >= #{startTime}
+</if>
+<if test="endTime != null">
+            AND create_time &lt;= #{endTime}
+</if>
+</select>
+
+<!-- 统计手续费总金额 -->
+<select id="getTotalFeeAmount" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(fee), 0)
+        FROM withdraw_records
+        WHERE deleted = 0 AND status IN (1, 3, 4)
+<if test="startTime != null">
+            AND create_time >= #{startTime}
+</if>
+<if test="endTime != null">
+            AND create_time &lt;= #{endTime}
+</if>
+</select>
+
+<!-- 统计提现记录数量 -->
+<select id="getWithdrawCount" resultType="java.lang.Long">
+        SELECT COUNT(1)
+        FROM withdraw_records
+        WHERE deleted = 0
+<if test="status != null">
+            AND status = #{status}
+</if>
+<if test="startTime != null">
+            AND create_time >= #{startTime}
+</if>
+<if test="endTime != null">
+            AND create_time &lt;= #{endTime}
+</if>
+</select>
+
+<!-- 获取用户提现总金额 -->
+<select id="getUserTotalWithdrawAmount" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(amount), 0)
+        FROM withdraw_records
+        WHERE deleted = 0 AND user_id = #{userId} AND status IN (1, 3, 4)
+</select>
+
+<!-- 获取待审核提现记录数量 -->
+<select id="getPendingWithdrawCount" resultType="java.lang.Long">
+        SELECT COUNT(1)
+        FROM withdraw_records
+        WHERE deleted = 0 AND status = 0
+</select>
+
+<!-- 获取最近提现记录 -->
+<select id="selectRecentWithdrawRecords" resultMap="WithdrawRecordVOMap">
+        SELECT <include refid="JoinSelectColumns"/>
+<include refid="BaseJoins"/>
+        WHERE wr.deleted = 0
+        ORDER BY wr.create_time DESC
+<if test="limit != null">
+            LIMIT #{limit}
+</if>
+</select>
+
+<!-- 批量更新提现状态 -->
+<update id="batchUpdateStatus">
+        UPDATE withdraw_records
+        SET status = #{status}, update_time = NOW()
+        WHERE id IN
+<foreach collection="withdrawIds" item="id" open="(" separator="," close=")">
+            #{id}
+</foreach>
+        AND deleted = 0
+</update>
+
+</mapper>

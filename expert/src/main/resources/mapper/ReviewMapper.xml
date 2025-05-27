@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qing.expert.mapper.ReviewMapper">
+
+    <!-- 评价VO结果映射 -->
+    <resultMap id="ReviewVOMap" type="com.qing.expert.vo.review.ReviewVO">
+        <id column="id" property="id"/>
+        <result column="order_id" property="orderId"/>
+        <result column="order_no" property="orderNo"/>
+        <result column="user_id" property="userId"/>
+        <result column="user_nickname" property="userNickname"/>
+        <result column="user_avatar" property="userAvatar"/>
+        <result column="expert_id" property="expertId"/>
+        <result column="expert_nickname" property="expertNickname"/>
+        <result column="expert_avatar" property="expertAvatar"/>
+        <result column="service_id" property="serviceId"/>
+        <result column="service_name" property="serviceName"/>
+        <result column="review_type" property="reviewType"/>
+        <result column="review_type_desc" property="reviewTypeDesc"/>
+        <result column="rating" property="rating"/>
+        <result column="content" property="content"/>
+        <result column="images" property="images" typeHandler="com.qing.expert.common.handler.JsonListTypeHandler"/>
+        <result column="is_anonymous" property="isAnonymous"/>
+        <result column="reply_content" property="replyContent"/>
+        <result column="reply_time" property="replyTime"/>
+        <result column="status" property="status"/>
+        <result column="status_desc" property="statusDesc"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <!-- 基础查询字段 -->
+    <sql id="BaseSelectColumns">
+        r.id, r.order_id, r.user_id, r.expert_id, r.service_id,
+        r.review_type, r.rating, r.content, r.images, r.is_anonymous,
+        r.reply_content, r.reply_time, r.status, r.create_time, r.update_time
+    </sql>
+
+    <!-- 关联查询字段 -->
+    <sql id="JoinSelectColumns">
+        <include refid="BaseSelectColumns"/>,
+        o.order_no,
+        u.nickname as user_nickname, u.avatar as user_avatar,
+        e.nickname as expert_nickname, e.avatar as expert_avatar,
+        s.name as service_name,
+        CASE r.review_type
+            WHEN 1 THEN '用户评价达人'
+            WHEN 2 THEN '达人评价用户'
+            ELSE '未知'
+        END as review_type_desc,
+        CASE r.status
+            WHEN 1 THEN '正常'
+            WHEN 2 THEN '隐藏'
+            ELSE '未知'
+        END as status_desc
+    </sql>
+
+    <!-- 基础表关联 -->
+    <sql id="BaseJoins">
+        FROM reviews r
+        LEFT JOIN orders o ON r.order_id = o.id
+        LEFT JOIN users u ON r.user_id = u.id
+        LEFT JOIN experts e ON r.expert_id = e.id
+        LEFT JOIN services s ON r.service_id = s.id
+    </sql>
+
+    <!-- 查询条件 -->
+    <sql id="WhereConditions">
+        <where>
+            r.deleted = 0
+            <if test="query.orderId != null">
+                AND r.order_id = #{query.orderId}
+            </if>
+            <if test="query.userId != null">
+                AND r.user_id = #{query.userId}
+            </if>
+            <if test="query.expertId != null">
+                AND r.expert_id = #{query.expertId}
+            </if>
+            <if test="query.serviceId != null">
+                AND r.service_id = #{query.serviceId}
+            </if>
+            <if test="query.reviewType != null">
+                AND r.review_type = #{query.reviewType}
+            </if>
+            <if test="query.minRating != null">
+                AND r.rating >= #{query.minRating}
+            </if>
+            <if test="query.maxRating != null">
+                AND r.rating &lt;= #{query.maxRating}
+            </if>
+            <if test="query.contentKeyword != null and query.contentKeyword != ''">
+                AND r.content LIKE CONCAT('%', #{query.contentKeyword}, '%')
+            </if>
+            <if test="query.userNickname != null and query.userNickname != ''">
+                AND u.nickname LIKE CONCAT('%', #{query.userNickname}, '%')
+            </if>
+            <if test="query.expertNickname != null and query.expertNickname != ''">
+                AND e.nickname LIKE CONCAT('%', #{query.expertNickname}, '%')
+            </if>
+            <if test="query.serviceName != null and query.serviceName != ''">
+                AND s.name LIKE CONCAT('%', #{query.serviceName}, '%')
+            </if>
+            <if test="query.status != null">
+                AND r.status = #{query.status}
+            </if>
+            <if test="query.isAnonymous != null">
+                AND r.is_anonymous = #{query.isAnonymous}
+            </if>
+            <if test="query.createTimeStart != null">
+                AND r.create_time >= #{query.createTimeStart}
+            </if>
+            <if test="query.createTimeEnd != null">
+                AND r.create_time &lt;= #{query.createTimeEnd}
+            </if>
+        </where>
+    </sql>
+
+    <!-- 分页查询评价列表 -->
+    <select id="selectReviewPage" resultMap="ReviewVOMap">
+        SELECT <include refid="JoinSelectColumns"/>
+        <include refid="BaseJoins"/>
+        <include refid="WhereConditions"/>
+        ORDER BY r.create_time DESC
+    </select>
+
+    <!-- 根据ID查询评价详情 -->
+    <select id="selectReviewById" resultMap="ReviewVOMap">
+        SELECT <include refid="JoinSelectColumns"/>
+        <include refid="BaseJoins"/>
+        WHERE r.id = #{id} AND r.deleted = 0
+    </select>
+
+    <!-- 查询达人评价列表 -->
+    <select id="selectReviewsByExpertId" resultMap="ReviewVOMap">
+        SELECT <include refid="JoinSelectColumns"/>
+        <include refid="BaseJoins"/>
+        WHERE r.expert_id = #{expertId} AND r.review_type = 1 AND r.status = 1 AND r.deleted = 0
+        ORDER BY r.create_time DESC
+        <if test="limit != null">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+    <!-- 查询服务评价列表 -->
+    <select id="selectReviewsByServiceId" resultMap="ReviewVOMap">
+        SELECT <include refid="JoinSelectColumns"/>
+        <include refid="BaseJoins"/>
+        WHERE r.service_id = #{serviceId} AND r.review_type = 1 AND r.status = 1 AND r.deleted = 0
+        ORDER BY r.create_time DESC
+        <if test="limit != null">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+    <!-- 计算达人平均评分 -->
+    <select id="calculateExpertAvgRating" resultType="java.math.BigDecimal">
+        SELECT AVG(rating)
+        FROM reviews
+        WHERE expert_id = #{expertId} AND review_type = 1 AND status = 1 AND deleted = 0
+    </select>
+
+    <!-- 计算服务平均评分 -->
+    <select id="calculateServiceAvgRating" resultType="java.math.BigDecimal">
+        SELECT AVG(rating)
+        FROM reviews
+        WHERE service_id = #{serviceId} AND review_type = 1 AND status = 1 AND deleted = 0
+    </select>
+
+    <!-- 统计达人评价数量 -->
+    <select id="countExpertReviews" resultType="java.lang.Long">
+        SELECT COUNT(1)
+        FROM reviews
+        WHERE expert_id = #{expertId} AND review_type = 1 AND status = 1 AND deleted = 0
+    </select>
+
+    <!-- 统计服务评价数量 -->
+    <select id="countServiceReviews" resultType="java.lang.Long">
+        SELECT COUNT(1)
+        FROM reviews
+        WHERE service_id = #{serviceId} AND review_type = 1 AND status = 1 AND deleted = 0
+    </select>
+
+    <!-- 根据订单ID查询评价 -->
+    <select id="selectByOrderId" resultType="com.qing.expert.entity.Review">
+        SELECT * FROM reviews
+        WHERE order_id = #{orderId} AND review_type = #{reviewType} AND deleted = 0
+    </select>
+
+    <!-- 查询用户评价列表 -->
+    <select id="selectReviewsByUserId" resultMap="ReviewVOMap">
+        SELECT <include refid="JoinSelectColumns"/>
+        <include refid="BaseJoins"/>
+        WHERE r.user_id = #{userId} AND r.deleted = 0
+        <if test="reviewType != null">
+            AND r.review_type = #{reviewType}
+        </if>
+        ORDER BY r.create_time DESC
+    </select>
+
+</mapper>

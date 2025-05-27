@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qing.expert.mapper.OrderMapper">
+
+    <!-- 订单VO结果映射 -->
+    <resultMap id="OrderVOMap" type="com.qing.expert.vo.order.OrderVO">
+        <id column="id" property="id"/>
+        <result column="order_no" property="orderNo"/>
+        <result column="user_id" property="userId"/>
+        <result column="user_nickname" property="userNickname"/>
+        <result column="user_avatar" property="userAvatar"/>
+        <result column="expert_id" property="expertId"/>
+        <result column="expert_nickname" property="expertNickname"/>
+        <result column="expert_avatar" property="expertAvatar"/>
+        <result column="service_id" property="serviceId"/>
+        <result column="service_name" property="serviceName"/>
+        <result column="service_price" property="servicePrice"/>
+        <result column="service_cover" property="serviceCover"/>
+        <result column="title" property="title"/>
+        <result column="description" property="description"/>
+        <result column="amount" property="amount"/>
+        <result column="paid_amount" property="paidAmount"/>
+        <result column="discount_amount" property="discountAmount"/>
+        <result column="status" property="status"/>
+        <result column="status_desc" property="statusDesc"/>
+        <result column="pay_status" property="payStatus"/>
+        <result column="pay_status_desc" property="payStatusDesc"/>
+        <result column="pay_type" property="payType"/>
+        <result column="pay_time" property="payTime"/>
+        <result column="expected_time" property="expectedTime"/>
+        <result column="accept_time" property="acceptTime"/>
+        <result column="start_time" property="startTime"/>
+        <result column="finish_time" property="finishTime"/>
+        <result column="cancel_time" property="cancelTime"/>
+        <result column="cancel_reason" property="cancelReason"/>
+        <result column="user_remark" property="userRemark"/>
+        <result column="expert_remark" property="expertRemark"/>
+        <result column="admin_remark" property="adminRemark"/>
+        <result column="contact_info" property="contactInfo"/>
+        <result column="service_address" property="serviceAddress"/>
+        <result column="appointment_time" property="appointmentTime"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <!-- 基础查询字段 -->
+    <sql id="BaseSelectColumns">
+        o.id, o.order_no, o.user_id, o.expert_id, o.service_id, o.service_name, o.service_price,
+        o.title, o.description, o.amount, o.paid_amount, o.discount_amount,
+        o.status, o.pay_status, o.pay_type, o.pay_time, o.expected_time, o.accept_time, o.start_time,
+        o.finish_time, o.cancel_time, o.cancel_reason, o.user_remark,
+        o.expert_remark, o.admin_remark, o.contact_info, o.service_address,
+        o.appointment_time, o.create_time, o.update_time
+    </sql>
+
+    <!-- 关联查询字段 -->
+    <sql id="JoinSelectColumns">
+        <include refid="BaseSelectColumns"/>
+,
+        u.nickname as user_nickname, u.avatar as user_avatar,
+        e.nickname as expert_nickname, e.avatar as expert_avatar,
+        s.name as service_name, s.cover as service_cover,
+        CASE o.status
+            WHEN 1 THEN '待接单'
+            WHEN 2 THEN '已接单'
+            WHEN 3 THEN '服务中'
+            WHEN 4 THEN '已完成'
+            WHEN 5 THEN '已取消'
+            WHEN 6 THEN '售后中'
+            ELSE '未知'
+        END as status_desc,
+        CASE o.pay_status
+            WHEN 0 THEN '未支付'
+            WHEN 1 THEN '已支付'
+            WHEN 2 THEN '已退款'
+            ELSE '未知'
+        END as pay_status_desc
+    </sql>
+
+    <!-- 基础表关联 -->
+    <sql id="BaseJoins">
+        FROM orders o
+        LEFT JOIN users u ON o.user_id = u.id
+        LEFT JOIN experts e ON o.expert_id = e.id
+        LEFT JOIN services s ON o.service_id = s.id
+    </sql>
+
+    <!-- 查询条件 -->
+    <sql id="WhereConditions">
+        <where>
+            o.deleted = 0
+            <if test="query.orderNo != null and query.orderNo != ''">
+                AND o.order_no LIKE CONCAT('%', #{query.orderNo}, '%')
+            </if>
+            <if test="query.userId != null">
+                AND o.user_id = #{query.userId}
+            </if>
+            <if test="query.expertId != null">
+                AND o.expert_id = #{query.expertId}
+            </if>
+            <if test="query.serviceId != null">
+                AND o.service_id = #{query.serviceId}
+            </if>
+            <if test="query.categoryId != null">
+                AND s.category_id = #{query.categoryId}
+            </if>
+            <if test="query.status != null">
+                AND o.status = #{query.status}
+            </if>
+            <if test="query.payStatus != null">
+                AND o.pay_status = #{query.payStatus}
+            </if>
+            <if test="query.title != null and query.title != ''">
+                AND o.title LIKE CONCAT('%', #{query.title}, '%')
+            </if>
+            <if test="query.userNickname != null and query.userNickname != ''">
+                AND u.nickname LIKE CONCAT('%', #{query.userNickname}, '%')
+            </if>
+            <if test="query.expertNickname != null and query.expertNickname != ''">
+                AND e.nickname LIKE CONCAT('%', #{query.expertNickname}, '%')
+            </if>
+            <if test="query.serviceName != null and query.serviceName != ''">
+                AND s.name LIKE CONCAT('%', #{query.serviceName}, '%')
+            </if>
+            <if test="query.createTimeStart != null">
+                AND o.create_time >= #{query.createTimeStart}
+            </if>
+            <if test="query.createTimeEnd != null">
+                AND o.create_time &lt;= #{query.createTimeEnd}
+            </if>
+            <if test="query.payTimeStart != null">
+                AND o.pay_time >= #{query.payTimeStart}
+            </if>
+            <if test="query.payTimeEnd != null">
+                AND o.pay_time &lt;= #{query.payTimeEnd}
+            </if>
+            <if test="query.finishTimeStart != null">
+                AND o.finish_time >= #{query.finishTimeStart}
+            </if>
+            <if test="query.finishTimeEnd != null">
+                AND o.finish_time &lt;= #{query.finishTimeEnd}
+            </if>
+        </where>
+    </sql>
+
+    <!-- 分页查询订单列表 -->
+    <select id="selectOrderPage" resultMap="OrderVOMap">
+        SELECT <include refid="JoinSelectColumns"/>
+    <include refid="BaseJoins"/>
+    <include refid="WhereConditions"/>
+        ORDER BY o.create_time DESC
+</select>
+
+<!-- 根据ID查询订单详情 -->
+<select id="selectOrderById" resultMap="OrderVOMap">
+        SELECT <include refid="JoinSelectColumns"/>
+<include refid="BaseJoins"/>
+        WHERE o.id = #{id} AND o.deleted = 0
+</select>
+
+<!-- 查询用户订单列表 -->
+<select id="selectOrdersByUserId" resultMap="OrderVOMap">
+        SELECT <include refid="JoinSelectColumns"/>
+<include refid="BaseJoins"/>
+        WHERE o.user_id = #{userId} AND o.deleted = 0
+<if test="status != null">
+            AND o.status = #{status}
+</if>
+        ORDER BY o.create_time DESC
+</select>
+
+<!-- 查询达人订单列表 -->
+<select id="selectOrdersByExpertId" resultMap="OrderVOMap">
+        SELECT <include refid="JoinSelectColumns"/>
+<include refid="BaseJoins"/>
+        WHERE o.expert_id = #{expertId} AND o.deleted = 0
+<if test="status != null">
+            AND o.status = #{status}
+</if>
+        ORDER BY o.create_time DESC
+</select>
+
+<!-- 统计订单数量 -->
+<select id="countOrders" resultType="java.lang.Long">
+        SELECT COUNT(1)
+<include refid="BaseJoins"/>
+<include refid="WhereConditions"/>
+</select>
+
+<!-- 根据订单编号查询订单 -->
+<select id="selectByOrderNo" resultType="com.qing.expert.entity.Order">
+        SELECT * FROM orders WHERE order_no = #{orderNo} AND deleted = 0
+</select>
+
+<!-- 查询待接单的订单列表 -->
+<select id="selectPendingOrders" resultMap="OrderVOMap">
+        SELECT <include refid="JoinSelectColumns"/>
+<include refid="BaseJoins"/>
+        WHERE o.status = 1 AND o.deleted = 0
+<if test="serviceId != null">
+            AND o.service_id = #{serviceId}
+</if>
+        ORDER BY o.create_time DESC
+<if test="limit != null">
+            LIMIT #{limit}
+</if>
+</select>
+
+<!-- 根据时间范围统计订单数量 -->
+<select id="getOrderCountByTime" resultType="java.lang.Long">
+        SELECT COUNT(1)
+        FROM orders
+        WHERE deleted = 0
+<if test="startTime != null">
+            AND create_time >= #{startTime}
+</if>
+<if test="endTime != null">
+            AND create_time &lt;= #{endTime}
+</if>
+</select>
+
+</mapper>

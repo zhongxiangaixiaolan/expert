@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qing.expert.mapper.SystemConfigMapper">
+
+    <!-- 根据配置分组查询配置列表 -->
+    <select id="selectByGroup" resultType="com.qing.expert.entity.SystemConfig">
+        SELECT id, config_key, config_value, config_type, config_group, description, is_encrypted, create_time, update_time
+        FROM system_configs
+        WHERE config_group = #{configGroup}
+        ORDER BY id ASC
+    </select>
+
+    <!-- 根据配置键查询配置 -->
+    <select id="selectByKey" resultType="com.qing.expert.entity.SystemConfig">
+        SELECT id, config_key, config_value, config_type, config_group, description, is_encrypted, create_time, update_time
+        FROM system_configs
+        WHERE config_key = #{configKey}
+        LIMIT 1
+    </select>
+
+    <!-- 批量更新配置 -->
+    <update id="batchUpdate">
+        UPDATE system_configs
+        SET config_value = CASE config_key
+            <foreach collection="configs" item="config">
+                WHEN #{config.configKey} THEN #{config.configValue}
+            </foreach>
+            ELSE config_value
+        END,
+        update_time = NOW()
+        WHERE config_key IN
+        <foreach collection="configs" item="config" open="(" separator="," close=")">
+            #{config.configKey}
+        </foreach>
+    </update>
+
+</mapper>

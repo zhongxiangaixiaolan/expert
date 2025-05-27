@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qing.expert.mapper.PaymentRecordMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="PaymentRecordVOMap" type="com.qing.expert.vo.PaymentRecordVO">
+        <id column="id" property="id"/>
+        <result column="payment_no" property="paymentNo"/>
+        <result column="third_party_no" property="thirdPartyNo"/>
+        <result column="user_id" property="userId"/>
+        <result column="user_nickname" property="userNickname"/>
+        <result column="user_phone" property="userPhone"/>
+        <result column="order_id" property="orderId"/>
+        <result column="order_no" property="orderNo"/>
+        <result column="payment_type" property="paymentType"/>
+        <result column="payment_type_desc" property="paymentTypeDesc"/>
+        <result column="payment_amount" property="paymentAmount"/>
+        <result column="actual_amount" property="actualAmount"/>
+        <result column="payment_status" property="paymentStatus"/>
+        <result column="payment_status_desc" property="paymentStatusDesc"/>
+        <result column="payment_desc" property="paymentDesc"/>
+        <result column="payment_time" property="paymentTime"/>
+        <result column="expire_time" property="expireTime"/>
+        <result column="callback_time" property="callbackTime"/>
+        <result column="refund_amount" property="refundAmount"/>
+        <result column="refund_time" property="refundTime"/>
+        <result column="refund_reason" property="refundReason"/>
+        <result column="client_ip" property="clientIp"/>
+        <result column="remark" property="remark"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="creator" property="creator"/>
+        <result column="updater" property="updater"/>
+    </resultMap>
+
+    <!-- 基础查询SQL -->
+    <sql id="selectPaymentRecordVo">
+        SELECT 
+            pr.id,
+            pr.payment_no,
+            pr.third_party_no,
+            pr.user_id,
+            u.nickname as user_nickname,
+            u.phone as user_phone,
+            pr.order_id,
+            o.order_no,
+            pr.payment_type,
+            CASE pr.payment_type
+                WHEN 'WECHAT_PAY' THEN '微信支付'
+                WHEN 'BALANCE_PAY' THEN '余额支付'
+                WHEN 'ALIPAY' THEN '支付宝支付'
+                ELSE '未知类型'
+            END as payment_type_desc,
+            pr.payment_amount,
+            pr.actual_amount,
+            pr.payment_status,
+            CASE pr.payment_status
+                WHEN 'PENDING' THEN '待支付'
+                WHEN 'PAYING' THEN '支付中'
+                WHEN 'SUCCESS' THEN '支付成功'
+                WHEN 'FAILED' THEN '支付失败'
+                WHEN 'CANCELLED' THEN '支付取消'
+                WHEN 'REFUNDED' THEN '已退款'
+                WHEN 'REFUNDING' THEN '退款中'
+                ELSE '未知状态'
+            END as payment_status_desc,
+            pr.payment_desc,
+            pr.payment_time,
+            pr.expire_time,
+            pr.callback_time,
+            pr.refund_amount,
+            pr.refund_time,
+            pr.refund_reason,
+            pr.client_ip,
+            pr.remark,
+            pr.create_time,
+            pr.update_time,
+            pr.creator,
+            pr.updater
+        FROM payment_records pr
+        LEFT JOIN users u ON pr.user_id = u.id AND u.deleted = 0
+        LEFT JOIN orders o ON pr.order_id = o.id AND o.deleted = 0
+        WHERE pr.deleted = 0
+    </sql>
+
+    <!-- 分页查询支付记录列表 -->
+    <select id="selectPaymentRecordPage" resultMap="PaymentRecordVOMap">
+        <include refid="selectPaymentRecordVo"/>
+        <where>
+            <if test="userId != null">
+                AND pr.user_id = #{userId}
+            </if>
+            <if test="orderId != null">
+                AND pr.order_id = #{orderId}
+            </if>
+            <if test="paymentType != null and paymentType != ''">
+                AND pr.payment_type = #{paymentType}
+            </if>
+            <if test="paymentStatus != null and paymentStatus != ''">
+                AND pr.payment_status = #{paymentStatus}
+            </if>
+            <if test="userNickname != null and userNickname != ''">
+                AND u.nickname LIKE CONCAT('%', #{userNickname}, '%')
+            </if>
+            <if test="userPhone != null and userPhone != ''">
+                AND u.phone LIKE CONCAT('%', #{userPhone}, '%')
+            </if>
+            <if test="startTime != null">
+                AND pr.create_time &gt;= #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND pr.create_time &lt;= #{endTime}
+            </if>
+        </where>
+        ORDER BY pr.create_time DESC
+    </select>
+
+    <!-- 根据ID查询支付记录详情 -->
+    <select id="selectPaymentRecordById" resultMap="PaymentRecordVOMap">
+        <include refid="selectPaymentRecordVo"/>
+        AND pr.id = #{id}
+    </select>
+
+    <!-- 根据支付单号查询支付记录 -->
+    <select id="selectByPaymentNo" resultType="com.qing.expert.entity.PaymentRecord">
+        SELECT * FROM payment_records
+        WHERE deleted = 0 AND payment_no = #{paymentNo}
+    </select>
+
+    <!-- 根据第三方支付单号查询支付记录 -->
+    <select id="selectByThirdPartyNo" resultType="com.qing.expert.entity.PaymentRecord">
+        SELECT * FROM payment_records
+        WHERE deleted = 0 AND third_party_no = #{thirdPartyNo}
+    </select>
+
+    <!-- 查询用户支付记录列表 -->
+    <select id="selectUserPaymentRecords" resultMap="PaymentRecordVOMap">
+        <include refid="selectPaymentRecordVo"/>
+        AND pr.user_id = #{userId}
+        <if test="paymentStatus != null and paymentStatus != ''">
+            AND pr.payment_status = #{paymentStatus}
+        </if>
+        ORDER BY pr.create_time DESC
+        <if test="limit != null and limit > 0">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+    <!-- 查询支付统计数据 -->
+    <select id="selectPaymentStatistics" resultType="map">
+        SELECT 
+            payment_status,
+            COUNT(1) as count,
+            COALESCE(SUM(payment_amount), 0) as total_amount,
+            ROUND(COUNT(1) * 100.0 / SUM(COUNT(1)) OVER(), 2) as percentage
+        FROM payment_records
+        WHERE deleted = 0
+        <if test="paymentType != null and paymentType != ''">
+            AND payment_type = #{paymentType}
+        </if>
+        <if test="startTime != null">
+            AND create_time &gt;= #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND create_time &lt;= #{endTime}
+        </if>
+        GROUP BY payment_status
+        ORDER BY count DESC
+    </select>
+
+    <!-- 查询超时未支付的记录 -->
+    <select id="selectExpiredPayments" resultType="com.qing.expert.entity.PaymentRecord">
+        SELECT * FROM payment_records
+        WHERE deleted = 0
+        AND payment_status IN ('PENDING', 'PAYING')
+        AND expire_time &lt; NOW()
+        AND create_time &lt;= DATE_SUB(NOW(), INTERVAL #{minutes} MINUTE)
+        ORDER BY create_time ASC
+    </select>
+
+    <!-- 统计用户支付金额 -->
+    <select id="sumUserPaymentAmount" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(payment_amount), 0)
+        FROM payment_records
+        WHERE deleted = 0
+        AND user_id = #{userId}
+        <if test="paymentStatus != null and paymentStatus != ''">
+            AND payment_status = #{paymentStatus}
+        </if>
+        <if test="startTime != null">
+            AND payment_time &gt;= #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND payment_time &lt;= #{endTime}
+        </if>
+    </select>
+
+    <!-- 统计平台支付数据 -->
+    <select id="selectPlatformPaymentSummary" resultType="map">
+        SELECT 
+            COUNT(1) as total_count,
+            COALESCE(SUM(CASE WHEN payment_status = 'SUCCESS' THEN payment_amount ELSE 0 END), 0) as success_amount,
+            COALESCE(SUM(CASE WHEN payment_status = 'SUCCESS' THEN 1 ELSE 0 END), 0) as success_count,
+            COALESCE(SUM(CASE WHEN payment_status = 'FAILED' THEN 1 ELSE 0 END), 0) as failed_count,
+            COALESCE(SUM(CASE WHEN payment_status = 'REFUNDED' THEN refund_amount ELSE 0 END), 0) as refund_amount,
+            ROUND(
+                CASE WHEN COUNT(1) > 0 
+                THEN SUM(CASE WHEN payment_status = 'SUCCESS' THEN 1 ELSE 0 END) * 100.0 / COUNT(1)
+                ELSE 0 END, 2
+            ) as success_rate
+        FROM payment_records
+        WHERE deleted = 0
+        <if test="startTime != null">
+            AND create_time &gt;= #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND create_time &lt;= #{endTime}
+        </if>
+    </select>
+
+</mapper>

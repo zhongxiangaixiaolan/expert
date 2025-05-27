@@ -1,0 +1,504 @@
+/* 通用样式组件 */
+
+/* 布局相关 */
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.items-start {
+  align-items: flex-start;
+}
+
+.items-end {
+  align-items: flex-end;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.justify-around {
+  justify-content: space-around;
+}
+
+.justify-start {
+  justify-content: flex-start;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+/* 定位相关 */
+.relative {
+  position: relative;
+}
+
+.absolute {
+  position: absolute;
+}
+
+.fixed {
+  position: fixed;
+}
+
+.sticky {
+  position: sticky;
+}
+
+/* 文字对齐 */
+.text-left {
+  text-align: left;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+/* 文字颜色 */
+.text-primary {
+  color: $text-color-primary;
+}
+
+.text-secondary {
+  color: $text-color-secondary;
+}
+
+.text-tertiary {
+  color: $text-color-tertiary;
+}
+
+.text-placeholder {
+  color: $text-color-placeholder;
+}
+
+.text-white {
+  color: $text-color-white;
+}
+
+.text-success {
+  color: $success-color;
+}
+
+.text-warning {
+  color: $warning-color;
+}
+
+.text-error {
+  color: $error-color;
+}
+
+.text-info {
+  color: $info-color;
+}
+
+/* 字体大小 */
+.text-xs {
+  font-size: $font-size-xs;
+}
+
+.text-sm {
+  font-size: $font-size-sm;
+}
+
+.text-base {
+  font-size: $font-size-base;
+}
+
+.text-lg {
+  font-size: $font-size-lg;
+}
+
+.text-xl {
+  font-size: $font-size-xl;
+}
+
+.text-xxl {
+  font-size: $font-size-xxl;
+}
+
+.text-title {
+  font-size: $font-size-title;
+}
+
+/* 字体粗细 */
+.font-light {
+  font-weight: $font-weight-light;
+}
+
+.font-normal {
+  font-weight: $font-weight-normal;
+}
+
+.font-medium {
+  font-weight: $font-weight-medium;
+}
+
+.font-semibold {
+  font-weight: $font-weight-semibold;
+}
+
+.font-bold {
+  font-weight: $font-weight-bold;
+}
+
+/* 背景颜色 */
+.bg-white {
+  background-color: $bg-color-white;
+}
+
+.bg-gray {
+  background-color: $bg-color-gray;
+}
+
+.bg-light {
+  background-color: $bg-color-light;
+}
+
+.bg-primary {
+  background-color: $primary-color;
+}
+
+.bg-secondary {
+  background-color: $secondary-color;
+}
+
+.bg-success {
+  background-color: $success-color;
+}
+
+.bg-warning {
+  background-color: $warning-color;
+}
+
+.bg-error {
+  background-color: $error-color;
+}
+
+.bg-info {
+  background-color: $info-color;
+}
+
+/* 渐变背景 */
+.bg-gradient-primary {
+  background: $primary-gradient;
+}
+
+.bg-gradient-secondary {
+  background: $secondary-gradient;
+}
+
+/* 边框 */
+.border {
+  border: 1rpx solid $border-color;
+}
+
+.border-light {
+  border: 1rpx solid $border-color-light;
+}
+
+.border-dark {
+  border: 1rpx solid $border-color-dark;
+}
+
+.border-t {
+  border-top: 1rpx solid $border-color;
+}
+
+.border-b {
+  border-bottom: 1rpx solid $border-color;
+}
+
+.border-l {
+  border-left: 1rpx solid $border-color;
+}
+
+.border-r {
+  border-right: 1rpx solid $border-color;
+}
+
+/* 圆角 */
+.rounded-xs {
+  border-radius: $border-radius-xs;
+}
+
+.rounded-sm {
+  border-radius: $border-radius-sm;
+}
+
+.rounded {
+  border-radius: $border-radius-base;
+}
+
+.rounded-lg {
+  border-radius: $border-radius-lg;
+}
+
+.rounded-xl {
+  border-radius: $border-radius-xl;
+}
+
+.rounded-2xl {
+  border-radius: $border-radius-2xl;
+}
+
+.rounded-full {
+  border-radius: $border-radius-full;
+}
+
+/* 阴影 */
+.shadow-xs {
+  box-shadow: $box-shadow-xs;
+}
+
+.shadow-sm {
+  box-shadow: $box-shadow-sm;
+}
+
+.shadow {
+  box-shadow: $box-shadow-base;
+}
+
+.shadow-lg {
+  box-shadow: $box-shadow-lg;
+}
+
+.shadow-xl {
+  box-shadow: $box-shadow-xl;
+}
+
+.shadow-card {
+  box-shadow: $box-shadow-card;
+}
+
+.shadow-float {
+  box-shadow: $box-shadow-float;
+}
+
+/* 间距 - 内边距 */
+.p-xs {
+  padding: $spacing-xs;
+}
+
+.p-sm {
+  padding: $spacing-sm;
+}
+
+.p-base {
+  padding: $spacing-base;
+}
+
+.p-lg {
+  padding: $spacing-lg;
+}
+
+.p-xl {
+  padding: $spacing-xl;
+}
+
+.p-2xl {
+  padding: $spacing-2xl;
+}
+
+.px-xs {
+  padding-left: $spacing-xs;
+  padding-right: $spacing-xs;
+}
+
+.px-sm {
+  padding-left: $spacing-sm;
+  padding-right: $spacing-sm;
+}
+
+.px-base {
+  padding-left: $spacing-base;
+  padding-right: $spacing-base;
+}
+
+.px-lg {
+  padding-left: $spacing-lg;
+  padding-right: $spacing-lg;
+}
+
+.px-xl {
+  padding-left: $spacing-xl;
+  padding-right: $spacing-xl;
+}
+
+.py-xs {
+  padding-top: $spacing-xs;
+  padding-bottom: $spacing-xs;
+}
+
+.py-sm {
+  padding-top: $spacing-sm;
+  padding-bottom: $spacing-sm;
+}
+
+.py-base {
+  padding-top: $spacing-base;
+  padding-bottom: $spacing-base;
+}
+
+.py-lg {
+  padding-top: $spacing-lg;
+  padding-bottom: $spacing-lg;
+}
+
+.py-xl {
+  padding-top: $spacing-xl;
+  padding-bottom: $spacing-xl;
+}
+
+/* 间距 - 外边距 */
+.m-xs {
+  margin: $spacing-xs;
+}
+
+.m-sm {
+  margin: $spacing-sm;
+}
+
+.m-base {
+  margin: $spacing-base;
+}
+
+.m-lg {
+  margin: $spacing-lg;
+}
+
+.m-xl {
+  margin: $spacing-xl;
+}
+
+.mx-xs {
+  margin-left: $spacing-xs;
+  margin-right: $spacing-xs;
+}
+
+.mx-sm {
+  margin-left: $spacing-sm;
+  margin-right: $spacing-sm;
+}
+
+.mx-base {
+  margin-left: $spacing-base;
+  margin-right: $spacing-base;
+}
+
+.mx-lg {
+  margin-left: $spacing-lg;
+  margin-right: $spacing-lg;
+}
+
+.my-xs {
+  margin-top: $spacing-xs;
+  margin-bottom: $spacing-xs;
+}
+
+.my-sm {
+  margin-top: $spacing-sm;
+  margin-bottom: $spacing-sm;
+}
+
+.my-base {
+  margin-top: $spacing-base;
+  margin-bottom: $spacing-base;
+}
+
+.my-lg {
+  margin-top: $spacing-lg;
+  margin-bottom: $spacing-lg;
+}
+
+/* 过渡动画 */
+.transition-fast {
+  transition: all $transition-fast;
+}
+
+.transition {
+  transition: all $transition-base;
+}
+
+.transition-slow {
+  transition: all $transition-slow;
+}
+
+/* 透明度 */
+.opacity-0 {
+  opacity: 0;
+}
+
+.opacity-50 {
+  opacity: 0.5;
+}
+
+.opacity-75 {
+  opacity: 0.75;
+}
+
+.opacity-100 {
+  opacity: 1;
+}
+
+/* 溢出处理 */
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.overflow-scroll {
+  overflow: scroll;
+}
+
+.text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 显示/隐藏 */
+.hidden {
+  display: none;
+}
+
+.block {
+  display: block;
+}
+
+.inline {
+  display: inline;
+}
+
+.inline-block {
+  display: inline-block;
+}

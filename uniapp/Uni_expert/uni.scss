@@ -1,0 +1,208 @@
+/**
+ * 这里是uni-app内置的常用样式变量
+ *
+ * uni-app 官方扩展插件及插件市场（https://ext.dcloud.net.cn）上很多三方插件均使用了这些样式变量
+ * 如果你是插件开发者，建议你使用scss预处理，并在插件代码中直接使用这些变量（无需 import 这个文件），方便用户通过搭积木的方式开发整体风格一致的App
+ *
+ */
+
+/**
+ * 如果你是App开发者（插件使用者），你可以通过修改这些变量来定制自己的插件主题，实现自定义主题功能
+ *
+ * 如果你的项目同样使用了scss预处理，你也可以直接在你的 scss 代码中使用如下变量，同时无需 import 这个文件
+ */
+
+/* 颜色变量 */
+
+/* 行为相关颜色 */
+$uni-color-primary: #007aff;
+$uni-color-success: #4cd964;
+$uni-color-warning: #f0ad4e;
+$uni-color-error: #dd524d;
+
+/* 文字基本颜色 */
+$uni-text-color:#333;//基本色
+$uni-text-color-inverse:#fff;//反色
+$uni-text-color-grey:#999;//辅助灰色，如加载更多的提示信息
+$uni-text-color-placeholder: #808080;
+$uni-text-color-disable:#c0c0c0;
+
+/* 背景颜色 */
+$uni-bg-color:#ffffff;
+$uni-bg-color-grey:#f8f8f8;
+$uni-bg-color-hover:#f1f1f1;//点击状态颜色
+$uni-bg-color-mask:rgba(0, 0, 0, 0.4);//遮罩颜色
+
+/* 边框颜色 */
+$uni-border-color:#c8c7cc;
+
+/* 尺寸变量 */
+
+/* 文字尺寸 */
+$uni-font-size-sm:12px;
+$uni-font-size-base:14px;
+$uni-font-size-lg:16px;
+
+/* 图片尺寸 */
+$uni-img-size-sm:20px;
+$uni-img-size-base:26px;
+$uni-img-size-lg:40px;
+
+/* Border Radius */
+$uni-border-radius-sm: 2px;
+$uni-border-radius-base: 3px;
+$uni-border-radius-lg: 6px;
+$uni-border-radius-circle: 50%;
+
+/* 水平间距 */
+$uni-spacing-row-sm: 5px;
+$uni-spacing-row-base: 10px;
+$uni-spacing-row-lg: 15px;
+
+/* 垂直间距 */
+$uni-spacing-col-sm: 4px;
+$uni-spacing-col-base: 8px;
+$uni-spacing-col-lg: 12px;
+
+/* 透明度 */
+$uni-opacity-disabled: 0.3; // 组件禁用态的透明度
+
+/* 文章场景相关 */
+$uni-color-title: #2C405A; // 文章标题颜色
+$uni-font-size-title:20px;
+$uni-color-subtitle: #555555; // 二级标题颜色
+$uni-font-size-subtitle:26px;
+$uni-color-paragraph: #3F536E; // 文章段落颜色
+$uni-font-size-paragraph:15px;
+
+/* 达人接单小程序自定义样式变量 */
+
+/* 主题颜色 - 现代化配色方案 */
+$primary-color: #007aff;
+$primary-light: #4da6ff;
+$primary-dark: #0056cc;
+$primary-gradient: linear-gradient(135deg, #007aff 0%, #4da6ff 100%);
+
+$secondary-color: #ff6b35;
+$secondary-light: #ff8c66;
+$secondary-dark: #cc4a1a;
+$secondary-gradient: linear-gradient(135deg, #ff6b35 0%, #ff8c66 100%);
+
+/* 中性色系 */
+$neutral-50: #fafafa;
+$neutral-100: #f5f5f5;
+$neutral-200: #e5e5e5;
+$neutral-300: #d4d4d4;
+$neutral-400: #a3a3a3;
+$neutral-500: #737373;
+$neutral-600: #525252;
+$neutral-700: #404040;
+$neutral-800: #262626;
+$neutral-900: #171717;
+
+/* 状态颜色 */
+$success-color: #10b981;
+$success-light: #34d399;
+$success-dark: #059669;
+
+$warning-color: #f59e0b;
+$warning-light: #fbbf24;
+$warning-dark: #d97706;
+
+$error-color: #ef4444;
+$error-light: #f87171;
+$error-dark: #dc2626;
+
+$info-color: #3b82f6;
+$info-light: #60a5fa;
+$info-dark: #2563eb;
+
+/* 文字颜色 */
+$text-color-primary: #171717;
+$text-color-secondary: #525252;
+$text-color-tertiary: #737373;
+$text-color-placeholder: #a3a3a3;
+$text-color-disabled: #d4d4d4;
+$text-color-white: #ffffff;
+$text-color-inverse: #ffffff;
+
+/* 背景颜色 */
+$bg-color-page: #fafafa;
+$bg-color-white: #ffffff;
+$bg-color-gray: #f5f5f5;
+$bg-color-light: #fafafa;
+$bg-color-mask: rgba(0, 0, 0, 0.5);
+$bg-color-overlay: rgba(255, 255, 255, 0.9);
+
+/* 边框颜色 */
+$border-color: #e5e5e5;
+$border-color-light: #f0f0f0;
+$border-color-dark: #d4d4d4;
+
+/* 字体大小 (rpx单位) */
+$font-size-xs: 20rpx;
+$font-size-sm: 24rpx;
+$font-size-base: 28rpx;
+$font-size-lg: 32rpx;
+$font-size-xl: 36rpx;
+$font-size-xxl: 40rpx;
+$font-size-title: 44rpx;
+$font-size-display: 48rpx;
+
+/* 字体粗细 */
+$font-weight-light: 300;
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+/* 行高 */
+$line-height-tight: 1.2;
+$line-height-normal: 1.4;
+$line-height-relaxed: 1.6;
+
+/* 间距 (rpx单位) */
+$spacing-xs: 8rpx;
+$spacing-sm: 16rpx;
+$spacing-base: 24rpx;
+$spacing-lg: 32rpx;
+$spacing-xl: 40rpx;
+$spacing-2xl: 48rpx;
+$spacing-3xl: 64rpx;
+
+/* 圆角 (rpx单位) */
+$border-radius-xs: 4rpx;
+$border-radius-sm: 8rpx;
+$border-radius-base: 12rpx;
+$border-radius-lg: 16rpx;
+$border-radius-xl: 24rpx;
+$border-radius-2xl: 32rpx;
+$border-radius-full: 9999rpx;
+
+/* 阴影 */
+$box-shadow-xs: 0 1rpx 2rpx rgba(0, 0, 0, 0.05);
+$box-shadow-sm: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
+$box-shadow-base: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+$box-shadow-lg: 0 8rpx 32rpx rgba(0, 0, 0, 0.12);
+$box-shadow-xl: 0 16rpx 48rpx rgba(0, 0, 0, 0.15);
+$box-shadow-card: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+$box-shadow-float: 0 8rpx 24rpx rgba(0, 0, 0, 0.12);
+
+/* 层级 (z-index) */
+$z-index-base: 1;
+$z-index-dropdown: 100;
+$z-index-sticky: 200;
+$z-index-fixed: 300;
+$z-index-popup: 1000;
+$z-index-modal: 2000;
+$z-index-toast: 3000;
+
+/* 过渡动画 */
+$transition-fast: 0.15s ease-out;
+$transition-base: 0.25s ease-out;
+$transition-slow: 0.35s ease-out;
+
+/* 缓动函数 */
+$ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+$ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+$ease-in-out-back: cubic-bezier(0.68, -0.55, 0.265, 1.55);

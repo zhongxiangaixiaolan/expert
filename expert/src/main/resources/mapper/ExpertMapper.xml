@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qing.expert.mapper.ExpertMapper">
+
+    <!-- 达人详情结果映射 -->
+    <resultMap id="ExpertDetailMap" type="com.qing.expert.vo.ExpertDetailVO">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="category_id" property="categoryId"/>
+        <result column="expert_name" property="expertName"/>
+        <result column="description" property="description"/>
+        <result column="avatar" property="avatar"/>
+        <result column="price_min" property="priceMin"/>
+        <result column="price_max" property="priceMax"/>
+        <result column="rating" property="rating"/>
+        <result column="order_count" property="orderCount"/>
+        <result column="complete_count" property="completeCount"/>
+        <result column="complete_rate" property="completeRate"/>
+        <result column="status" property="status"/>
+        <result column="audit_status" property="auditStatus"/>
+        <result column="audit_remark" property="auditRemark"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        
+        <!-- 用户信息 -->
+        <association property="user" javaType="com.qing.expert.entity.User">
+            <id column="u_id" property="id"/>
+            <result column="u_openid" property="openid"/>
+            <result column="u_nickname" property="nickname"/>
+            <result column="u_avatar" property="avatar"/>
+            <result column="u_phone" property="phone"/>
+            <result column="u_real_name" property="realName"/>
+            <result column="u_status" property="status"/>
+        </association>
+        
+        <!-- 分类信息 -->
+        <association property="category" javaType="com.qing.expert.entity.Category">
+            <id column="c_id" property="id"/>
+            <result column="c_name" property="name"/>
+            <result column="c_description" property="description"/>
+            <result column="c_icon" property="icon"/>
+        </association>
+    </resultMap>
+
+    <!-- 分页查询达人列表 -->
+    <select id="selectExpertPage" resultMap="ExpertDetailMap">
+        SELECT 
+            e.id, e.user_id, e.category_id, e.expert_name, e.description, e.avatar,
+            e.price_min, e.price_max, e.rating, e.order_count, e.complete_count, 
+            e.complete_rate, e.status, e.audit_status, e.audit_remark, 
+            e.create_time, e.update_time,
+            u.id as u_id, u.openid as u_openid, u.nickname as u_nickname, 
+            u.avatar as u_avatar, u.phone as u_phone, u.real_name as u_real_name, u.status as u_status,
+            c.id as c_id, c.name as c_name, c.description as c_description, c.icon as c_icon
+        FROM experts e
+        LEFT JOIN users u ON e.user_id = u.id AND u.deleted = 0
+        LEFT JOIN categories c ON e.category_id = c.id AND c.deleted = 0
+        WHERE e.deleted = 0
+        <if test="keyword != null and keyword != ''">
+            AND (e.expert_name LIKE CONCAT('%', #{keyword}, '%') 
+                 OR u.nickname LIKE CONCAT('%', #{keyword}, '%')
+                 OR u.phone LIKE CONCAT('%', #{keyword}, '%')
+                 OR u.real_name LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        <if test="categoryId != null">
+            AND e.category_id = #{categoryId}
+        </if>
+        <if test="status != null">
+            AND e.status = #{status}
+        </if>
+        <if test="auditStatus != null">
+            AND e.audit_status = #{auditStatus}
+        </if>
+        <if test="minRating != null">
+            AND e.rating >= #{minRating}
+        </if>
+        <if test="maxRating != null">
+            AND e.rating &lt;= #{maxRating}
+        </if>
+        <if test="minPrice != null">
+            AND e.price_min >= #{minPrice}
+        </if>
+        <if test="maxPrice != null">
+            AND e.price_max &lt;= #{maxPrice}
+        </if>
+        <if test="createStartTime != null">
+            AND e.create_time >= #{createStartTime}
+        </if>
+        <if test="createEndTime != null">
+            AND e.create_time &lt;= #{createEndTime}
+        </if>
+        <choose>
+            <when test="sortField != null and sortField != ''">
+                <choose>
+                    <when test="sortField == 'rating'">
+                        ORDER BY e.rating
+                    </when>
+                    <when test="sortField == 'orderCount'">
+                        ORDER BY e.order_count
+                    </when>
+                    <when test="sortField == 'createTime'">
+                        ORDER BY e.create_time
+                    </when>
+                    <otherwise>
+                        ORDER BY e.create_time
+                    </otherwise>
+                </choose>
+                <choose>
+                    <when test="sortOrder == 'asc'">ASC</when>
+                    <otherwise>DESC</otherwise>
+                </choose>
+            </when>
+            <otherwise>
+                ORDER BY e.create_time DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <!-- 根据用户ID查询达人信息 -->
+    <select id="selectByUserId" resultType="com.qing.expert.entity.Expert">
+        SELECT id, user_id, category_id, expert_name, description, avatar,
+               price_min, price_max, rating, order_count, complete_count, 
+               complete_rate, status, audit_status, audit_remark, 
+               create_time, update_time
+        FROM experts
+        WHERE user_id = #{userId} AND deleted = 0
+        LIMIT 1
+    </select>
+
+    <!-- 获取达人详情 -->
+    <select id="selectExpertDetail" resultMap="ExpertDetailMap">
+        SELECT 
+            e.id, e.user_id, e.category_id, e.expert_name, e.description, e.avatar,
+            e.price_min, e.price_max, e.rating, e.order_count, e.complete_count, 
+            e.complete_rate, e.status, e.audit_status, e.audit_remark, 
+            e.create_time, e.update_time,
+            u.id as u_id, u.openid as u_openid, u.nickname as u_nickname, 
+            u.avatar as u_avatar, u.phone as u_phone, u.real_name as u_real_name, u.status as u_status,
+            c.id as c_id, c.name as c_name, c.description as c_description, c.icon as c_icon
+        FROM experts e
+        LEFT JOIN users u ON e.user_id = u.id AND u.deleted = 0
+        LEFT JOIN categories c ON e.category_id = c.id AND c.deleted = 0
+        WHERE e.id = #{expertId} AND e.deleted = 0
+    </select>
+
+    <!-- 获取达人统计信息 -->
+    <select id="getExpertStatistics" resultType="com.qing.expert.vo.ExpertStatisticsVO">
+        SELECT 
+            COUNT(*) as totalCount
+        FROM experts
+        WHERE deleted = 0
+    </select>
+
+    <!-- 获取在线达人数量 -->
+    <select id="getOnlineExpertCount" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM experts
+        WHERE deleted = 0 AND status = 1
+    </select>
+
+    <!-- 获取忙碌达人数量 -->
+    <select id="getBusyExpertCount" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM experts
+        WHERE deleted = 0 AND status = 2
+    </select>
+
+    <!-- 获取下线达人数量 -->
+    <select id="getOfflineExpertCount" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM experts
+        WHERE deleted = 0 AND status = 0
+    </select>
+
+    <!-- 获取待审核达人数量 -->
+    <select id="getPendingExpertCount" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM experts
+        WHERE deleted = 0 AND audit_status = 0
+    </select>
+
+    <!-- 获取审核通过达人数量 -->
+    <select id="getApprovedExpertCount" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM experts
+        WHERE deleted = 0 AND audit_status = 1
+    </select>
+
+    <!-- 获取审核拒绝达人数量 -->
+    <select id="getRejectedExpertCount" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM experts
+        WHERE deleted = 0 AND audit_status = 2
+    </select>
+
+    <!-- 获取新增达人数量 -->
+    <select id="getNewExpertCount" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM experts
+        WHERE deleted = 0
+          AND create_time >= #{startTime}
+          AND create_time &lt;= #{endTime}
+    </select>
+
+    <!-- 获取平均评分 -->
+    <select id="getAvgRating" resultType="java.lang.Double">
+        SELECT COALESCE(AVG(rating), 0)
+        FROM experts
+        WHERE deleted = 0 AND audit_status = 1
+    </select>
+
+    <!-- 获取总接单数 -->
+    <select id="getTotalOrderCount" resultType="java.lang.Long">
+        SELECT COALESCE(SUM(order_count), 0)
+        FROM experts
+        WHERE deleted = 0
+    </select>
+
+    <!-- 获取总完成数 -->
+    <select id="getTotalCompleteCount" resultType="java.lang.Long">
+        SELECT COALESCE(SUM(complete_count), 0)
+        FROM experts
+        WHERE deleted = 0
+    </select>
+
+    <!-- 获取平均完成率 -->
+    <select id="getAvgCompleteRate" resultType="java.lang.Double">
+        SELECT COALESCE(AVG(complete_rate), 0)
+        FROM experts
+        WHERE deleted = 0 AND order_count > 0
+    </select>
+
+    <!-- 批量更新达人状态 -->
+    <update id="batchUpdateStatus">
+        UPDATE experts
+        SET status = #{status}, update_time = NOW()
+        WHERE id IN
+        <foreach collection="expertIds" item="expertId" open="(" separator="," close=")">
+            #{expertId}
+        </foreach>
+        AND deleted = 0
+    </update>
+
+    <!-- 批量更新达人审核状态 -->
+    <update id="batchUpdateAuditStatus">
+        UPDATE experts
+        SET audit_status = #{auditStatus}, 
+            audit_remark = #{auditRemark}, 
+            update_time = NOW()
+        WHERE id IN
+        <foreach collection="expertIds" item="expertId" open="(" separator="," close=")">
+            #{expertId}
+        </foreach>
+        AND deleted = 0
+    </update>
+
+    <!-- 更新达人统计信息 -->
+    <update id="updateExpertStatistics">
+        UPDATE experts
+        SET order_count = #{orderCount},
+            complete_count = #{completeCount},
+            complete_rate = CASE 
+                WHEN #{orderCount} > 0 THEN ROUND((#{completeCount} * 100.0 / #{orderCount}), 2)
+                ELSE 100.00
+            END,
+            rating = #{rating},
+            update_time = NOW()
+        WHERE id = #{expertId} AND deleted = 0
+    </update>
+
+    <!-- 检查用户是否已经是达人 -->
+    <select id="checkUserIsExpert" resultType="java.lang.Boolean">
+        SELECT COUNT(*) > 0
+        FROM experts
+        WHERE user_id = #{userId} AND deleted = 0
+    </select>
+
+    <!-- 根据分类ID获取达人列表 -->
+    <select id="selectByCategoryId" resultType="com.qing.expert.entity.Expert">
+        SELECT id, user_id, category_id, expert_name, description, avatar,
+               price_min, price_max, rating, order_count, complete_count, 
+               complete_rate, status, audit_status, audit_remark, 
+               create_time, update_time
+        FROM experts
+        WHERE category_id = #{categoryId} AND deleted = 0 AND audit_status = 1
+        ORDER BY rating DESC, order_count DESC
+    </select>
+
+    <!-- 获取热门达人列表 -->
+    <select id="selectHotExperts" resultMap="ExpertDetailMap">
+        SELECT 
+            e.id, e.user_id, e.category_id, e.expert_name, e.description, e.avatar,
+            e.price_min, e.price_max, e.rating, e.order_count, e.complete_count, 
+            e.complete_rate, e.status, e.audit_status, e.audit_remark, 
+            e.create_time, e.update_time,
+            u.id as u_id, u.openid as u_openid, u.nickname as u_nickname, 
+            u.avatar as u_avatar, u.phone as u_phone, u.real_name as u_real_name, u.status as u_status,
+            c.id as c_id, c.name as c_name, c.description as c_description, c.icon as c_icon
+        FROM experts e
+        LEFT JOIN users u ON e.user_id = u.id AND u.deleted = 0
+        LEFT JOIN categories c ON e.category_id = c.id AND c.deleted = 0
+        WHERE e.deleted = 0 AND e.audit_status = 1 AND e.status = 1
+        ORDER BY e.rating DESC, e.order_count DESC, e.complete_rate DESC
+        LIMIT #{limit}
+    </select>
+
+</mapper>

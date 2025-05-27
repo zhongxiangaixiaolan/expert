@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qing.expert.mapper.RechargeRecordMapper">
+
+    <!-- 基础字段 -->
+    <sql id="BaseSelectColumns">
+        rr.id,
+        rr.user_id,
+        rr.order_no,
+        rr.recharge_amount,
+        rr.actual_amount,
+        rr.pay_type,
+        rr.status,
+        rr.pay_time,
+        rr.third_party_no,
+        rr.remark,
+        rr.create_time,
+        rr.update_time
+    </sql>
+
+    <!-- 关联查询字段 -->
+    <sql id="JoinSelectColumns">
+        <include refid="BaseSelectColumns"/>,
+        u.nickname as user_nickname,
+        u.avatar as user_avatar,
+        u.phone as user_phone,
+        CASE rr.status
+            WHEN 0 THEN '待支付'
+            WHEN 1 THEN '支付成功'
+            WHEN 2 THEN '支付失败'
+            WHEN 3 THEN '已退款'
+            ELSE '未知'
+        END as status_desc,
+        CASE rr.pay_type
+            WHEN 'WECHAT' THEN '微信支付'
+            WHEN 'ALIPAY' THEN '支付宝'
+            WHEN 'BALANCE' THEN '余额支付'
+            ELSE '未知'
+        END as pay_type_desc
+    </sql>
+
+    <!-- 基础表关联 -->
+    <sql id="BaseJoins">
+        FROM recharge_records rr
+        LEFT JOIN users u ON rr.user_id = u.id
+    </sql>
+
+    <!-- 查询条件 -->
+    <sql id="WhereConditions">
+        WHERE rr.deleted = 0
+        <if test="query != null">
+            <if test="query.userId != null">
+                AND rr.user_id = #{query.userId}
+            </if>
+            <if test="query.orderNo != null and query.orderNo != ''">
+                AND rr.order_no LIKE CONCAT('%', #{query.orderNo}, '%')
+            </if>
+            <if test="query.status != null">
+                AND rr.status = #{query.status}
+            </if>
+            <if test="query.payType != null and query.payType != ''">
+                AND rr.pay_type = #{query.payType}
+            </if>
+            <if test="query.startTime != null">
+                AND rr.create_time >= #{query.startTime}
+            </if>
+            <if test="query.endTime != null">
+                AND rr.create_time &lt;= #{query.endTime}
+            </if>
+            <if test="query.keyword != null and query.keyword != ''">
+                AND (rr.order_no LIKE CONCAT('%', #{query.keyword}, '%')
+                     OR u.nickname LIKE CONCAT('%', #{query.keyword}, '%')
+                     OR rr.third_party_no LIKE CONCAT('%', #{query.keyword}, '%'))
+            </if>
+        </if>
+    </sql>
+
+    <!-- 结果映射 -->
+    <resultMap id="RechargeRecordVOMap" type="com.qing.expert.vo.recharge.RechargeRecordVO">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="order_no" property="orderNo"/>
+        <result column="recharge_amount" property="rechargeAmount"/>
+        <result column="actual_amount" property="actualAmount"/>
+        <result column="pay_type" property="payType"/>
+        <result column="pay_type_desc" property="payTypeDesc"/>
+        <result column="status" property="status"/>
+        <result column="status_desc" property="statusDesc"/>
+        <result column="pay_time" property="payTime"/>
+        <result column="third_party_no" property="thirdPartyNo"/>
+        <result column="remark" property="remark"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="user_nickname" property="userNickname"/>
+        <result column="user_avatar" property="userAvatar"/>
+        <result column="user_phone" property="userPhone"/>
+    </resultMap>
+
+    <!-- 分页查询充值记录列表 -->
+    <select id="selectRechargeRecordPage" resultMap="RechargeRecordVOMap">
+        SELECT <include refid="JoinSelectColumns"/>
+        <include refid="BaseJoins"/>
+        <include refid="WhereConditions"/>
+        ORDER BY rr.create_time DESC
+    </select>
+
+    <!-- 根据ID查询充值记录详情 -->
+    <select id="selectRechargeRecordById" resultMap="RechargeRecordVOMap">
+        SELECT <include refid="JoinSelectColumns"/>
+        <include refid="BaseJoins"/>
+        WHERE rr.deleted = 0 AND rr.id = #{id}
+    </select>
+
+    <!-- 根据订单号查询充值记录 -->
+    <select id="selectByOrderNo" resultType="com.qing.expert.entity.RechargeRecord">
+        SELECT <include refid="BaseSelectColumns"/>
+        FROM recharge_records rr
+        WHERE rr.deleted = 0 AND rr.order_no = #{orderNo}
+    </select>
+
+    <!-- 查询用户充值记录列表 -->
+    <select id="selectRechargeRecordsByUserId" resultMap="RechargeRecordVOMap">
+        SELECT <include refid="JoinSelectColumns"/>
+        <include refid="BaseJoins"/>
+        WHERE rr.deleted = 0 AND rr.user_id = #{userId}
+        <if test="status != null">
+            AND rr.status = #{status}
+        </if>
+        ORDER BY rr.create_time DESC
+    </select>
+
+    <!-- 统计充值总金额 -->
+    <select id="getTotalRechargeAmount" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(recharge_amount), 0)
+        FROM recharge_records
+        WHERE deleted = 0 AND status = 1
+        <if test="startTime != null">
+            AND create_time >= #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND create_time &lt;= #{endTime}
+        </if>
+    </select>
+
+    <!-- 统计充值记录数量 -->
+    <select id="getRechargeCount" resultType="java.lang.Long">
+        SELECT COUNT(1)
+        FROM recharge_records
+        WHERE deleted = 0
+        <if test="status != null">
+            AND status = #{status}
+        </if>
+        <if test="startTime != null">
+            AND create_time >= #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND create_time &lt;= #{endTime}
+        </if>
+    </select>
+
+    <!-- 根据支付方式统计充值金额 -->
+    <select id="getRechargeAmountByPayType" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(recharge_amount), 0)
+        FROM recharge_records
+        WHERE deleted = 0 AND status = 1 AND pay_type = #{payType}
+        <if test="startTime != null">
+            AND create_time >= #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND create_time &lt;= #{endTime}
+        </if>
+    </select>
+
+    <!-- 获取用户充值总金额 -->
+    <select id="getUserTotalRechargeAmount" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(recharge_amount), 0)
+        FROM recharge_records
+        WHERE deleted = 0 AND user_id = #{userId} AND status = 1
+    </select>
+
+    <!-- 获取最近充值记录 -->
+    <select id="selectRecentRechargeRecords" resultMap="RechargeRecordVOMap">
+        SELECT <include refid="JoinSelectColumns"/>
+        <include refid="BaseJoins"/>
+        WHERE rr.deleted = 0
+        ORDER BY rr.create_time DESC
+        <if test="limit != null">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+</mapper>

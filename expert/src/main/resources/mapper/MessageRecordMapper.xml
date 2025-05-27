@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qing.expert.mapper.MessageRecordMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="MessageRecordVOMap" type="com.qing.expert.vo.message.MessageRecordVO">
+        <id column="id" property="id"/>
+        <result column="message_type" property="messageType"/>
+        <result column="user_id" property="userId"/>
+        <result column="user_nickname" property="userNickname"/>
+        <result column="user_avatar" property="userAvatar"/>
+        <result column="user_phone" property="userPhone"/>
+        <result column="title" property="title"/>
+        <result column="content" property="content"/>
+        <result column="status" property="status"/>
+        <result column="business_id" property="businessId"/>
+        <result column="business_type" property="businessType"/>
+        <result column="template_id" property="templateId"/>
+        <result column="template_data" property="templateData"/>
+        <result column="send_channel" property="sendChannel"/>
+        <result column="send_time" property="sendTime"/>
+        <result column="read_time" property="readTime"/>
+        <result column="expire_time" property="expireTime"/>
+        <result column="retry_count" property="retryCount"/>
+        <result column="max_retry_count" property="maxRetryCount"/>
+        <result column="fail_reason" property="failReason"/>
+        <result column="extra_data" property="extraData"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="creator" property="creator"/>
+        <result column="updater" property="updater"/>
+    </resultMap>
+
+    <!-- 基础查询字段 -->
+    <sql id="Base_Column_List">
+        mr.id, mr.message_type, mr.user_id, mr.title, mr.content, mr.status,
+        mr.business_id, mr.business_type, mr.template_id, mr.template_data,
+        mr.send_channel, mr.send_time, mr.read_time, mr.expire_time,
+        mr.retry_count, mr.max_retry_count, mr.fail_reason, mr.extra_data,
+        mr.create_time, mr.update_time, mr.creator, mr.updater
+    </sql>
+
+    <!-- 关联查询字段 -->
+    <sql id="Join_Column_List">
+        <include refid="Base_Column_List"/>,
+        u.nickname as user_nickname,
+        u.avatar as user_avatar,
+        u.phone as user_phone
+    </sql>
+
+    <!-- 分页查询消息记录列表 -->
+    <select id="selectMessageRecordPage" resultMap="MessageRecordVOMap">
+        SELECT
+        <include refid="Join_Column_List"/>
+        FROM message_records mr
+        LEFT JOIN users u ON mr.user_id = u.id
+        <where>
+            mr.deleted = 0
+            <if test="query.userId != null">
+                AND mr.user_id = #{query.userId}
+            </if>
+            <if test="query.messageType != null and query.messageType != ''">
+                AND mr.message_type = #{query.messageType}
+            </if>
+            <if test="query.status != null and query.status != ''">
+                AND mr.status = #{query.status}
+            </if>
+            <if test="query.sendChannel != null and query.sendChannel != ''">
+                AND mr.send_channel = #{query.sendChannel}
+            </if>
+            <if test="query.businessType != null and query.businessType != ''">
+                AND mr.business_type = #{query.businessType}
+            </if>
+            <if test="query.businessId != null">
+                AND mr.business_id = #{query.businessId}
+            </if>
+            <if test="query.userNickname != null and query.userNickname != ''">
+                AND u.nickname LIKE CONCAT('%', #{query.userNickname}, '%')
+            </if>
+            <if test="query.userPhone != null and query.userPhone != ''">
+                AND u.phone LIKE CONCAT('%', #{query.userPhone}, '%')
+            </if>
+            <if test="query.title != null and query.title != ''">
+                AND mr.title LIKE CONCAT('%', #{query.title}, '%')
+            </if>
+            <if test="query.startTime != null">
+                AND mr.create_time >= #{query.startTime}
+            </if>
+            <if test="query.endTime != null">
+                AND mr.create_time &lt;= #{query.endTime}
+            </if>
+            <if test="query.unreadOnly != null and query.unreadOnly == true">
+                AND mr.status != 'READ'
+            </if>
+            <if test="query.failedOnly != null and query.failedOnly == true">
+                AND mr.status = 'FAILED'
+            </if>
+        </where>
+        ORDER BY mr.create_time DESC
+    </select>
+
+    <!-- 根据ID查询消息记录详情 -->
+    <select id="selectMessageRecordById" resultMap="MessageRecordVOMap">
+        SELECT
+        <include refid="Join_Column_List"/>
+        FROM message_records mr
+        LEFT JOIN users u ON mr.user_id = u.id
+        WHERE mr.id = #{id} AND mr.deleted = 0
+    </select>
+
+    <!-- 查询用户消息记录列表 -->
+    <select id="selectMessageRecordsByUserId" resultMap="MessageRecordVOMap">
+        SELECT
+        <include refid="Join_Column_List"/>
+        FROM message_records mr
+        LEFT JOIN users u ON mr.user_id = u.id
+        <where>
+            mr.deleted = 0 AND mr.user_id = #{userId}
+            <if test="messageType != null and messageType != ''">
+                AND mr.message_type = #{messageType}
+            </if>
+            <if test="status != null and status != ''">
+                AND mr.status = #{status}
+            </if>
+        </where>
+        ORDER BY mr.create_time DESC
+    </select>
+
+    <!-- 查询待发送的消息记录 -->
+    <select id="selectPendingMessages" resultType="com.qing.expert.entity.MessageRecord">
+        SELECT * FROM message_records
+        WHERE deleted = 0 AND status = 'PENDING'
+        AND (expire_time IS NULL OR expire_time > NOW())
+        ORDER BY create_time ASC
+        <if test="limit != null">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+    <!-- 查询需要重试的消息记录 -->
+    <select id="selectRetryMessages" resultType="com.qing.expert.entity.MessageRecord">
+        SELECT * FROM message_records
+        WHERE deleted = 0 AND status = 'FAILED'
+        AND retry_count &lt; max_retry_count
+        AND (expire_time IS NULL OR expire_time > NOW())
+        ORDER BY update_time ASC
+        <if test="limit != null">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+    <!-- 统计消息发送数量 -->
+    <select id="countMessagesByStatus" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM message_records
+        WHERE deleted = 0
+        <if test="status != null and status != ''">
+            AND status = #{status}
+        </if>
+        <if test="startTime != null">
+            AND create_time >= #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND create_time &lt;= #{endTime}
+        </if>
+    </select>
+
+    <!-- 统计用户未读消息数量 -->
+    <select id="countUnreadMessagesByUserId" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM message_records
+        WHERE deleted = 0 AND user_id = #{userId}
+        AND status != 'READ'
+        AND (expire_time IS NULL OR expire_time > NOW())
+    </select>
+
+    <!-- 根据业务ID和类型查询消息记录 -->
+    <select id="selectByBusinessIdAndType" resultType="com.qing.expert.entity.MessageRecord">
+        SELECT * FROM message_records
+        WHERE deleted = 0
+        AND business_id = #{businessId}
+        AND business_type = #{businessType}
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 批量更新消息状态 -->
+    <update id="batchUpdateMessageStatus">
+        UPDATE message_records
+        SET status = #{status},
+        <if test="failReason != null">
+            fail_reason = #{failReason},
+        </if>
+        update_time = NOW()
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        AND deleted = 0
+    </update>
+
+    <!-- 查询消息发送统计数据 -->
+    <select id="getMessageSendStatistics" resultType="java.util.Map">
+        SELECT
+        message_type,
+        COUNT(*) as total_count,
+        SUM(CASE WHEN status = 'SUCCESS' THEN 1 ELSE 0 END) as success_count,
+        SUM(CASE WHEN status = 'FAILED' THEN 1 ELSE 0 END) as failed_count,
+        SUM(CASE WHEN status = 'READ' THEN 1 ELSE 0 END) as read_count
+        FROM message_records
+        WHERE deleted = 0
+        <if test="startTime != null">
+            AND create_time >= #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND create_time &lt;= #{endTime}
+        </if>
+        GROUP BY message_type
+        ORDER BY total_count DESC
+    </select>
+
+    <!-- 查询用户消息阅读统计 -->
+    <select id="getUserMessageReadStatistics" resultType="java.util.Map">
+        SELECT
+        DATE(create_time) as date,
+        COUNT(*) as total_count,
+        SUM(CASE WHEN status = 'read' THEN 1 ELSE 0 END) as read_count
+        FROM message_records
+        WHERE deleted = 0
+        <if test="startTime != null">
+            AND create_time >= #{startTime}
+        </if>
+        <if test="endTime != null">
+            AND create_time &lt;= #{endTime}
+        </if>
+        GROUP BY DATE(create_time)
+        ORDER BY date DESC
+    </select>
+
+    <!-- 清理过期消息记录 -->
+    <delete id="deleteExpiredMessages">
+        DELETE FROM message_records
+        WHERE expire_time IS NOT NULL
+        AND expire_time &lt; #{expireTime}
+        AND deleted = 0
+    </delete>
+
+    <!-- 标记消息为已读 -->
+    <update id="markMessageAsRead">
+        UPDATE message_records
+        SET status = 'read',
+        read_time = #{readTime},
+        update_time = NOW()
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <!-- 批量标记消息为已读 -->
+    <update id="batchMarkMessagesAsRead">
+        UPDATE message_records
+        SET status = 'read',
+        read_time = #{readTime},
+        update_time = NOW()
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        AND deleted = 0
+    </update>
+
+</mapper>
