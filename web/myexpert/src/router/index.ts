@@ -67,6 +67,12 @@ const routes: RouteRecordRaw[] = [
         name: 'Announcements',
         component: () => import('@/views/announcements/index.vue'),
         meta: { title: '通告管理', icon: 'Bell' }
+      },
+      {
+        path: '/profile',
+        name: 'Profile',
+        component: () => import('@/views/Profile.vue'),
+        meta: { title: '个人中心', icon: 'User' }
       }
     ]
   }

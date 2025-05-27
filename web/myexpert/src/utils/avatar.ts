@@ -1,6 +1,7 @@
 /**
  * 头像处理工具函数
  */
+import { buildUrl } from '@/config'
 
 // 默认头像配置（仅前端）
 const DEFAULT_AVATARS = {
@@ -43,47 +44,49 @@ export function getAvatarUrl(
   fallbackType: 'default' | 'letter' = 'default',
   nickname?: string
 ): string {
-  console.log('getAvatarUrl 调用参数:', { avatar, gender, fallbackType, nickname });
+  // 开发环境下的调试日志
+  if (import.meta.env.DEV) {
+    console.log('getAvatarUrl 调用参数:', { avatar, gender, fallbackType, nickname });
+  }
 
   // 如果有头像路径
   if (avatar && avatar.trim()) {
     // 判断是否为完整URL（http/https开头）
     if (avatar.startsWith('http://') || avatar.startsWith('https://')) {
-      console.log('使用网络URL头像:', avatar);
+      if (import.meta.env.DEV) console.log('使用网络URL头像:', avatar);
       return avatar
     }
 
     // 判断是否为绝对路径（以/开头）
     if (avatar.startsWith('/')) {
-      console.log('使用绝对路径头像:', avatar);
+      if (import.meta.env.DEV) console.log('使用绝对路径头像:', avatar);
       return avatar
     }
 
     // 判断是否为相对路径的本地文件（包含文件扩展名）
     if (avatar.match(/\.(jpg|jpeg|png|webp|gif)$/i)) {
-      // 本地上传的头像文件，使用后端静态资源路径
-      // 优先使用 /api/avatars/ 路径，这样更简洁
-      const avatarUrl = `/api/avatars/${avatar}`;
-      console.log('使用本地文件头像:', avatar, '-> URL:', avatarUrl);
+      // 本地上传的头像文件，使用统一配置构建URL
+      const avatarUrl = buildUrl.avatar(avatar);
+      if (import.meta.env.DEV) console.log('使用本地文件头像:', avatar, '-> URL:', avatarUrl);
       return avatarUrl;
     }
 
     // 其他情况，直接返回原路径
-    console.log('使用原路径头像:', avatar);
+    if (import.meta.env.DEV) console.log('使用原路径头像:', avatar);
     return avatar
   }
 
   // 没有头像时的处理
-  if (fallbackType === 'letter' && nickname) {
+  if (fallbackType === 'letter' && nickname && nickname.trim()) {
     // 生成字母头像（这里返回一个占位符，实际可以集成字母头像生成库）
     const letterAvatar = generateLetterAvatar(nickname);
-    console.log('使用字母头像:', letterAvatar);
+    if (import.meta.env.DEV) console.log('使用字母头像:', letterAvatar);
     return letterAvatar;
   }
 
   // 使用默认头像
   const defaultAvatar = getDefaultAvatar(gender);
-  console.log('使用默认头像:', defaultAvatar);
+  if (import.meta.env.DEV) console.log('使用默认头像:', defaultAvatar);
   return defaultAvatar;
 }
 

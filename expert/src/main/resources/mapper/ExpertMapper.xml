@@ -21,18 +21,19 @@
         <result column="audit_remark" property="auditRemark"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
-        
+
         <!-- 用户信息 -->
         <association property="user" javaType="com.qing.expert.entity.User">
             <id column="u_id" property="id"/>
             <result column="u_openid" property="openid"/>
             <result column="u_nickname" property="nickname"/>
             <result column="u_avatar" property="avatar"/>
+            <result column="u_gender" property="gender"/>
             <result column="u_phone" property="phone"/>
             <result column="u_real_name" property="realName"/>
             <result column="u_status" property="status"/>
         </association>
-        
+
         <!-- 分类信息 -->
         <association property="category" javaType="com.qing.expert.entity.Category">
             <id column="c_id" property="id"/>
@@ -44,20 +45,20 @@
 
     <!-- 分页查询达人列表 -->
     <select id="selectExpertPage" resultMap="ExpertDetailMap">
-        SELECT 
+        SELECT
             e.id, e.user_id, e.category_id, e.expert_name, e.description, e.avatar,
-            e.price_min, e.price_max, e.rating, e.order_count, e.complete_count, 
-            e.complete_rate, e.status, e.audit_status, e.audit_remark, 
+            e.price_min, e.price_max, e.rating, e.order_count, e.complete_count,
+            e.complete_rate, e.status, e.audit_status, e.audit_remark,
             e.create_time, e.update_time,
-            u.id as u_id, u.openid as u_openid, u.nickname as u_nickname, 
-            u.avatar as u_avatar, u.phone as u_phone, u.real_name as u_real_name, u.status as u_status,
+            u.id as u_id, u.openid as u_openid, u.nickname as u_nickname,
+            u.avatar as u_avatar, u.gender as u_gender, u.phone as u_phone, u.real_name as u_real_name, u.status as u_status,
             c.id as c_id, c.name as c_name, c.description as c_description, c.icon as c_icon
         FROM experts e
         LEFT JOIN users u ON e.user_id = u.id AND u.deleted = 0
         LEFT JOIN categories c ON e.category_id = c.id AND c.deleted = 0
         WHERE e.deleted = 0
         <if test="keyword != null and keyword != ''">
-            AND (e.expert_name LIKE CONCAT('%', #{keyword}, '%') 
+            AND (e.expert_name LIKE CONCAT('%', #{keyword}, '%')
                  OR u.nickname LIKE CONCAT('%', #{keyword}, '%')
                  OR u.phone LIKE CONCAT('%', #{keyword}, '%')
                  OR u.real_name LIKE CONCAT('%', #{keyword}, '%'))
@@ -119,8 +120,8 @@
     <!-- 根据用户ID查询达人信息 -->
     <select id="selectByUserId" resultType="com.qing.expert.entity.Expert">
         SELECT id, user_id, category_id, expert_name, description, avatar,
-               price_min, price_max, rating, order_count, complete_count, 
-               complete_rate, status, audit_status, audit_remark, 
+               price_min, price_max, rating, order_count, complete_count,
+               complete_rate, status, audit_status, audit_remark,
                create_time, update_time
         FROM experts
         WHERE user_id = #{userId} AND deleted = 0
@@ -129,13 +130,13 @@
 
     <!-- 获取达人详情 -->
     <select id="selectExpertDetail" resultMap="ExpertDetailMap">
-        SELECT 
+        SELECT
             e.id, e.user_id, e.category_id, e.expert_name, e.description, e.avatar,
-            e.price_min, e.price_max, e.rating, e.order_count, e.complete_count, 
-            e.complete_rate, e.status, e.audit_status, e.audit_remark, 
+            e.price_min, e.price_max, e.rating, e.order_count, e.complete_count,
+            e.complete_rate, e.status, e.audit_status, e.audit_remark,
             e.create_time, e.update_time,
-            u.id as u_id, u.openid as u_openid, u.nickname as u_nickname, 
-            u.avatar as u_avatar, u.phone as u_phone, u.real_name as u_real_name, u.status as u_status,
+            u.id as u_id, u.openid as u_openid, u.nickname as u_nickname,
+            u.avatar as u_avatar, u.gender as u_gender, u.phone as u_phone, u.real_name as u_real_name, u.status as u_status,
             c.id as c_id, c.name as c_name, c.description as c_description, c.icon as c_icon
         FROM experts e
         LEFT JOIN users u ON e.user_id = u.id AND u.deleted = 0
@@ -145,7 +146,7 @@
 
     <!-- 获取达人统计信息 -->
     <select id="getExpertStatistics" resultType="com.qing.expert.vo.ExpertStatisticsVO">
-        SELECT 
+        SELECT
             COUNT(*) as totalCount
         FROM experts
         WHERE deleted = 0
@@ -244,8 +245,8 @@
     <!-- 批量更新达人审核状态 -->
     <update id="batchUpdateAuditStatus">
         UPDATE experts
-        SET audit_status = #{auditStatus}, 
-            audit_remark = #{auditRemark}, 
+        SET audit_status = #{auditStatus},
+            audit_remark = #{auditRemark},
             update_time = NOW()
         WHERE id IN
         <foreach collection="expertIds" item="expertId" open="(" separator="," close=")">
@@ -259,7 +260,7 @@
         UPDATE experts
         SET order_count = #{orderCount},
             complete_count = #{completeCount},
-            complete_rate = CASE 
+            complete_rate = CASE
                 WHEN #{orderCount} > 0 THEN ROUND((#{completeCount} * 100.0 / #{orderCount}), 2)
                 ELSE 100.00
             END,
@@ -278,8 +279,8 @@
     <!-- 根据分类ID获取达人列表 -->
     <select id="selectByCategoryId" resultType="com.qing.expert.entity.Expert">
         SELECT id, user_id, category_id, expert_name, description, avatar,
-               price_min, price_max, rating, order_count, complete_count, 
-               complete_rate, status, audit_status, audit_remark, 
+               price_min, price_max, rating, order_count, complete_count,
+               complete_rate, status, audit_status, audit_remark,
                create_time, update_time
         FROM experts
         WHERE category_id = #{categoryId} AND deleted = 0 AND audit_status = 1
@@ -288,13 +289,13 @@
 
     <!-- 获取热门达人列表 -->
     <select id="selectHotExperts" resultMap="ExpertDetailMap">
-        SELECT 
+        SELECT
             e.id, e.user_id, e.category_id, e.expert_name, e.description, e.avatar,
-            e.price_min, e.price_max, e.rating, e.order_count, e.complete_count, 
-            e.complete_rate, e.status, e.audit_status, e.audit_remark, 
+            e.price_min, e.price_max, e.rating, e.order_count, e.complete_count,
+            e.complete_rate, e.status, e.audit_status, e.audit_remark,
             e.create_time, e.update_time,
-            u.id as u_id, u.openid as u_openid, u.nickname as u_nickname, 
-            u.avatar as u_avatar, u.phone as u_phone, u.real_name as u_real_name, u.status as u_status,
+            u.id as u_id, u.openid as u_openid, u.nickname as u_nickname,
+            u.avatar as u_avatar, u.gender as u_gender, u.phone as u_phone, u.real_name as u_real_name, u.status as u_status,
             c.id as c_id, c.name as c_name, c.description as c_description, c.icon as c_icon
         FROM experts e
         LEFT JOIN users u ON e.user_id = u.id AND u.deleted = 0

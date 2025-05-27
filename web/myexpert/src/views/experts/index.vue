@@ -158,6 +158,7 @@
             <Avatar
               :avatar="row.avatar"
               :nickname="row.expertName"
+              :gender="row.user?.gender"
               size="medium"
             />
           </template>

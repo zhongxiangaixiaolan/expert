@@ -88,7 +88,56 @@ public class FileUploadUtil {
      * 上传头像
      */
     public String uploadAvatar(MultipartFile file) {
-        return uploadFile(file, "avatars");
+        return uploadAvatarFile(file);
+    }
+
+    /**
+     * 上传头像文件（不使用日期文件夹）
+     */
+    public String uploadAvatarFile(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new BusinessException("文件不能为空");
+        }
+
+        // 检查文件大小
+        if (file.getSize() > maxSize) {
+            throw new BusinessException("文件大小不能超过" + (maxSize / 1024 / 1024) + "MB");
+        }
+
+        // 检查文件类型
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null) {
+            throw new BusinessException("文件名不能为空");
+        }
+
+        String fileExtension = getFileExtension(originalFilename);
+        if (!isAllowedFileType(fileExtension)) {
+            throw new BusinessException("不支持的文件类型：" + fileExtension);
+        }
+
+        try {
+            // 创建avatars目录（不使用日期子目录）
+            String fullUploadPath = uploadPath + "/avatars";
+            Path uploadDir = Paths.get(fullUploadPath);
+            if (!Files.exists(uploadDir)) {
+                Files.createDirectories(uploadDir);
+            }
+
+            // 生成新文件名
+            String newFileName = UUID.randomUUID().toString() + "." + fileExtension;
+            Path filePath = uploadDir.resolve(newFileName);
+
+            // 保存文件
+            Files.copy(file.getInputStream(), filePath);
+
+            // 只返回文件名，不包含路径
+            log.info("头像文件上传成功：{}", newFileName);
+            return newFileName;
+
+        } catch (IOException e) {
+            log.error("头像文件上传失败", e);
+            throw new BusinessException("文件上传失败：" + e.getMessage());
+        }
     }
 
     /**
@@ -122,6 +171,28 @@ public class FileUploadUtil {
             }
         } catch (IOException e) {
             log.error("文件删除失败：{}", filePath, e);
+        }
+        return false;
+    }
+
+    /**
+     * 删除头像文件
+     */
+    public boolean deleteAvatarFile(String fileName) {
+        if (fileName == null || fileName.trim().isEmpty()) {
+            return false;
+        }
+
+        try {
+            // 头像文件在avatars目录下
+            Path path = Paths.get(uploadPath, "avatars", fileName);
+            if (Files.exists(path)) {
+                Files.delete(path);
+                log.info("头像文件删除成功：{}", fileName);
+                return true;
+            }
+        } catch (IOException e) {
+            log.error("头像文件删除失败：{}", fileName, e);
         }
         return false;
     }

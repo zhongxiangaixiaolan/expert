@@ -81,17 +81,35 @@
         <div class="header-right">
           <el-dropdown @command="handleCommand">
             <div class="user-info">
-              <el-avatar :size="32" :src="adminInfo?.avatar">
-                {{ adminInfo?.nickname?.charAt(0) || "A" }}
+              <el-avatar
+                :size="32"
+                :src="
+                  getAvatarUrl(
+                    adminInfo?.avatar,
+                    0,
+                    'default',
+                    adminInfo?.realName || adminInfo?.username
+                  )
+                "
+              >
+                {{
+                  adminInfo?.realName?.charAt(0) ||
+                  adminInfo?.username?.charAt(0) ||
+                  "A"
+                }}
               </el-avatar>
               <span class="username">{{
-                adminInfo?.nickname || adminInfo?.username
+                adminInfo?.realName || adminInfo?.username
               }}</span>
               <el-icon><ArrowDown /></el-icon>
             </div>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item command="logout">
+                <el-dropdown-item command="profile">
+                  <el-icon><User /></el-icon>
+                  个人中心
+                </el-dropdown-item>
+                <el-dropdown-item divided command="logout">
                   <el-icon><SwitchButton /></el-icon>
                   退出登录
                 </el-dropdown-item>
@@ -114,6 +132,7 @@ import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { ElMessageBox, ElMessage } from "element-plus";
 import { useAuthStore } from "@/stores/auth";
+import { getAvatarUrl } from "@/utils/avatar";
 
 const route = useRoute();
 const router = useRouter();
@@ -139,6 +158,9 @@ const toggleCollapse = () => {
 // 处理下拉菜单命令
 const handleCommand = async (command: string) => {
   switch (command) {
+    case "profile":
+      router.push("/profile");
+      break;
     case "logout":
       await handleLogout();
       break;

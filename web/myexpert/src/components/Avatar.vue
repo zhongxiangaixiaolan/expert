@@ -49,7 +49,7 @@ const size = computed(() => {
 const avatarUrl = computed(() => {
   if (imageError.value) {
     // 图片加载失败时使用默认头像
-    return getAvatarUrl(null, props.gender, "default");
+    return getAvatarUrl(null, props.gender, "default", props.nickname);
   }
   return getAvatarUrl(
     props.avatar,

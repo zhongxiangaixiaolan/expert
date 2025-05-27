@@ -25,6 +25,7 @@ export interface Expert {
     id: number
     nickname: string
     avatar?: string
+    gender?: number
     phone?: string
     realName?: string
     status: number

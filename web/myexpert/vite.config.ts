@@ -36,14 +36,15 @@ export default defineConfig({
     },
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        target: process.env.VITE_API_BASE_URL || 'http://localhost:8080',
         changeOrigin: true,
         // 不需要重写路径，因为后端已经配置了context-path: /api
-        configure: (proxy, options) => {
-          proxy.on('proxyReq', (proxyReq, req, res) => {
-            console.log('代理请求:', req.method, req.url, '-> http://localhost:8080' + req.url);
+        configure: (proxy) => {
+          const targetUrl = process.env.VITE_API_BASE_URL || 'http://localhost:8080'
+          proxy.on('proxyReq', (_, req) => {
+            console.log('代理请求:', req.method, req.url, '->', targetUrl + req.url);
           });
-          proxy.on('proxyRes', (proxyRes, req, res) => {
+          proxy.on('proxyRes', (proxyRes, req) => {
             console.log('代理响应:', req.url, '状态码:', proxyRes.statusCode);
           });
         }
