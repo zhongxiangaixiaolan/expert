@@ -153,6 +153,25 @@ public class FileController {
         }
     }
 
+    @Operation(summary = "上传轮播图", description = "上传轮播图文件")
+    @PostMapping("/upload/banner")
+    public Result<Map<String, Object>> uploadBanner(
+            @Parameter(description = "轮播图文件") @RequestParam("file") MultipartFile file) {
+        try {
+            String filePath = fileUploadUtil.uploadBannerFile(file);
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("url", filePath);
+            result.put("fileName", file.getOriginalFilename());
+            result.put("fileSize", file.getSize());
+
+            return Result.success("上传成功", result);
+        } catch (Exception e) {
+            log.error("上传轮播图失败", e);
+            return Result.error("上传失败：" + e.getMessage());
+        }
+    }
+
     @Operation(summary = "上传通用文件", description = "上传通用文件")
     @PostMapping("/upload/{type}")
     public Result<Map<String, Object>> uploadFile(
@@ -163,6 +182,9 @@ public class FileController {
             switch (type.toLowerCase()) {
                 case "avatar":
                     filePath = fileUploadUtil.uploadAvatar(file);
+                    break;
+                case "banner":
+                    filePath = fileUploadUtil.uploadBannerFile(file);
                     break;
                 case "image":
                 case "screenshot":

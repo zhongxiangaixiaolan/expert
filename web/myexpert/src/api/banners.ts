@@ -101,6 +101,22 @@ export const batchDeleteBanners = (bannerIds: number[]): Promise<void> => {
   })
 }
 
+// 上传轮播图
+export const uploadBanner = (file: File): Promise<{
+  url: string
+  fileName: string
+  fileSize: number
+}> => {
+  const formData = new FormData()
+  formData.append('file', file)
+
+  return request.post('/files/upload/banner', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+}
+
 // 链接类型枚举
 export const LinkTypeEnum = {
   NONE: 'NONE',

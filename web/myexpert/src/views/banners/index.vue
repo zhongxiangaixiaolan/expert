@@ -76,11 +76,11 @@
           <template #default="{ row }">
             <div class="banner-image">
               <el-image
-                :src="row.imageUrl"
+                :src="getBannerImageUrl(row.imageUrl)"
                 :alt="row.title"
                 fit="cover"
                 style="width: 80px; height: 45px; border-radius: 4px"
-                :preview-src-list="[row.imageUrl]"
+                :preview-src-list="[getBannerImageUrl(row.imageUrl)]"
                 preview-teleported
               >
                 <template #error>
@@ -213,16 +213,38 @@
 
         <el-form-item label="轮播图片" prop="imageUrl">
           <div class="image-upload">
-            <el-input
-              v-model="formData.imageUrl"
-              placeholder="请输入图片URL或上传图片"
-              style="margin-bottom: 10px"
-            />
+            <!-- 图片上传组件 -->
+            <el-upload
+              ref="uploadRef"
+              :show-file-list="false"
+              :before-upload="beforeBannerUpload"
+              :http-request="handleBannerUpload"
+              accept="image/*"
+              class="banner-upload"
+            >
+              <el-button type="primary" :loading="bannerUploading">
+                <el-icon><Upload /></el-icon>
+                上传轮播图
+              </el-button>
+              <template #tip>
+                <div class="el-upload__tip">
+                  支持 jpg/png/webp 格式，建议尺寸比例 16:9，文件大小不超过 5MB
+                </div>
+              </template>
+            </el-upload>
+
+            <!-- 图片预览 -->
             <div v-if="formData.imageUrl" class="image-preview">
               <el-image
-                :src="formData.imageUrl"
+                :src="getBannerImageUrl(formData.imageUrl)"
                 fit="cover"
-                style="width: 200px; height: 112px; border-radius: 4px"
+                style="
+                  width: 320px;
+                  height: 180px;
+                  border-radius: 4px;
+                  border: 1px solid #dcdfe6;
+                  margin-top: 10px;
+                "
               >
                 <template #error>
                   <div class="image-error">
@@ -231,6 +253,17 @@
                   </div>
                 </template>
               </el-image>
+              <div class="image-actions">
+                <el-button
+                  type="danger"
+                  size="small"
+                  @click="removeBannerImage"
+                  style="margin-top: 8px"
+                >
+                  <el-icon><Delete /></el-icon>
+                  删除图片
+                </el-button>
+              </div>
             </div>
           </div>
         </el-form-item>
@@ -325,7 +358,12 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from "vue";
-import { ElMessage, ElMessageBox, type FormInstance } from "element-plus";
+import {
+  ElMessage,
+  ElMessageBox,
+  type FormInstance,
+  type UploadRequestOptions,
+} from "element-plus";
 import dayjs from "dayjs";
 import {
   getBannerPage,
@@ -333,6 +371,7 @@ import {
   deleteBanner,
   updateBannerStatus,
   batchDeleteBanners,
+  uploadBanner,
   linkTypeOptions,
   type Banner,
   type BannerSaveParams,
@@ -340,15 +379,18 @@ import {
   type PageResult,
 } from "@/api/banners";
 import { getEnabledCategories, type Category } from "@/api/categories";
+import { UPLOAD_CONFIG, ENV_CONFIG } from "@/config";
 
 // 响应式数据
 const loading = ref(false);
 const submitting = ref(false);
 const dialogVisible = ref(false);
+const bannerUploading = ref(false);
 const tableData = ref<Banner[]>([]);
 const selectedRows = ref<Banner[]>([]);
 const categoryOptions = ref<Category[]>([]);
 const formRef = ref<FormInstance>();
+const uploadRef = ref();
 
 // 分页数据
 const pagination = reactive({
@@ -389,14 +431,7 @@ const formRules = {
       trigger: "blur",
     },
   ],
-  imageUrl: [
-    { required: true, message: "请输入图片URL", trigger: "blur" },
-    {
-      pattern: /^https?:\/\/.+/,
-      message: "请输入有效的图片URL",
-      trigger: "blur",
-    },
-  ],
+  imageUrl: [{ required: true, message: "请上传轮播图", trigger: "blur" }],
   linkType: [{ required: true, message: "请选择链接类型", trigger: "change" }],
   linkUrl: [
     {
@@ -650,6 +685,63 @@ const handleSubmit = async () => {
 // 关闭对话框
 const handleDialogClose = () => {
   formRef.value?.resetFields();
+};
+
+// 轮播图上传前验证
+const beforeBannerUpload = (file: File) => {
+  // 检查文件类型
+  const isValidType = UPLOAD_CONFIG.BANNER.ALLOWED_TYPES.includes(file.type);
+  if (!isValidType) {
+    ElMessage.error("只能上传 JPG/PNG/WEBP 格式的图片!");
+    return false;
+  }
+
+  // 检查文件大小
+  const isValidSize = file.size <= UPLOAD_CONFIG.BANNER.MAX_SIZE;
+  if (!isValidSize) {
+    ElMessage.error(
+      `图片大小不能超过 ${UPLOAD_CONFIG.BANNER.MAX_SIZE / 1024 / 1024}MB!`
+    );
+    return false;
+  }
+
+  return true;
+};
+
+// 处理轮播图上传
+const handleBannerUpload = async (options: UploadRequestOptions) => {
+  try {
+    bannerUploading.value = true;
+    const response = await uploadBanner(options.file as File);
+
+    // 更新表单数据（只保存文件名）
+    formData.imageUrl = response.url;
+
+    ElMessage.success("轮播图上传成功");
+  } catch (error) {
+    console.error("轮播图上传失败:", error);
+    ElMessage.error("轮播图上传失败");
+  } finally {
+    bannerUploading.value = false;
+  }
+};
+
+// 删除轮播图
+const removeBannerImage = () => {
+  formData.imageUrl = "";
+};
+
+// 获取轮播图显示URL
+const getBannerImageUrl = (imageUrl: string) => {
+  if (!imageUrl) return "";
+
+  // 如果是完整URL，直接返回
+  if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
+    return imageUrl;
+  }
+
+  // 如果是文件名，构造完整URL
+  return `${ENV_CONFIG.API_BASE_URL}/api/files/banner/${imageUrl}`;
 };
 
 // 页面加载时获取数据

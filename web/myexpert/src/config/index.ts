@@ -51,6 +51,13 @@ export const UPLOAD_CONFIG = {
     MAX_SIZE: 2 * 1024 * 1024, // 2MB
     ALLOWED_TYPES: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'],
     ALLOWED_EXTENSIONS: ['jpg', 'jpeg', 'png', 'webp']
+  },
+  // 轮播图上传
+  BANNER: {
+    MAX_SIZE: 5 * 1024 * 1024, // 5MB
+    ALLOWED_TYPES: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'],
+    ALLOWED_EXTENSIONS: ['jpg', 'jpeg', 'png', 'webp'],
+    ASPECT_RATIO: 16 / 9 // 16:9 比例
   }
 }
 
