@@ -12,8 +12,10 @@ import com.qing.expert.dto.ExpertAuditDTO;
 import com.qing.expert.dto.ExpertQueryDTO;
 import com.qing.expert.dto.ExpertSaveDTO;
 import com.qing.expert.entity.Expert;
+import com.qing.expert.entity.ExpertPhoto;
 import com.qing.expert.entity.User;
 import com.qing.expert.mapper.ExpertMapper;
+import com.qing.expert.service.ExpertPhotoService;
 import com.qing.expert.service.ExpertService;
 import com.qing.expert.service.UserService;
 import com.qing.expert.vo.ExpertDetailVO;
@@ -39,44 +41,44 @@ public class ExpertServiceImpl extends ServiceImpl<ExpertMapper, Expert> impleme
 
     private final ExpertMapper expertMapper;
     private final UserService userService;
+    private final ExpertPhotoService expertPhotoService;
 
     @Override
     public PageResult<ExpertDetailVO> getExpertPage(ExpertQueryDTO queryDTO) {
         // 构建分页对象
         Page<ExpertDetailVO> page = new Page<>(queryDTO.getCurrent(), queryDTO.getSize());
-        
+
         // 处理时间参数
         LocalDateTime createStartTime = null;
         LocalDateTime createEndTime = null;
         if (StringUtils.hasText(queryDTO.getCreateStartTime())) {
-            createStartTime = LocalDateTime.parse(queryDTO.getCreateStartTime() + " 00:00:00", 
-                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            createStartTime = LocalDateTime.parse(queryDTO.getCreateStartTime() + " 00:00:00",
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         }
         if (StringUtils.hasText(queryDTO.getCreateEndTime())) {
-            createEndTime = LocalDateTime.parse(queryDTO.getCreateEndTime() + " 23:59:59", 
-                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            createEndTime = LocalDateTime.parse(queryDTO.getCreateEndTime() + " 23:59:59",
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         }
-        
+
         // 执行分页查询
         IPage<ExpertDetailVO> pageResult = expertMapper.selectExpertPage(
-            page,
-            queryDTO.getKeyword(),
-            queryDTO.getCategoryId(),
-            queryDTO.getStatus(),
-            queryDTO.getAuditStatus(),
-            queryDTO.getMinRating(),
-            queryDTO.getMaxRating(),
-            queryDTO.getMinPrice(),
-            queryDTO.getMaxPrice(),
-            createStartTime,
-            createEndTime,
-            queryDTO.getSortField(),
-            queryDTO.getSortOrder()
-        );
-        
+                page,
+                queryDTO.getKeyword(),
+                queryDTO.getCategoryId(),
+                queryDTO.getStatus(),
+                queryDTO.getAuditStatus(),
+                queryDTO.getMinRating(),
+                queryDTO.getMaxRating(),
+                queryDTO.getMinPrice(),
+                queryDTO.getMaxPrice(),
+                createStartTime,
+                createEndTime,
+                queryDTO.getSortField(),
+                queryDTO.getSortOrder());
+
         // 处理状态描述
         pageResult.getRecords().forEach(this::fillStatusDesc);
-        
+
         return PageResult.of(pageResult);
     }
 
@@ -86,7 +88,7 @@ public class ExpertServiceImpl extends ServiceImpl<ExpertMapper, Expert> impleme
         if (statistics == null) {
             statistics = new ExpertStatisticsVO();
         }
-        
+
         // 补充统计信息
         statistics.setOnlineCount(expertMapper.getOnlineExpertCount());
         statistics.setBusyCount(expertMapper.getBusyExpertCount());
@@ -94,23 +96,23 @@ public class ExpertServiceImpl extends ServiceImpl<ExpertMapper, Expert> impleme
         statistics.setPendingCount(expertMapper.getPendingExpertCount());
         statistics.setApprovedCount(expertMapper.getApprovedExpertCount());
         statistics.setRejectedCount(expertMapper.getRejectedExpertCount());
-        
+
         // 计算时间范围
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime todayStart = now.toLocalDate().atStartOfDay();
         LocalDateTime weekStart = now.minusDays(7);
         LocalDateTime monthStart = now.minusDays(30);
-        
+
         statistics.setTodayNewCount(expertMapper.getNewExpertCount(todayStart, now));
         statistics.setWeekNewCount(expertMapper.getNewExpertCount(weekStart, now));
         statistics.setMonthNewCount(expertMapper.getNewExpertCount(monthStart, now));
-        
+
         // 补充其他统计信息
         statistics.setAvgRating(expertMapper.getAvgRating());
         statistics.setTotalOrderCount(expertMapper.getTotalOrderCount());
         statistics.setTotalCompleteCount(expertMapper.getTotalCompleteCount());
         statistics.setAvgCompleteRate(expertMapper.getAvgCompleteRate());
-        
+
         return statistics;
     }
 
@@ -122,7 +124,7 @@ public class ExpertServiceImpl extends ServiceImpl<ExpertMapper, Expert> impleme
         if (user == null) {
             throw new BusinessException("用户不存在");
         }
-        
+
         Expert expert;
         if (saveDTO.getId() != null) {
             // 更新操作
@@ -130,7 +132,7 @@ public class ExpertServiceImpl extends ServiceImpl<ExpertMapper, Expert> impleme
             if (expert == null) {
                 throw new BusinessException("达人不存在");
             }
-            
+
             // 检查达人名称是否重复
             if (checkExpertNameExists(saveDTO.getExpertName(), saveDTO.getId())) {
                 throw new BusinessException("达人名称已存在");
@@ -138,36 +140,36 @@ public class ExpertServiceImpl extends ServiceImpl<ExpertMapper, Expert> impleme
         } else {
             // 新增操作
             expert = new Expert();
-            
+
             // 检查用户是否已经是达人
             if (checkUserIsExpert(saveDTO.getUserId())) {
                 throw new BusinessException("该用户已经是达人");
             }
-            
+
             // 检查达人名称是否重复
             if (checkExpertNameExists(saveDTO.getExpertName(), null)) {
                 throw new BusinessException("达人名称已存在");
             }
         }
-        
+
         // 复制属性
         BeanUtils.copyProperties(saveDTO, expert);
-        
+
         // 验证价格范围
         if (saveDTO.getPriceMin() != null && saveDTO.getPriceMax() != null) {
             if (saveDTO.getPriceMin().compareTo(saveDTO.getPriceMax()) > 0) {
                 throw new BusinessException("最低价格不能大于最高价格");
             }
         }
-        
+
         boolean result = this.saveOrUpdate(expert);
-        
+
         // 如果是新增达人，更新用户的达人标识
         if (saveDTO.getId() == null && result) {
             user.setIsExpert(1);
             userService.updateById(user);
         }
-        
+
         return result;
     }
 
@@ -176,6 +178,9 @@ public class ExpertServiceImpl extends ServiceImpl<ExpertMapper, Expert> impleme
         ExpertDetailVO expertDetail = expertMapper.selectExpertDetail(expertId);
         if (expertDetail != null) {
             fillStatusDesc(expertDetail);
+            // 加载达人照片列表
+            List<ExpertPhoto> photos = expertPhotoService.getPhotosByExpertId(expertId);
+            expertDetail.setPhotos(photos);
         }
         return expertDetail;
     }
@@ -187,10 +192,10 @@ public class ExpertServiceImpl extends ServiceImpl<ExpertMapper, Expert> impleme
         if (expert == null) {
             throw new BusinessException("达人不存在");
         }
-        
+
         // 删除达人
         boolean result = this.removeById(expertId);
-        
+
         // 更新用户的达人标识
         if (result) {
             User user = userService.getById(expert.getUserId());
@@ -199,7 +204,7 @@ public class ExpertServiceImpl extends ServiceImpl<ExpertMapper, Expert> impleme
                 userService.updateById(user);
             }
         }
-        
+
         return result;
     }
 
@@ -209,13 +214,13 @@ public class ExpertServiceImpl extends ServiceImpl<ExpertMapper, Expert> impleme
         if (expertIds == null || expertIds.isEmpty()) {
             return false;
         }
-        
+
         // 获取要删除的达人信息
         List<Expert> experts = this.listByIds(expertIds);
-        
+
         // 删除达人
         boolean result = this.removeByIds(expertIds);
-        
+
         // 更新用户的达人标识
         if (result) {
             for (Expert expert : experts) {
@@ -226,7 +231,7 @@ public class ExpertServiceImpl extends ServiceImpl<ExpertMapper, Expert> impleme
                 }
             }
         }
-        
+
         return result;
     }
 
@@ -236,7 +241,7 @@ public class ExpertServiceImpl extends ServiceImpl<ExpertMapper, Expert> impleme
         if (expert == null) {
             throw new BusinessException("达人不存在");
         }
-        
+
         expert.setStatus(status);
         return this.updateById(expert);
     }
@@ -246,7 +251,7 @@ public class ExpertServiceImpl extends ServiceImpl<ExpertMapper, Expert> impleme
         if (expertIds == null || expertIds.isEmpty()) {
             return false;
         }
-        
+
         return expertMapper.batchUpdateStatus(expertIds, status) > 0;
     }
 
@@ -257,10 +262,10 @@ public class ExpertServiceImpl extends ServiceImpl<ExpertMapper, Expert> impleme
         if (expert == null) {
             throw new BusinessException("达人不存在");
         }
-        
+
         expert.setAuditStatus(auditDTO.getAuditStatus());
         expert.setAuditRemark(auditDTO.getAuditRemark());
-        
+
         return this.updateById(expert);
     }
 
@@ -269,7 +274,7 @@ public class ExpertServiceImpl extends ServiceImpl<ExpertMapper, Expert> impleme
         if (expertIds == null || expertIds.isEmpty()) {
             return false;
         }
-        
+
         return expertMapper.batchUpdateAuditStatus(expertIds, auditStatus, auditRemark) > 0;
     }
 
@@ -334,7 +339,7 @@ public class ExpertServiceImpl extends ServiceImpl<ExpertMapper, Expert> impleme
         if (statusEnum != null) {
             expertDetail.setStatusDesc(statusEnum.getDesc());
         }
-        
+
         // 填充审核状态描述
         ExpertAuditStatusEnum auditStatusEnum = ExpertAuditStatusEnum.getByCode(expertDetail.getAuditStatus());
         if (auditStatusEnum != null) {

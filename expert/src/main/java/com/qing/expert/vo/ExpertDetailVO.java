@@ -1,12 +1,14 @@
 package com.qing.expert.vo;
 
 import com.qing.expert.entity.Category;
+import com.qing.expert.entity.ExpertPhoto;
 import com.qing.expert.entity.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 达人详情VO
@@ -77,4 +79,7 @@ public class ExpertDetailVO {
 
     @Schema(description = "分类信息")
     private Category category;
+
+    @Schema(description = "达人照片列表")
+    private List<ExpertPhoto> photos;
 }

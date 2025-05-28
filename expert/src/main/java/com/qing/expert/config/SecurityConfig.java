@@ -75,6 +75,7 @@ public class SecurityConfig {
                                 // 静态资源和文件访问
                                 "/files/**", // 允许访问静态文件 (相对于context-path /api)
                                 "/avatars/**", // 允许访问头像文件 (相对于context-path /api)
+                                "/photos/**", // 允许访问照片文件 (相对于context-path /api)
 
                                 // 支付回调接口（不需要认证）
                                 "/user/payment/callback/**", // 支付回调

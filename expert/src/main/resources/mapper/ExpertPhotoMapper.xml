@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qing.expert.mapper.ExpertPhotoMapper">
+
+    <!-- 基础结果映射 -->
+    <resultMap id="BaseResultMap" type="com.qing.expert.entity.ExpertPhoto">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="expert_id" property="expertId" jdbcType="BIGINT"/>
+        <result column="photo_name" property="photoName" jdbcType="VARCHAR"/>
+        <result column="photo_title" property="photoTitle" jdbcType="VARCHAR"/>
+        <result column="photo_description" property="photoDescription" jdbcType="VARCHAR"/>
+        <result column="sort_order" property="sortOrder" jdbcType="INTEGER"/>
+        <result column="file_size" property="fileSize" jdbcType="BIGINT"/>
+        <result column="width" property="width" jdbcType="INTEGER"/>
+        <result column="height" property="height" jdbcType="INTEGER"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+        <result column="deleted" property="deleted" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <!-- 根据达人ID查询照片列表 -->
+    <select id="selectByExpertId" resultMap="BaseResultMap">
+        SELECT id, expert_id, photo_name, photo_title, photo_description, 
+               sort_order, file_size, width, height, create_time, update_time, deleted
+        FROM expert_photos
+        WHERE expert_id = #{expertId} AND deleted = 0
+        ORDER BY sort_order ASC, create_time ASC
+    </select>
+
+    <!-- 根据达人ID删除所有照片 -->
+    <update id="deleteByExpertId">
+        UPDATE expert_photos 
+        SET deleted = 1, update_time = NOW()
+        WHERE expert_id = #{expertId} AND deleted = 0
+    </update>
+
+    <!-- 更新照片排序 -->
+    <update id="updateSortOrder">
+        UPDATE expert_photos 
+        SET sort_order = #{sortOrder}, update_time = NOW()
+        WHERE id = #{photoId} AND deleted = 0
+    </update>
+
+    <!-- 获取达人照片的最大排序号 -->
+    <select id="getMaxSortOrder" resultType="java.lang.Integer">
+        SELECT COALESCE(MAX(sort_order), 0)
+        FROM expert_photos
+        WHERE expert_id = #{expertId} AND deleted = 0
+    </select>
+
+</mapper>

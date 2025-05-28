@@ -148,6 +148,21 @@
             </div>
           </div>
         </div>
+
+        <!-- 照片管理 -->
+        <div class="info-section">
+          <h3 class="section-title">达人照片</h3>
+          <PhotoManager
+            v-if="expert.id"
+            :expert-id="expert.id"
+            :photos="expertPhotos"
+            @photos-updated="handlePhotosUpdated"
+            @upload-photo="handleUploadPhoto"
+            @update-photo="handleUpdatePhoto"
+            @delete-photo="handleDeletePhoto"
+            @sort-photos="handleSortPhotos"
+          />
+        </div>
       </div>
     </div>
 
@@ -162,6 +177,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
+import { ElMessage } from "element-plus";
 import dayjs from "dayjs";
 import {
   getExpertDetail,
@@ -171,7 +187,18 @@ import {
   getAuditStatusTagType,
   type Expert,
 } from "@/api/experts";
+import {
+  getExpertPhotos,
+  uploadExpertPhoto,
+  updateExpertPhoto,
+  deleteExpertPhoto,
+  updatePhotosSort,
+  type ExpertPhoto,
+  type UploadPhotoParams,
+  type UpdatePhotoParams,
+} from "@/api/photos";
 import Avatar from "@/components/Avatar.vue";
+import PhotoManager from "@/components/PhotoManager.vue";
 
 // 定义组件属性
 interface ExpertDetailDialogProps {
@@ -192,6 +219,7 @@ const emit = defineEmits<ExpertDetailDialogEmits>();
 // 状态
 const loading = ref(false);
 const expert = ref<Expert | null>(null);
+const expertPhotos = ref<ExpertPhoto[]>([]);
 
 // 计算属性
 const visible = computed({
@@ -214,6 +242,8 @@ const loadExpertDetail = async () => {
   try {
     loading.value = true;
     expert.value = await getExpertDetail(props.expertId);
+    // 加载达人照片
+    await loadExpertPhotos();
   } catch (error) {
     console.error("加载达人详情失败:", error);
     expert.value = null;
@@ -222,16 +252,104 @@ const loadExpertDetail = async () => {
   }
 };
 
+// 加载达人照片
+const loadExpertPhotos = async () => {
+  if (!props.expertId) return;
+
+  try {
+    expertPhotos.value = await getExpertPhotos(props.expertId);
+  } catch (error) {
+    console.error("加载达人照片失败:", error);
+    expertPhotos.value = [];
+  }
+};
+
 // 关闭弹窗
 const handleClose = () => {
   visible.value = false;
   expert.value = null;
+  expertPhotos.value = [];
 };
 
 // 编辑达人
 const handleEdit = () => {
   if (expert.value) {
     emit("edit", expert.value);
+  }
+};
+
+// 照片管理事件处理
+const handlePhotosUpdated = (photos: ExpertPhoto[]) => {
+  expertPhotos.value = photos;
+};
+
+const handleUploadPhoto = async (data: UploadPhotoParams) => {
+  if (!props.expertId) return;
+
+  try {
+    const result = await uploadExpertPhoto(props.expertId, data);
+    expertPhotos.value.push(result.photo);
+    ElMessage.success("照片上传成功");
+  } catch (error) {
+    console.error("上传照片失败:", error);
+    ElMessage.error("照片上传失败");
+  }
+};
+
+const handleUpdatePhoto = async (data: {
+  photoId: number;
+  photoTitle?: string;
+  photoDescription?: string;
+}) => {
+  try {
+    await updateExpertPhoto(data.photoId, {
+      photoTitle: data.photoTitle,
+      photoDescription: data.photoDescription,
+    });
+
+    // 更新本地数据
+    const photoIndex = expertPhotos.value.findIndex(
+      (p) => p.id === data.photoId
+    );
+    if (photoIndex !== -1) {
+      if (data.photoTitle !== undefined) {
+        expertPhotos.value[photoIndex].photoTitle = data.photoTitle;
+      }
+      if (data.photoDescription !== undefined) {
+        expertPhotos.value[photoIndex].photoDescription = data.photoDescription;
+      }
+    }
+
+    ElMessage.success("照片信息更新成功");
+  } catch (error) {
+    console.error("更新照片信息失败:", error);
+    ElMessage.error("照片信息更新失败");
+  }
+};
+
+const handleDeletePhoto = async (photoId: number) => {
+  try {
+    await deleteExpertPhoto(photoId);
+    expertPhotos.value = expertPhotos.value.filter((p) => p.id !== photoId);
+    ElMessage.success("照片删除成功");
+  } catch (error) {
+    console.error("删除照片失败:", error);
+    ElMessage.error("照片删除失败");
+  }
+};
+
+const handleSortPhotos = async (photoIds: number[]) => {
+  try {
+    await updatePhotosSort(photoIds);
+    // 重新排序本地数据
+    const sortedPhotos = photoIds
+      .map((id) => expertPhotos.value.find((p) => p.id === id))
+      .filter(Boolean) as ExpertPhoto[];
+    expertPhotos.value = sortedPhotos;
+    ElMessage.success("照片排序更新成功");
+  } catch (error) {
+    console.error("更新照片排序失败:", error);
+    ElMessage.error("照片排序更新失败");
   }
 };
 

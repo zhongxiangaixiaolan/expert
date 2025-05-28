@@ -11,7 +11,7 @@
  Target Server Version : 80400
  File Encoding         : 65001
 
- Date: 27/05/2025 19:11:28
+ Date: 28/05/2025 12:28:28
 */
 
 SET NAMES utf8mb4;
@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `admins`;
 CREATE TABLE `admins`  (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
   `username` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '用户名',
-  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '密码（加密）',
+  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '密码（加密:admin123）',
   `real_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '真实姓名',
   `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '手机号',
   `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '邮箱',
@@ -45,7 +45,7 @@ CREATE TABLE `admins`  (
 -- ----------------------------
 -- Records of admins
 -- ----------------------------
-INSERT INTO `admins` VALUES (1, 'admin', '$2a$10$lbTc4N60cczI6VODWCJpGud6mo4c3fdB7bkLPYnDKGAek1fdU5Ks.', '超级管理员', NULL, NULL, NULL, 'SUPER_ADMIN', 1, '2025-05-26 21:10:35', '127.0.0.1', '2025-05-23 20:25:30', '2025-05-26 21:10:35', 0);
+INSERT INTO `admins` VALUES (1, 'admin', '$2a$10$lbTc4N60cczI6VODWCJpGud6mo4c3fdB7bkLPYnDKGAek1fdU5Ks.', '超级管理员', '15478654785', '25746qwe8@qq.com', '322cb157-27a6-4773-9bca-3d50e1ac0d62.png', 'SUPER_ADMIN', 1, '2025-05-27 19:16:47', '127.0.0.1', '2025-05-23 20:25:30', '2025-05-27 19:16:47', 0);
 
 -- ----------------------------
 -- Table structure for announcements
@@ -179,7 +179,7 @@ INSERT INTO `categories` VALUES (1, '摄影服务', '专业摄影服务，包括
 INSERT INTO `categories` VALUES (2, '设计服务', 'UI/UX设计、平面设计、品牌设计等专业设计服务', 'Brush', 'iconify', '#e91e63', 2, 1, '2024-01-01 10:00:00', '2025-05-27 15:24:46', 0);
 INSERT INTO `categories` VALUES (3, '编程开发', '网站开发、APP开发、小程序开发等技术服务', 'Monitor', 'iconify', '#007aff', 3, 1, '2024-01-01 10:00:00', '2025-05-27 15:24:47', 0);
 INSERT INTO `categories` VALUES (4, '翻译服务', '英语翻译、多语种翻译、文档翻译等语言服务', 'ChatLineRound', 'iconify', '#4cd964', 4, 1, '2024-01-01 10:00:00', '2025-05-27 15:24:47', 0);
-INSERT INTO `categories` VALUES (5, '营销策划', '品牌策划、活动策划、数字营销等营销服务', '/icons/marketing.png', 'url', '#409eff', 5, 1, '2024-01-01 10:00:00', '2025-05-27 15:24:17', 0);
+INSERT INTO `categories` VALUES (5, '营销策划', '品牌策划、活动策划、数字营销等营销服务', 'ShoppingBag', 'iconify', '#409eff', 5, 1, '2024-01-01 10:00:00', '2025-05-27 15:24:17', 0);
 INSERT INTO `categories` VALUES (6, '咨询服务', '商业咨询、法律咨询、财务咨询等专业咨询', 'ChatDotRound', 'iconify', '#5bc0de', 6, 1, '2024-01-01 10:00:00', '2025-05-27 15:24:47', 0);
 
 -- ----------------------------
@@ -268,14 +268,51 @@ CREATE TABLE `experts`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '达人表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
+-- Table structure for expert_photos
+-- ----------------------------
+DROP TABLE IF EXISTS `expert_photos`;
+CREATE TABLE `expert_photos`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `expert_id` bigint NOT NULL COMMENT '达人ID',
+  `photo_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '照片文件名',
+  `photo_title` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '照片标题',
+  `photo_description` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '照片描述',
+  `sort_order` int NULL DEFAULT 0 COMMENT '排序顺序',
+  `file_size` bigint NULL DEFAULT NULL COMMENT '文件大小（字节）',
+  `width` int NULL DEFAULT NULL COMMENT '图片宽度',
+  `height` int NULL DEFAULT NULL COMMENT '图片高度',
+  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `deleted` tinyint(1) NULL DEFAULT 0 COMMENT '是否删除：0-否，1-是',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_expert_id`(`expert_id`) USING BTREE,
+  INDEX `idx_sort_order`(`sort_order`) USING BTREE,
+  CONSTRAINT `expert_photos_ibfk_1` FOREIGN KEY (`expert_id`) REFERENCES `experts` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '达人照片表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
 -- Records of experts
 -- ----------------------------
-INSERT INTO `experts` VALUES (1, 4, 1, '专业摄影师小赵', '专业摄影服务，擅长人像、风景、商业摄影，拥有10年摄影经验，设备齐全，服务周到。', '/avatars/expert_001.jpg', 200.00, 2000.00, 4.80, 156, 142, 91.03, 1, 1, '摄影技术专业，作品质量高', '2024-01-10 09:00:00', '2024-01-20 16:30:00', 0);
-INSERT INTO `experts` VALUES (2, 5, 2, '设计达人小钱', '专业UI/UX设计师，精通Photoshop、Illustrator、Figma等设计软件，为多家知名企业提供设计服务。', '/avatars/expert_002.jpg', 300.00, 1500.00, 4.90, 89, 85, 95.51, 1, 1, '设计理念先进，执行力强', '2024-01-08 14:30:00', '2024-01-20 11:45:00', 0);
-INSERT INTO `experts` VALUES (3, 10, 3, '编程高手小王', '全栈开发工程师，精通Java、Python、JavaScript等多种编程语言，有丰富的项目开发经验。', '/avatars/expert_003.jpg', 500.00, 3000.00, 4.70, 67, 58, 86.57, 2, 1, '技术能力强，项目经验丰富', '2024-01-07 10:15:00', '2024-01-14 17:30:00', 0);
-INSERT INTO `experts` VALUES (4, 14, 4, '翻译专家小刘', '专业英语翻译，英语专业八级，有海外留学经历，擅长商务翻译、文学翻译、技术翻译。', '/avatars/expert_004.jpg', 100.00, 800.00, 4.60, 234, 218, 93.16, 1, 1, '语言功底扎实，翻译准确', '2024-01-03 13:45:00', '2024-01-20 18:45:00', 0);
-INSERT INTO `experts` VALUES (5, 1, 5, '营销策划师小张', '资深营销策划师，擅长品牌策划、活动策划、数字营销，为多个品牌制定成功的营销方案。', '/avatars/expert_005.jpg', 800.00, 5000.00, 4.50, 45, 38, 84.44, 1, 1, '1133', '2024-01-15 10:30:00', '2024-01-20 14:25:00', 0);
-INSERT INTO `experts` VALUES (6, 2, 1, '婚礼摄影师小李', '专业婚礼摄影师，专注婚礼跟拍，擅长捕捉美好瞬间，让每一个重要时刻都成为永恒回忆。', '/avatars/expert_006.jpg', 1000.00, 8000.00, 4.90, 78, 76, 97.44, 1, 1, '婚礼摄影经验丰富，客户满意度高', '2024-01-14 15:20:00', '2024-01-19 09:15:00', 0);
+INSERT INTO `experts` VALUES (1, 4, 1, '专业摄影师小赵', '专业摄影服务，擅长人像、风景、商业摄影，拥有10年摄影经验，设备齐全，服务周到。', '1.png', 200.00, 2000.00, 4.80, 156, 142, 91.03, 1, 1, '摄影技术专业，作品质量高', '2024-01-10 09:00:00', '2025-05-27 23:41:41', 0);
+INSERT INTO `experts` VALUES (2, 5, 2, '设计达人小钱', '专业UI/UX设计师，精通Photoshop、Illustrator、Figma等设计软件，为多家知名企业提供设计服务。', '1.png', 300.00, 1500.00, 4.90, 89, 85, 95.51, 1, 1, '设计理念先进，执行力强', '2024-01-08 14:30:00', '2025-05-27 23:41:44', 0);
+INSERT INTO `experts` VALUES (3, 10, 3, '编程高手小王', '全栈开发工程师，精通Java、Python、JavaScript等多种编程语言，有丰富的项目开发经验。', '1.png', 500.00, 3000.00, 4.70, 67, 58, 86.57, 2, 1, '技术能力强，项目经验丰富', '2024-01-07 10:15:00', '2025-05-27 23:41:46', 0);
+INSERT INTO `experts` VALUES (4, 14, 4, '翻译专家小刘', '专业英语翻译，英语专业八级，有海外留学经历，擅长商务翻译、文学翻译、技术翻译。', '1.png', 100.00, 800.00, 4.60, 234, 218, 93.16, 1, 1, '语言功底扎实，翻译准确', '2024-01-03 13:45:00', '2025-05-27 23:41:48', 0);
+INSERT INTO `experts` VALUES (5, 1, 5, '营销策划师小张', '资深营销策划师，擅长品牌策划、活动策划、数字营销，为多个品牌制定成功的营销方案。', '1.png', 800.00, 5000.00, 4.50, 45, 38, 84.44, 0, 1, '1133', '2024-01-15 10:30:00', '2025-05-27 23:41:51', 0);
+INSERT INTO `experts` VALUES (6, 2, 1, '婚礼摄影师小李', '专业婚礼摄影师，专注婚礼跟拍，擅长捕捉美好瞬间，让每一个重要时刻都成为永恒回忆。', '1.png', 1000.00, 8000.00, 4.90, 78, 76, 97.44, 1, 1, '婚礼摄影经验丰富，客户满意度高', '2024-01-14 15:20:00', '2025-05-27 23:41:54', 0);
+
+-- ----------------------------
+-- Records of expert_photos
+-- ----------------------------
+INSERT INTO `expert_photos` VALUES (1, 1, 'photo_1_1.jpg', '人像摄影作品', '专业人像摄影，展现自然美感', 1, 245760, 1080, 1440, '2024-01-10 09:30:00', '2024-01-10 09:30:00', 0);
+INSERT INTO `expert_photos` VALUES (2, 1, 'photo_1_2.jpg', '风景摄影作品', '大自然风光摄影，色彩丰富', 2, 312480, 1080, 1440, '2024-01-10 09:35:00', '2024-01-10 09:35:00', 0);
+INSERT INTO `expert_photos` VALUES (3, 1, 'photo_1_3.jpg', '商业摄影作品', '产品商业摄影，细节精致', 3, 198720, 1080, 1440, '2024-01-10 09:40:00', '2024-01-10 09:40:00', 0);
+INSERT INTO `expert_photos` VALUES (4, 2, 'photo_2_1.jpg', 'UI设计作品', '移动端界面设计，简洁美观', 1, 156800, 1080, 1440, '2024-01-08 15:00:00', '2024-01-08 15:00:00', 0);
+INSERT INTO `expert_photos` VALUES (5, 2, 'photo_2_2.jpg', '品牌设计作品', '企业品牌视觉设计，专业规范', 2, 223360, 1080, 1440, '2024-01-08 15:05:00', '2024-01-08 15:05:00', 0);
+INSERT INTO `expert_photos` VALUES (6, 3, 'photo_3_1.jpg', '项目开发截图', '全栈项目开发，功能完善', 1, 189440, 1080, 1440, '2024-01-07 10:45:00', '2024-01-07 10:45:00', 0);
+INSERT INTO `expert_photos` VALUES (7, 3, 'photo_3_2.jpg', '代码展示', '优雅的代码结构，注释清晰', 2, 167680, 1080, 1440, '2024-01-07 10:50:00', '2024-01-07 10:50:00', 0);
+INSERT INTO `expert_photos` VALUES (8, 6, 'photo_6_1.jpg', '婚礼现场', '浪漫婚礼现场，幸福瞬间', 1, 278400, 1080, 1440, '2024-01-14 15:30:00', '2024-01-14 15:30:00', 0);
+INSERT INTO `expert_photos` VALUES (9, 6, 'photo_6_2.jpg', '新人合影', '新人甜蜜合影，爱意满满', 2, 234560, 1080, 1440, '2024-01-14 15:35:00', '2024-01-14 15:35:00', 0);
+INSERT INTO `expert_photos` VALUES (10, 6, 'photo_6_3.jpg', '婚礼细节', '婚礼细节拍摄，记录美好', 3, 201600, 1080, 1440, '2024-01-14 15:40:00', '2024-01-14 15:40:00', 0);
 
 -- ----------------------------
 -- Table structure for favorites
@@ -658,6 +695,8 @@ INSERT INTO `users` VALUES (12, 'wx_openid_012', 'wx_unionid_012', '林十四', 
 INSERT INTO `users` VALUES (13, 'wx_openid_013', 'wx_unionid_013', '黄十五', '1.png', 1, '13800138013', '黄十五', 2500.00, 5000.00, 2500.00, 1, 0, '2024-01-05 16:45:00', '2024-01-20 12:10:20', '2025-05-24 11:24:22', '2025-05-24 12:33:04', 0);
 INSERT INTO `users` VALUES (14, 'wx_openid_014', 'wx_unionid_014', '刘十六', '1.png', 1, '13800138014', '刘十六', 3200.50, 8000.00, 4799.50, 1, 1, '2024-01-03 13:30:00', '2024-01-20 18:45:30', '2025-05-24 11:24:22', '2025-05-24 12:33:06', 0);
 INSERT INTO `users` VALUES (15, 'wx_openid_015', 'wx_unionid_015', '游客用户', '0.png', 0, NULL, NULL, 0.00, 0.00, 0.00, 1, 0, '2024-01-18 22:30:00', '2024-01-18 22:30:00', '2025-05-24 11:24:22', '2025-05-24 12:33:19', 0);
+INSERT INTO `users` VALUES (1927329306829893634, 'test_openid_123456', NULL, '微信用户', 'https://thirdwx.qlogo.cn/mmopen/vi_32/POgEwh4mIHO4nibH0KlMECNjjGxQUq24ZEaGT4poC6icRiccVGKSyXwibcPq4BWmiaIGuG1icwxaQX6grC9VemZoJ8rg/132', 0, NULL, NULL, 0.00, 0.00, 0.00, 1, 0, '2025-05-27 19:41:29', '2025-05-27 19:42:33', '2025-05-27 19:41:29', '2025-05-27 19:41:29', 0);
+INSERT INTO `users` VALUES (1927332176149008386, 'oPRKV67Nl3VqKDYLVljtpat5WDpc', NULL, '微信用户', 'https://thirdwx.qlogo.cn/mmopen/vi_32/POgEwh4mIHO4nibH0KlMECNjjGxQUq24ZEaGT4poC6icRiccVGKSyXwibcPq4BWmiaIGuG1icwxaQX6grC9VemZoJ8rg/132', 0, NULL, NULL, 0.00, 0.00, 0.00, 1, 0, '2025-05-27 19:52:54', '2025-05-27 19:52:54', '2025-05-27 19:52:54', '2025-05-27 19:52:54', 0);
 
 -- ----------------------------
 -- Table structure for withdraw_records
