@@ -35,17 +35,19 @@
 
     <!-- 获取用户统计信息 -->
     <select id="getUserStatistics" resultType="com.qing.expert.vo.UserStatisticsVO">
-        SELECT 
+        SELECT
             COUNT(*) as totalUsers,
-            COUNT(CASE WHEN DATE(register_time) = CURDATE() THEN 1 END) as todayNewUsers,
-            COUNT(CASE WHEN is_expert = 1 THEN 1 END) as totalExperts,
             COUNT(CASE WHEN last_login_time >= DATE_SUB(NOW(), INTERVAL 30 MINUTE) THEN 1 END) as onlineUsers,
+            COUNT(CASE WHEN DATE(register_time) = CURDATE() THEN 1 END) as newUsersToday,
+            COUNT(CASE WHEN DATE(register_time) >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH) THEN 1 END) as newUsersThisMonth,
+            COUNT(CASE WHEN is_expert = 1 THEN 1 END) as expertUsers,
+            COUNT(CASE WHEN is_expert = 0 THEN 1 END) as normalUsers,
             COUNT(CASE WHEN last_login_time >= DATE_SUB(NOW(), INTERVAL 7 DAY) THEN 1 END) as activeUsers,
             COALESCE(SUM(balance), 0) as totalBalance,
             COALESCE(SUM(total_recharge), 0) as totalRecharge,
             COALESCE(SUM(total_consume), 0) as totalConsume
         FROM users
-        WHERE deleted = 0 AND status = 1
+        WHERE deleted = 0
     </select>
 
     <!-- 获取在线用户数量 -->

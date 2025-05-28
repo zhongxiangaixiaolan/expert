@@ -54,7 +54,7 @@ mybatis-plus:
     cache-enabled: false
     call-setters-on-nulls: true
     jdbc-type-for-null: "null"
-    # log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 关闭MyBatis控制台SQL日志
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 开启MyBatis控制台SQL日志用于调试
   global-config:
     db-config:
       id-type: ASSIGN_ID

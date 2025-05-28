@@ -43,6 +43,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public PageResult<User> getUserPage(UserQueryDTO queryDTO) {
+        log.info("开始查询用户分页数据: current={}, size={}, keyword={}, status={}, isExpert={}",
+                queryDTO.getCurrent(), queryDTO.getSize(), queryDTO.getKeyword(), queryDTO.getStatus(),
+                queryDTO.getIsExpert());
+
         Page<User> page = new Page<>(queryDTO.getCurrent(), queryDTO.getSize());
 
         IPage<User> result = baseMapper.selectUserPage(page,
@@ -50,6 +54,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 queryDTO.getStatus(),
                 queryDTO.getIsExpert());
 
+        log.info("用户分页查询完成: 总记录数={}, 当前页记录数={}", result.getTotal(), result.getRecords().size());
         return PageResult.of(result);
     }
 

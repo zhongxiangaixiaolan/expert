@@ -15,14 +15,20 @@ public class UserStatisticsVO {
     @Schema(description = "用户总数")
     private Long totalUsers;
 
-    @Schema(description = "今日新增用户")
-    private Long todayNewUsers;
-
     @Schema(description = "在线用户数")
     private Long onlineUsers;
 
-    @Schema(description = "达人总数")
-    private Long totalExperts;
+    @Schema(description = "今日新增用户")
+    private Long newUsersToday;
+
+    @Schema(description = "本月新增用户")
+    private Long newUsersThisMonth;
+
+    @Schema(description = "达人用户数")
+    private Long expertUsers;
+
+    @Schema(description = "普通用户数")
+    private Long normalUsers;
 
     @Schema(description = "活跃用户数")
     private Long activeUsers;

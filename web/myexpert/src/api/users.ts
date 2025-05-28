@@ -3,7 +3,7 @@ import type { PageResponse } from './request'
 
 // 用户信息接口
 export interface User {
-  id: number
+  id: string  // 改为string类型避免大整数精度丢失
   openid?: string
   unionid?: string
   nickname: string
@@ -55,36 +55,36 @@ export const getUserPage = (params: UserQueryParams): Promise<PageResponse<User>
 }
 
 // 获取用户详情
-export const getUserDetail = (userId: number): Promise<User> => {
+export const getUserDetail = (userId: string): Promise<User> => {
   return request.get(`/admin/user/${userId}`)
 }
 
 // 更新用户状态
-export const updateUserStatus = (userId: number, status: number): Promise<void> => {
+export const updateUserStatus = (userId: string, status: number): Promise<void> => {
   return request.put(`/admin/user/${userId}/status?status=${status}`)
 }
 
 // 批量更新用户状态
-export const batchUpdateUserStatus = (userIds: number[], status: number): Promise<void> => {
+export const batchUpdateUserStatus = (userIds: string[], status: number): Promise<void> => {
   return request.put('/admin/user/batch/status', { userIds, status })
 }
 
 // 删除用户
-export const deleteUser = (userId: number): Promise<void> => {
+export const deleteUser = (userId: string): Promise<void> => {
   return request.delete(`/admin/user/${userId}`)
 }
 
 // 批量删除用户
-export const batchDeleteUsers = (userIds: number[]): Promise<void> => {
+export const batchDeleteUsers = (userIds: string[]): Promise<void> => {
   return request.delete('/admin/user/batch', { data: { userIds } })
 }
 
 // 重置用户密码
-export const resetUserPassword = (userId: number): Promise<void> => {
+export const resetUserPassword = (userId: string): Promise<void> => {
   return request.put(`/admin/user/${userId}/reset-password`)
 }
 
 // 更新用户余额
-export const updateUserBalance = (userId: number, amount: number): Promise<void> => {
+export const updateUserBalance = (userId: string, amount: number): Promise<void> => {
   return request.put(`/admin/user/${userId}/balance?amount=${amount}`)
 }

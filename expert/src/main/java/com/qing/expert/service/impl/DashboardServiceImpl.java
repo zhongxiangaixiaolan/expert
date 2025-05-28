@@ -45,7 +45,7 @@ public class DashboardServiceImpl implements DashboardService {
             UserStatisticsVO userStats = userService.getUserStatistics();
             if (userStats != null) {
                 dashboard.setUserCount(userStats.getTotalUsers());
-                dashboard.setTodayNewUsers(userStats.getTodayNewUsers());
+                dashboard.setTodayNewUsers(userStats.getNewUsersToday());
             } else {
                 dashboard.setUserCount(0L);
                 dashboard.setTodayNewUsers(0L);
