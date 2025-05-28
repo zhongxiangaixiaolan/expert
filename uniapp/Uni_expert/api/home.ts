@@ -83,7 +83,26 @@ export interface Expert {
 
 // 获取轮播图列表
 export const getBannerList = (): Promise<Banner[]> => {
-  return request.get('/banners')
+  return request.get('/banners').then((data: Banner[]) => {
+    // 处理图片URL，确保是完整的访问路径
+    return data.map(banner => ({
+      ...banner,
+      imageUrl: getBannerImageUrl(banner.imageUrl)
+    }))
+  })
+}
+
+// 构建轮播图图片URL
+const getBannerImageUrl = (imageUrl: string): string => {
+  if (!imageUrl) return ''
+
+  // 如果已经是完整URL，直接返回
+  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    return imageUrl
+  }
+
+  // 构建完整的图片访问URL
+  return `http://localhost:8080/api/static/banner/${imageUrl}`
 }
 
 // 获取公告列表
@@ -108,7 +127,31 @@ export const getExpertList = (params?: {
   categoryId?: number
   keyword?: string
 }): Promise<{ records: Expert[], total: number }> => {
-  return request.get('/experts', { params })
+  return request.get('/experts', { params }).then((data: any) => {
+    // 处理达人头像URL
+    const processedRecords = (data.records || []).map((expert: any) => ({
+      ...expert,
+      avatar: getAvatarImageUrl(expert.avatar)
+    }))
+
+    return {
+      records: processedRecords,
+      total: data.total || 0
+    }
+  })
+}
+
+// 构建头像图片URL
+const getAvatarImageUrl = (avatar?: string): string => {
+  if (!avatar) return ''
+
+  // 如果已经是完整URL，直接返回
+  if (avatar.startsWith('http://') || avatar.startsWith('https://')) {
+    return avatar
+  }
+
+  // 构建完整的头像访问URL
+  return `http://localhost:8080/api/static/avatars/${avatar}`
 }
 
 // 获取达人详情

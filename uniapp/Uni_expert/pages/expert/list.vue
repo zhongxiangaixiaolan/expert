@@ -174,16 +174,16 @@
       </view>
     </view>
 
-    <!-- 自定义TabBar -->
-    <CustomTabBar />
+    <!-- 底部导航栏 -->
+    <Tabbar />
   </view>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, reactive } from "vue";
+import { ref, onMounted, onShow, reactive } from "vue";
 import { getExpertList, getCategoryList } from "@/api/home";
 import { showError, debounce } from "@/utils/index";
-import CustomTabBar from "@/custom-tab-bar/index.vue";
+import Tabbar from "@/components/Tabbar.vue";
 
 // 状态
 const expertList = ref([]);
@@ -221,15 +221,7 @@ const sortOptions = [
 onMounted(() => {
   loadCategoryList();
   loadExpertList();
-  setTabBarIndex();
 });
-
-// 设置自定义tabbar选中状态
-const setTabBarIndex = () => {
-  if (typeof getApp().globalData.setTabBarIndex === "function") {
-    getApp().globalData.setTabBarIndex(1);
-  }
-};
 
 // 加载分类列表
 const loadCategoryList = async () => {

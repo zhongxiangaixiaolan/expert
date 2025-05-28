@@ -16,7 +16,7 @@
     <!-- 正常内容 -->
     <view v-else>
       <!-- 轮播图 -->
-      <view class="banner-section" v-if="bannerList.length > 0">
+      <view class="banner-section" v-if="bannerList && bannerList.length > 0">
         <swiper
           class="banner-swiper"
           :indicator-dots="true"
@@ -26,7 +26,7 @@
         >
           <swiper-item
             v-for="(banner, index) in bannerList"
-            :key="index"
+            :key="banner.id || index"
             @click="onBannerClick(banner)"
           >
             <image
@@ -40,7 +40,7 @@
       </view>
 
     <!-- 公告通知 -->
-    <view class="notice-section" v-if="noticeList.length > 0">
+    <view class="notice-section" v-if="noticeList && noticeList.length > 0">
       <view class="notice-icon">
         <image class="notice-icon-img" src="/static/icons/info.svg"></image>
       </view>
@@ -51,7 +51,7 @@
         :interval="3000"
         :duration="500"
       >
-        <swiper-item v-for="(notice, index) in noticeList" :key="index">
+        <swiper-item v-for="(notice, index) in noticeList" :key="notice.id || index">
           <text class="notice-text" @click="onNoticeClick(notice)">{{
             notice.title
           }}</text>
@@ -66,7 +66,7 @@
         <view
           class="category-item"
           v-for="(category, index) in categoryList"
-          :key="index"
+          :key="category.id || index"
           @click="onCategoryClick(category)"
         >
           <!-- 简化图标显示 -->
@@ -88,7 +88,7 @@
         <view
           class="expert-item"
           v-for="(expert, index) in expertList"
-          :key="index"
+          :key="expert.id || index"
           @click="onExpertClick(expert)"
         >
           <image
@@ -97,11 +97,11 @@
             mode="aspectFill"
           ></image>
           <view class="expert-info">
-            <text class="expert-name">{{ expert.name }}</text>
-            <text class="expert-desc">{{ expert.description }}</text>
+            <text class="expert-name">{{ expert.expertName || '未知达人' }}</text>
+            <text class="expert-desc">{{ expert.description || '暂无描述' }}</text>
             <view class="expert-meta">
-              <text class="expert-rating">⭐ {{ expert.rating }}</text>
-              <text class="expert-price">¥{{ expert.servicePrice }}/次</text>
+              <text class="expert-rating">⭐ {{ expert.rating || 0 }}</text>
+              <text class="expert-price">¥{{ expert.priceMin || 0 }}-{{ expert.priceMax || 0 }}/次</text>
             </view>
           </view>
         </view>
@@ -109,42 +109,65 @@
     </view>
     </view>
 
-    <!-- 自定义TabBar -->
-    <CustomTabBar />
+    <!-- 底部导航栏 -->
+    <Tabbar />
   </view>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onShow, reactive } from "vue";
 import {
   getBannerList,
   getCategoryList,
   getExpertList,
   getNoticeList,
 } from "@/api/home";
-import CustomTabBar from "@/custom-tab-bar/index.vue";
+import Tabbar from "@/components/Tabbar.vue";
 
-// 响应式数据
-const bannerList = ref([]);
-const noticeList = ref([]);
-const categoryList = ref([]);
-const expertList = ref([]);
-const loading = ref(true);
-const error = ref('');
+// 定义数据类型接口
+interface Banner {
+  id: number;
+  imageUrl: string;
+  linkUrl?: string;
+  title?: string;
+}
+
+interface Notice {
+  id: number;
+  title: string;
+  content?: string;
+}
+
+interface Category {
+  id: number;
+  name: string;
+  description?: string;
+  icon?: string;
+}
+
+interface Expert {
+  id: number;
+  expertName: string;
+  description: string;
+  avatar: string;
+  rating: number;
+  priceMin: number;
+  priceMax: number;
+}
+
+// 响应式数据 - 使用明确的类型定义
+const bannerList = ref<Banner[]>([]);
+const noticeList = ref<Notice[]>([]);
+const categoryList = ref<Category[]>([]);
+const expertList = ref<Expert[]>([]);
+const loading = ref<boolean>(true);
+const error = ref<string>('');
 
 // 页面加载
 onMounted(() => {
   console.log('首页组件挂载完成');
   loadPageData();
-  setTabBarIndex();
 });
-
-// 设置自定义tabbar选中状态
-const setTabBarIndex = () => {
-  if (typeof getApp().globalData.setTabBarIndex === "function") {
-    getApp().globalData.setTabBarIndex(0);
-  }
-};
 
 // 加载页面数据
 const loadPageData = async () => {
@@ -159,21 +182,34 @@ const loadPageData = async () => {
       getBannerList(),
       getNoticeList(),
       getCategoryList(),
-      getExpertList({ pageSize: 6 }),
+      getExpertList({ size: 6 }),
     ]);
 
     console.log('数据加载成功:', { banners, notices, categories, experts });
 
-    bannerList.value = banners;
-    noticeList.value = notices;
-    categoryList.value = categories;
-    expertList.value = experts.records || experts;
+    // 安全地设置数据，确保数据类型正确
+    bannerList.value = Array.isArray(banners) ? banners : [];
+    noticeList.value = Array.isArray(notices) ? notices : [];
+    categoryList.value = Array.isArray(categories) ? categories : [];
+
+    // 处理专家列表数据
+    let expertData = experts;
+    if (experts && typeof experts === 'object' && experts.records) {
+      expertData = experts.records;
+    }
+    expertList.value = Array.isArray(expertData) ? expertData : [];
 
     loading.value = false;
   } catch (err) {
     console.error("加载页面数据失败:", err);
     loading.value = false;
     error.value = '数据加载失败，请检查网络连接';
+
+    // 设置空数组防止渲染错误
+    bannerList.value = [];
+    noticeList.value = [];
+    categoryList.value = [];
+    expertList.value = [];
 
     // 不显示toast，改为在页面上显示错误信息
     // uni.showToast({
@@ -184,32 +220,38 @@ const loadPageData = async () => {
 };
 
 // 轮播图点击
-const onBannerClick = (banner: any) => {
-  if (banner.linkUrl) {
+const onBannerClick = (banner: Banner) => {
+  if (banner && banner.linkUrl) {
     // 处理跳转逻辑
     console.log("点击轮播图:", banner);
   }
 };
 
 // 公告点击
-const onNoticeClick = (notice: any) => {
-  uni.navigateTo({
-    url: `/pages/common/notice-detail?id=${notice.id}`,
-  });
+const onNoticeClick = (notice: Notice) => {
+  if (notice && notice.id) {
+    uni.navigateTo({
+      url: `/pages/common/notice-detail?id=${notice.id}`,
+    });
+  }
 };
 
 // 分类点击
-const onCategoryClick = (category: any) => {
-  uni.navigateTo({
-    url: `/pages/category/detail?id=${category.id}&name=${category.name}`,
-  });
+const onCategoryClick = (category: Category) => {
+  if (category && category.id) {
+    uni.navigateTo({
+      url: `/pages/category/detail?id=${category.id}&name=${encodeURIComponent(category.name || '')}`,
+    });
+  }
 };
 
 // 达人点击
-const onExpertClick = (expert: any) => {
-  uni.navigateTo({
-    url: `/pages/expert/detail?id=${expert.id}`,
-  });
+const onExpertClick = (expert: Expert) => {
+  if (expert && expert.id) {
+    uni.navigateTo({
+      url: `/pages/expert/detail?id=${expert.id}`,
+    });
+  }
 };
 
 // 查看更多达人

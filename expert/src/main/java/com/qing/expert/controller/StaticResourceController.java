@@ -36,7 +36,7 @@ public class StaticResourceController {
         try {
             // 构建文件路径
             Path filePath = Paths.get(uploadPath, "avatars", fileName);
-            
+
             // 检查文件是否存在
             if (!Files.exists(filePath)) {
                 log.warn("头像文件不存在：{}", fileName);
@@ -45,7 +45,7 @@ public class StaticResourceController {
 
             // 创建资源
             Resource resource = new FileSystemResource(filePath);
-            
+
             // 获取文件的MIME类型
             String contentType = Files.probeContentType(filePath);
             if (contentType == null) {
@@ -56,7 +56,7 @@ public class StaticResourceController {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.parseMediaType(contentType));
             headers.setCacheControl("max-age=31536000"); // 缓存一年
-            
+
             log.debug("返回头像文件：{}", fileName);
             return ResponseEntity.ok()
                     .headers(headers)
@@ -69,23 +69,23 @@ public class StaticResourceController {
     }
 
     /**
-     * 获取通用图片文件
+     * 获取轮播图文件
      */
-    @GetMapping("/images/{fileName}")
-    public ResponseEntity<Resource> getImage(@PathVariable String fileName) {
+    @GetMapping("/banner/{fileName}")
+    public ResponseEntity<Resource> getBanner(@PathVariable String fileName) {
         try {
             // 构建文件路径
-            Path filePath = Paths.get(uploadPath, "images", fileName);
-            
+            Path filePath = Paths.get(uploadPath, "banner", fileName);
+
             // 检查文件是否存在
             if (!Files.exists(filePath)) {
-                log.warn("图片文件不存在：{}", fileName);
+                log.warn("轮播图文件不存在：{}", fileName);
                 return ResponseEntity.notFound().build();
             }
 
             // 创建资源
             Resource resource = new FileSystemResource(filePath);
-            
+
             // 获取文件的MIME类型
             String contentType = Files.probeContentType(filePath);
             if (contentType == null) {
@@ -96,7 +96,47 @@ public class StaticResourceController {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.parseMediaType(contentType));
             headers.setCacheControl("max-age=31536000"); // 缓存一年
-            
+
+            log.debug("返回轮播图文件：{}", fileName);
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(resource);
+
+        } catch (IOException e) {
+            log.error("获取轮播图文件失败：{}", fileName, e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
+     * 获取通用图片文件
+     */
+    @GetMapping("/images/{fileName}")
+    public ResponseEntity<Resource> getImage(@PathVariable String fileName) {
+        try {
+            // 构建文件路径
+            Path filePath = Paths.get(uploadPath, "images", fileName);
+
+            // 检查文件是否存在
+            if (!Files.exists(filePath)) {
+                log.warn("图片文件不存在：{}", fileName);
+                return ResponseEntity.notFound().build();
+            }
+
+            // 创建资源
+            Resource resource = new FileSystemResource(filePath);
+
+            // 获取文件的MIME类型
+            String contentType = Files.probeContentType(filePath);
+            if (contentType == null) {
+                contentType = "application/octet-stream";
+            }
+
+            // 设置响应头
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.parseMediaType(contentType));
+            headers.setCacheControl("max-age=31536000"); // 缓存一年
+
             log.debug("返回图片文件：{}", fileName);
             return ResponseEntity.ok()
                     .headers(headers)

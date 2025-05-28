@@ -150,13 +150,13 @@
       </view>
     </scroll-view>
 
-    <!-- 自定义TabBar -->
-    <CustomTabBar />
+    <!-- 底部导航栏 -->
+    <Tabbar />
   </view>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, reactive, computed } from "vue";
+import { ref, onMounted, onShow, reactive, computed } from "vue";
 import { useUserStore } from "@/store/user";
 import {
   getUserOrders,
@@ -167,7 +167,7 @@ import {
   type Order,
 } from "@/api/order";
 import { formatTime, showError, showConfirm } from "@/utils/index";
-import CustomTabBar from "@/custom-tab-bar/index.vue";
+import Tabbar from "@/components/Tabbar.vue";
 
 // 状态
 const userStore = useUserStore();
@@ -195,15 +195,7 @@ const statusTabs = ref([
 // 页面加载
 onMounted(() => {
   loadOrderList();
-  setTabBarIndex();
 });
-
-// 设置自定义tabbar选中状态
-const setTabBarIndex = () => {
-  if (typeof getApp().globalData.setTabBarIndex === "function") {
-    getApp().globalData.setTabBarIndex(2);
-  }
-};
 
 // 加载订单列表
 const loadOrderList = async (refresh = false) => {
