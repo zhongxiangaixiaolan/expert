@@ -15,6 +15,7 @@ export interface Expert {
   orderCount?: number
   completeCount?: number
   completeRate?: number
+  isHot?: number
   status: number
   auditStatus: number
   auditRemark?: string
@@ -151,6 +152,16 @@ export const getExpertsByCategory = (categoryId: number): Promise<Expert[]> => {
 // 获取热门达人列表
 export const getHotExperts = (limit?: number): Promise<Expert[]> => {
   return request.get('/admin/expert/hot', { params: { limit } })
+}
+
+// 设置达人热门状态
+export const updateExpertHotStatus = (expertId: number, isHot: number): Promise<void> => {
+  return request.put(`/admin/expert/${expertId}/hot?isHot=${isHot}`)
+}
+
+// 批量设置达人热门状态
+export const batchUpdateExpertHotStatus = (expertIds: number[], isHot: number): Promise<void> => {
+  return request.put('/admin/expert/batch/hot', expertIds, { params: { isHot } })
 }
 
 // 达人状态枚举

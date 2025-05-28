@@ -4,8 +4,7 @@
 		{
 			"path": "pages/index/index",
 			"style": {
-				"navigationBarTitleText": "达人接单",
-				"navigationStyle": "custom"
+				"navigationBarTitleText": "首页"
 			}
 		},
 		{
@@ -26,7 +25,6 @@
 				"navigationBarTitleText": "我的"
 			}
 		},
-
 		// 认证相关
 		{
 			"path": "pages/auth/login",
@@ -41,7 +39,6 @@
 				"navigationBarTitleText": "完善信息"
 			}
 		},
-
 		// 分类相关
 		{
 			"path": "pages/category/index",
@@ -55,7 +52,6 @@
 				"navigationBarTitleText": "分类详情"
 			}
 		},
-
 		// 达人相关
 		{
 			"path": "pages/expert/detail",
@@ -87,7 +83,6 @@
 				"navigationBarTitleText": "达人资料"
 			}
 		},
-
 		// 订单相关
 		{
 			"path": "pages/order/create",
@@ -107,7 +102,6 @@
 				"navigationBarTitleText": "评价订单"
 			}
 		},
-
 		// 用户中心
 		{
 			"path": "pages/user/profile",
@@ -141,7 +135,6 @@
 				"navigationBarTitleText": "消息中心"
 			}
 		},
-
 		// 公共页面
 		{
 			"path": "pages/common/notice-detail",

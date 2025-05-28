@@ -21,19 +21,19 @@ public interface ExpertMapper extends BaseMapper<Expert> {
     /**
      * 分页查询达人列表（包含用户和分类信息）
      */
-    IPage<ExpertDetailVO> selectExpertPage(Page<ExpertDetailVO> page, 
-                                          @Param("keyword") String keyword,
-                                          @Param("categoryId") Long categoryId,
-                                          @Param("status") Integer status,
-                                          @Param("auditStatus") Integer auditStatus,
-                                          @Param("minRating") Double minRating,
-                                          @Param("maxRating") Double maxRating,
-                                          @Param("minPrice") Double minPrice,
-                                          @Param("maxPrice") Double maxPrice,
-                                          @Param("createStartTime") LocalDateTime createStartTime,
-                                          @Param("createEndTime") LocalDateTime createEndTime,
-                                          @Param("sortField") String sortField,
-                                          @Param("sortOrder") String sortOrder);
+    IPage<ExpertDetailVO> selectExpertPage(Page<ExpertDetailVO> page,
+            @Param("keyword") String keyword,
+            @Param("categoryId") Long categoryId,
+            @Param("status") Integer status,
+            @Param("auditStatus") Integer auditStatus,
+            @Param("minRating") Double minRating,
+            @Param("maxRating") Double maxRating,
+            @Param("minPrice") Double minPrice,
+            @Param("maxPrice") Double maxPrice,
+            @Param("createStartTime") LocalDateTime createStartTime,
+            @Param("createEndTime") LocalDateTime createEndTime,
+            @Param("sortField") String sortField,
+            @Param("sortOrder") String sortOrder);
 
     /**
      * 根据用户ID查询达人信息
@@ -113,17 +113,17 @@ public interface ExpertMapper extends BaseMapper<Expert> {
     /**
      * 批量更新达人审核状态
      */
-    int batchUpdateAuditStatus(@Param("expertIds") List<Long> expertIds, 
-                              @Param("auditStatus") Integer auditStatus,
-                              @Param("auditRemark") String auditRemark);
+    int batchUpdateAuditStatus(@Param("expertIds") List<Long> expertIds,
+            @Param("auditStatus") Integer auditStatus,
+            @Param("auditRemark") String auditRemark);
 
     /**
      * 更新达人统计信息
      */
     int updateExpertStatistics(@Param("expertId") Long expertId,
-                              @Param("orderCount") Integer orderCount,
-                              @Param("completeCount") Integer completeCount,
-                              @Param("rating") Double rating);
+            @Param("orderCount") Integer orderCount,
+            @Param("completeCount") Integer completeCount,
+            @Param("rating") Double rating);
 
     /**
      * 检查用户是否已经是达人
@@ -139,4 +139,14 @@ public interface ExpertMapper extends BaseMapper<Expert> {
      * 获取热门达人列表
      */
     List<ExpertDetailVO> selectHotExperts(@Param("limit") Integer limit);
+
+    /**
+     * 更新达人热门状态
+     */
+    int updateExpertHotStatus(@Param("expertId") Long expertId, @Param("isHot") Integer isHot);
+
+    /**
+     * 批量更新达人热门状态
+     */
+    int batchUpdateExpertHotStatus(@Param("expertIds") List<Long> expertIds, @Param("isHot") Integer isHot);
 }

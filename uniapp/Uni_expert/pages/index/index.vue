@@ -23,6 +23,8 @@
           :autoplay="true"
           :interval="3000"
           :duration="500"
+          indicator-color="rgba(255, 255, 255, 0.5)"
+          indicator-active-color="rgba(255, 255, 255, 0.9)"
         >
           <swiper-item
             v-for="(banner, index) in bannerList"
@@ -59,24 +61,7 @@
       </swiper>
     </view>
 
-    <!-- 服务分类 -->
-    <view class="category-section">
-      <view class="section-title">服务分类</view>
-      <view class="category-grid">
-        <view
-          class="category-item"
-          v-for="(category, index) in categoryList"
-          :key="category.id || index"
-          @click="onCategoryClick(category)"
-        >
-          <!-- 简化图标显示 -->
-          <view class="category-icon">
-            <text class="category-emoji">{{ getCategoryEmoji(category.name) }}</text>
-          </view>
-          <text class="category-name">{{ category.name }}</text>
-        </view>
-      </view>
-    </view>
+
 
     <!-- 推荐达人 -->
     <view class="expert-section">
@@ -118,7 +103,6 @@
 import { ref, onMounted, onShow, reactive } from "vue";
 import {
   getBannerList,
-  getCategoryList,
   getExpertList,
   getNoticeList,
 } from "@/api/home";
@@ -138,12 +122,7 @@ interface Notice {
   content?: string;
 }
 
-interface Category {
-  id: number;
-  name: string;
-  description?: string;
-  icon?: string;
-}
+
 
 interface Expert {
   id: number;
@@ -158,7 +137,6 @@ interface Expert {
 // 响应式数据 - 使用明确的类型定义
 const bannerList = ref<Banner[]>([]);
 const noticeList = ref<Notice[]>([]);
-const categoryList = ref<Category[]>([]);
 const expertList = ref<Expert[]>([]);
 const loading = ref<boolean>(true);
 const error = ref<string>('');
@@ -178,19 +156,17 @@ const loadPageData = async () => {
     console.log('开始加载页面数据...');
 
     // 并行加载数据
-    const [banners, notices, categories, experts] = await Promise.all([
+    const [banners, notices, experts] = await Promise.all([
       getBannerList(),
       getNoticeList(),
-      getCategoryList(),
       getExpertList({ size: 6 }),
     ]);
 
-    console.log('数据加载成功:', { banners, notices, categories, experts });
+    console.log('数据加载成功:', { banners, notices, experts });
 
     // 安全地设置数据，确保数据类型正确
     bannerList.value = Array.isArray(banners) ? banners : [];
     noticeList.value = Array.isArray(notices) ? notices : [];
-    categoryList.value = Array.isArray(categories) ? categories : [];
 
     // 处理专家列表数据
     let expertData = experts;
@@ -208,7 +184,6 @@ const loadPageData = async () => {
     // 设置空数组防止渲染错误
     bannerList.value = [];
     noticeList.value = [];
-    categoryList.value = [];
     expertList.value = [];
 
     // 不显示toast，改为在页面上显示错误信息
@@ -236,14 +211,7 @@ const onNoticeClick = (notice: Notice) => {
   }
 };
 
-// 分类点击
-const onCategoryClick = (category: Category) => {
-  if (category && category.id) {
-    uni.navigateTo({
-      url: `/pages/category/detail?id=${category.id}&name=${encodeURIComponent(category.name || '')}`,
-    });
-  }
-};
+
 
 // 达人点击
 const onExpertClick = (expert: Expert) => {
@@ -267,22 +235,7 @@ const onImageError = (e: any) => {
   // 可以在这里设置默认图片
 };
 
-// 获取分类emoji图标
-const getCategoryEmoji = (categoryName: string) => {
-  const emojiMap: Record<string, string> = {
-    '设计': '🎨',
-    '编程': '💻',
-    '写作': '✍️',
-    '营销': '📢',
-    '咨询': '💡',
-    '教育': '🎓',
-    '生活服务': '🏠',
-    '商务服务': '💼',
-    '技术服务': '⚙️',
-    '创意服务': '🎭'
-  };
-  return emojiMap[categoryName] || '📋';
-};
+
 </script>
 
 <style lang="scss" scoped>
@@ -294,6 +247,8 @@ const getCategoryEmoji = (categoryName: string) => {
   min-height: 100vh;
   padding-bottom: calc(120rpx + env(safe-area-inset-bottom));
 }
+
+
 
 // 加载状态样式
 .loading-container {
@@ -401,8 +356,10 @@ const getCategoryEmoji = (categoryName: string) => {
   @extend .flex, .items-center, .card;
   margin: $spacing-base;
   padding: $spacing-lg $spacing-xl;
-  background: linear-gradient(135deg, rgba($info-color, 0.05) 0%, rgba($info-color, 0.02) 100%);
+  background: linear-gradient(135deg, rgba($info-color, 0.15) 0%, rgba($info-color, 0.08) 100%);
   border-left: 6rpx solid $info-color;
+  border-radius: $border-radius-lg;
+  box-shadow: 0 4rpx 12rpx rgba($info-color, 0.1);
 
   .notice-icon {
     margin-right: $spacing-base;
@@ -437,7 +394,6 @@ const getCategoryEmoji = (categoryName: string) => {
   }
 }
 
-.category-section,
 .expert-section {
   @extend .card;
   margin: $spacing-base;
@@ -504,99 +460,7 @@ const getCategoryEmoji = (categoryName: string) => {
   }
 }
 
-.category-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: $spacing-lg;
 
-  .category-item {
-    @extend .flex-col, .items-center;
-    padding: $spacing-base;
-    border-radius: $border-radius-lg;
-    transition: all $transition-base;
-    cursor: pointer;
-    position: relative;
-
-    &:active {
-      transform: scale(0.95);
-      background-color: rgba($primary-color, 0.05);
-    }
-
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(135deg, rgba($primary-color, 0.1) 0%, rgba($secondary-color, 0.05) 100%);
-      border-radius: $border-radius-lg;
-      opacity: 0;
-      transition: opacity $transition-base;
-      z-index: -1;
-    }
-
-    &:active::before {
-      opacity: 1;
-    }
-
-    .category-icon {
-      width: 100rpx;
-      height: 100rpx;
-      margin-bottom: $spacing-base;
-      @extend .flex, .items-center, .justify-center;
-      background: linear-gradient(135deg, rgba($primary-color, 0.1) 0%, rgba($secondary-color, 0.05) 100%);
-      border-radius: $border-radius-xl;
-      position: relative;
-      transition: all $transition-base;
-
-      &::after {
-        content: '';
-        position: absolute;
-        top: -4rpx;
-        left: -4rpx;
-        right: -4rpx;
-        bottom: -4rpx;
-        background: linear-gradient(135deg, $primary-color 0%, $secondary-color 100%);
-        border-radius: $border-radius-xl;
-        opacity: 0;
-        z-index: -1;
-        transition: opacity $transition-base;
-      }
-
-      .category-emoji {
-        font-size: 56rpx;
-        line-height: 1;
-        transition: transform $transition-base;
-      }
-    }
-
-    &:active .category-icon {
-      transform: scale(1.1);
-
-      &::after {
-        opacity: 0.1;
-      }
-
-      .category-emoji {
-        transform: scale(1.1);
-      }
-    }
-
-    .category-name {
-      font-size: $font-size-sm;
-      color: $text-color-secondary;
-      text-align: center;
-      font-weight: $font-weight-medium;
-      line-height: $line-height-tight;
-      transition: color $transition-base;
-    }
-
-    &:active .category-name {
-      color: $primary-color;
-    }
-  }
-}
 
 .expert-list {
   .expert-item {

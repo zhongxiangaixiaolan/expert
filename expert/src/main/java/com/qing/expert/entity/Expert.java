@@ -60,6 +60,10 @@ public class Expert extends BaseEntity {
     @TableField("complete_rate")
     private BigDecimal completeRate;
 
+    @Schema(description = "是否热门：0-否，1-是")
+    @TableField("is_hot")
+    private Integer isHot;
+
     @Schema(description = "状态：0-下线，1-在线，2-忙碌")
     @TableField("status")
     private Integer status;

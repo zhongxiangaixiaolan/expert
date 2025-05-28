@@ -177,4 +177,33 @@ public class ExpertManageController {
                 .toList();
         return Result.success("获取成功", expertVOs);
     }
+
+    @Operation(summary = "设置达人热门状态", description = "设置达人是否为热门达人")
+    @PutMapping("/{expertId}/hot")
+    public Result<Void> updateExpertHotStatus(
+            @Parameter(description = "达人ID") @PathVariable Long expertId,
+            @Parameter(description = "是否热门：0-否，1-是") @RequestParam Integer isHot) {
+        boolean success = expertService.updateExpertHotStatus(expertId, isHot);
+        if (success) {
+            return Result.success(isHot == 1 ? "设置为热门达人成功" : "取消热门达人成功");
+        } else {
+            return Result.error(isHot == 1 ? "设置为热门达人失败" : "取消热门达人失败");
+        }
+    }
+
+    @Operation(summary = "批量设置达人热门状态", description = "批量设置达人是否为热门达人")
+    @PutMapping("/batch/hot")
+    public Result<Void> batchUpdateExpertHotStatus(
+            @RequestBody List<Long> expertIds,
+            @Parameter(description = "是否热门：0-否，1-是") @RequestParam Integer isHot) {
+        if (expertIds == null || expertIds.isEmpty()) {
+            return Result.error("请选择要设置的达人");
+        }
+        boolean success = expertService.batchUpdateExpertHotStatus(expertIds, isHot);
+        if (success) {
+            return Result.success(isHot == 1 ? "批量设置为热门达人成功" : "批量取消热门达人成功");
+        } else {
+            return Result.error(isHot == 1 ? "批量设置为热门达人失败" : "批量取消热门达人失败");
+        }
+    }
 }

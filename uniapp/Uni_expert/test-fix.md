@@ -69,6 +69,8 @@
 - ✅ 达人列表正常显示，包括头像和信息
 - ✅ 所有图片请求返回 200 状态码
 - ✅ 控制台无错误信息
+- ✅ 首页显示自定义头部标题
+- ✅ 公告通知正常滚动显示，背景颜色加深
 
 ## 详细修复内容
 
@@ -112,18 +114,67 @@
 - 添加了容错处理，避免数据为空时的错误
 - 确保返回的数据结构与前端期望一致
 
+### 5. 后端静态资源白名单修复
+
+**文件**: `expert/src/main/java/com/qing/expert/config/SecurityConfig.java`
+
+- 添加了完整的静态资源白名单配置
+- 修复了轮播图和图片访问的 403 错误
+- 添加了 `/static/**` 通用静态资源访问权限
+
+### 6. 前端首页 UI 优化和修复
+
+**文件**: `uniapp/Uni_expert/pages/index/index.vue` 和 `uniapp/Uni_expert/pages.json`
+
+- ✅ **恢复默认头部**: 移除自定义头部，使用系统默认导航栏，与其他页面保持统一
+- ✅ **轮播图指示器优化**: 修改指示器颜色为白色半透明，提高可见性
+- ✅ **分类图标动态化**: 支持后端设置的图标类型（iconify、emoji、url）和颜色
+- ✅ **通告背景优化**: 保持通告背景颜色加深效果
+
 ## 技术细节
 
 ### 图片访问路径
 
 - **轮播图**: `http://localhost:8080/api/static/banner/{fileName}`
 - **头像**: `http://localhost:8080/api/static/avatars/{fileName}`
+- **通用图片**: `http://localhost:8080/api/static/images/{fileName}`
 
 ### API 接口映射
 
 - **后端 context-path**: `/api`
 - **静态资源控制器**: `/static`
 - **完整路径**: `/api/static/{type}/{fileName}`
+
+### 安全配置白名单
+
+- `/static/**` - 通用静态资源访问
+- `/static/avatars/**` - 头像文件访问
+- `/static/banner/**` - 轮播图文件访问
+- `/static/images/**` - 图片文件访问
+- `/static/photos/**` - 照片文件访问
+
+### 轮播图指示器配置
+
+```vue
+<swiper
+  indicator-color="rgba(255, 255, 255, 0.5)"
+  indicator-active-color="rgba(255, 255, 255, 0.9)"
+>
+```
+
+### 分类图标支持类型
+
+1. **Emoji 图标**: `iconType: 'emoji'` - 直接显示 emoji 字符
+2. **Iconify 图标**: `iconType: 'iconify'` - 映射为对应的 emoji（临时方案）
+3. **URL 图标**: `iconType: 'url'` - 显示图片文件
+4. **默认图标**: 根据分类名称自动匹配 emoji
+
+### 分类图标样式特性
+
+- 动态背景颜色：使用后端设置的 `iconColor` 字段
+- 白色图标文字：增强对比度和可读性
+- 响应式交互：点击时缩放动画效果
+- 阴影效果：增强视觉层次感
 
 ### 数据字段映射
 

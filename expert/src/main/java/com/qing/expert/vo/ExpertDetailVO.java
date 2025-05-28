@@ -53,6 +53,9 @@ public class ExpertDetailVO {
     @Schema(description = "完成率")
     private BigDecimal completeRate;
 
+    @Schema(description = "是否热门：0-否，1-是")
+    private Integer isHot;
+
     @Schema(description = "状态：0-下线，1-在线，2-忙碌")
     private Integer status;
 

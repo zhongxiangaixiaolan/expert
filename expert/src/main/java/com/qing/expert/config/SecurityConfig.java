@@ -73,6 +73,11 @@ public class SecurityConfig {
                                 "/services/*", // 服务详情（公开）
 
                                 // 静态资源和文件访问
+                                "/static/**", // 允许访问静态资源 (相对于context-path /api)
+                                "/static/avatars/**", // 允许访问头像文件 (相对于context-path /api)
+                                "/static/banner/**", // 允许访问轮播图文件 (相对于context-path /api)
+                                "/static/images/**", // 允许访问图片文件 (相对于context-path /api)
+                                "/static/photos/**", // 允许访问照片文件 (相对于context-path /api)
                                 "/files/**", // 允许访问静态文件 (相对于context-path /api)
                                 "/avatars/**", // 允许访问头像文件 (相对于context-path /api)
                                 "/photos/**", // 允许访问照片文件 (相对于context-path /api)

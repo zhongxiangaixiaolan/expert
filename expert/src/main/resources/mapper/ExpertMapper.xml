@@ -16,6 +16,7 @@
         <result column="order_count" property="orderCount"/>
         <result column="complete_count" property="completeCount"/>
         <result column="complete_rate" property="completeRate"/>
+        <result column="is_hot" property="isHot"/>
         <result column="status" property="status"/>
         <result column="audit_status" property="auditStatus"/>
         <result column="audit_remark" property="auditRemark"/>
@@ -48,7 +49,7 @@
         SELECT
             e.id, e.user_id, e.category_id, e.expert_name, e.description, e.avatar,
             e.price_min, e.price_max, e.rating, e.order_count, e.complete_count,
-            e.complete_rate, e.status, e.audit_status, e.audit_remark,
+            e.complete_rate, e.is_hot, e.status, e.audit_status, e.audit_remark,
             e.create_time, e.update_time,
             u.id as u_id, u.openid as u_openid, u.nickname as u_nickname,
             u.avatar as u_avatar, u.gender as u_gender, u.phone as u_phone, u.real_name as u_real_name, u.status as u_status,
@@ -121,7 +122,7 @@
     <select id="selectByUserId" resultType="com.qing.expert.entity.Expert">
         SELECT id, user_id, category_id, expert_name, description, avatar,
                price_min, price_max, rating, order_count, complete_count,
-               complete_rate, status, audit_status, audit_remark,
+               complete_rate, is_hot, status, audit_status, audit_remark,
                create_time, update_time
         FROM experts
         WHERE user_id = #{userId} AND deleted = 0
@@ -133,7 +134,7 @@
         SELECT
             e.id, e.user_id, e.category_id, e.expert_name, e.description, e.avatar,
             e.price_min, e.price_max, e.rating, e.order_count, e.complete_count,
-            e.complete_rate, e.status, e.audit_status, e.audit_remark,
+            e.complete_rate, e.is_hot, e.status, e.audit_status, e.audit_remark,
             e.create_time, e.update_time,
             u.id as u_id, u.openid as u_openid, u.nickname as u_nickname,
             u.avatar as u_avatar, u.gender as u_gender, u.phone as u_phone, u.real_name as u_real_name, u.status as u_status,
@@ -280,11 +281,11 @@
     <select id="selectByCategoryId" resultType="com.qing.expert.entity.Expert">
         SELECT id, user_id, category_id, expert_name, description, avatar,
                price_min, price_max, rating, order_count, complete_count,
-               complete_rate, status, audit_status, audit_remark,
+               complete_rate, is_hot, status, audit_status, audit_remark,
                create_time, update_time
         FROM experts
         WHERE category_id = #{categoryId} AND deleted = 0 AND audit_status = 1
-        ORDER BY rating DESC, order_count DESC
+        ORDER BY is_hot DESC, rating DESC, order_count DESC
     </select>
 
     <!-- 获取热门达人列表 -->
@@ -292,7 +293,7 @@
         SELECT
             e.id, e.user_id, e.category_id, e.expert_name, e.description, e.avatar,
             e.price_min, e.price_max, e.rating, e.order_count, e.complete_count,
-            e.complete_rate, e.status, e.audit_status, e.audit_remark,
+            e.complete_rate, e.is_hot, e.status, e.audit_status, e.audit_remark,
             e.create_time, e.update_time,
             u.id as u_id, u.openid as u_openid, u.nickname as u_nickname,
             u.avatar as u_avatar, u.gender as u_gender, u.phone as u_phone, u.real_name as u_real_name, u.status as u_status,
@@ -300,9 +301,27 @@
         FROM experts e
         LEFT JOIN users u ON e.user_id = u.id AND u.deleted = 0
         LEFT JOIN categories c ON e.category_id = c.id AND c.deleted = 0
-        WHERE e.deleted = 0 AND e.audit_status = 1 AND e.status = 1
+        WHERE e.deleted = 0 AND e.audit_status = 1 AND e.status = 1 AND e.is_hot = 1
         ORDER BY e.rating DESC, e.order_count DESC, e.complete_rate DESC
         LIMIT #{limit}
     </select>
+
+    <!-- 更新达人热门状态 -->
+    <update id="updateExpertHotStatus">
+        UPDATE experts
+        SET is_hot = #{isHot}, update_time = NOW()
+        WHERE id = #{expertId} AND deleted = 0
+    </update>
+
+    <!-- 批量更新达人热门状态 -->
+    <update id="batchUpdateExpertHotStatus">
+        UPDATE experts
+        SET is_hot = #{isHot}, update_time = NOW()
+        WHERE id IN
+        <foreach collection="expertIds" item="expertId" open="(" separator="," close=")">
+            #{expertId}
+        </foreach>
+        AND deleted = 0
+    </update>
 
 </mapper>

@@ -330,6 +330,22 @@ public class ExpertServiceImpl extends ServiceImpl<ExpertMapper, Expert> impleme
         return expertMapper.getPendingExpertCount();
     }
 
+    @Override
+    public boolean updateExpertHotStatus(Long expertId, Integer isHot) {
+        if (expertId == null || isHot == null) {
+            return false;
+        }
+        return expertMapper.updateExpertHotStatus(expertId, isHot) > 0;
+    }
+
+    @Override
+    public boolean batchUpdateExpertHotStatus(List<Long> expertIds, Integer isHot) {
+        if (expertIds == null || expertIds.isEmpty() || isHot == null) {
+            return false;
+        }
+        return expertMapper.batchUpdateExpertHotStatus(expertIds, isHot) > 0;
+    }
+
     /**
      * 填充状态描述
      */

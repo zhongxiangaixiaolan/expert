@@ -11,7 +11,7 @@
  Target Server Version : 80400
  File Encoding         : 65001
 
- Date: 28/05/2025 12:28:18
+ Date: 28/05/2025 21:25:17
 */
 
 SET NAMES utf8mb4;
@@ -195,39 +195,6 @@ CREATE TABLE `contracts`  (
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '合同表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
--- Table structure for experts
--- ----------------------------
-DROP TABLE IF EXISTS `experts`;
-CREATE TABLE `experts`  (
-  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `user_id` bigint NOT NULL COMMENT '用户ID',
-  `category_id` bigint NOT NULL COMMENT '服务分类ID',
-  `expert_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '达人名称',
-  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '达人描述',
-  `avatar` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '达人头像',
-  `price_min` decimal(8, 2) NULL DEFAULT 0.00 COMMENT '最低价格',
-  `price_max` decimal(8, 2) NULL DEFAULT 0.00 COMMENT '最高价格',
-  `rating` decimal(3, 2) NULL DEFAULT 5.00 COMMENT '评分（1-5分）',
-  `order_count` int NULL DEFAULT 0 COMMENT '接单数量',
-  `complete_count` int NULL DEFAULT 0 COMMENT '完成数量',
-  `complete_rate` decimal(5, 2) NULL DEFAULT 100.00 COMMENT '完成率',
-  `status` tinyint(1) NULL DEFAULT 1 COMMENT '状态：0-下线，1-在线，2-忙碌',
-  `audit_status` tinyint(1) NULL DEFAULT 0 COMMENT '审核状态：0-待审核，1-通过，2-拒绝',
-  `audit_remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '审核备注',
-  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `deleted` tinyint(1) NULL DEFAULT 0 COMMENT '逻辑删除：0-未删除，1-已删除',
-  PRIMARY KEY (`id`) USING BTREE,
-  INDEX `idx_user_id`(`user_id`) USING BTREE,
-  INDEX `idx_category_id`(`category_id`) USING BTREE,
-  INDEX `idx_status`(`status`) USING BTREE,
-  INDEX `idx_audit_status`(`audit_status`) USING BTREE,
-  INDEX `idx_rating`(`rating`) USING BTREE,
-  CONSTRAINT `experts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  CONSTRAINT `experts_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '达人表' ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
 -- Table structure for expert_photos
 -- ----------------------------
 DROP TABLE IF EXISTS `expert_photos`;
@@ -248,7 +215,42 @@ CREATE TABLE `expert_photos`  (
   INDEX `idx_expert_id`(`expert_id`) USING BTREE,
   INDEX `idx_sort_order`(`sort_order`) USING BTREE,
   CONSTRAINT `expert_photos_ibfk_1` FOREIGN KEY (`expert_id`) REFERENCES `experts` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '达人照片表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1927602935773786115 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '达人照片表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Table structure for experts
+-- ----------------------------
+DROP TABLE IF EXISTS `experts`;
+CREATE TABLE `experts`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `user_id` bigint NOT NULL COMMENT '用户ID',
+  `category_id` bigint NOT NULL COMMENT '服务分类ID',
+  `expert_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '达人名称',
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '达人描述',
+  `avatar` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '达人头像',
+  `price_min` decimal(8, 2) NULL DEFAULT 0.00 COMMENT '最低价格',
+  `price_max` decimal(8, 2) NULL DEFAULT 0.00 COMMENT '最高价格',
+  `rating` decimal(3, 2) NULL DEFAULT 5.00 COMMENT '评分（1-5分）',
+  `order_count` int NULL DEFAULT 0 COMMENT '接单数量',
+  `complete_count` int NULL DEFAULT 0 COMMENT '完成数量',
+  `complete_rate` decimal(5, 2) NULL DEFAULT 100.00 COMMENT '完成率',
+  `is_hot` tinyint(1) NULL DEFAULT 0 COMMENT '是否热门：0-否，1-是',
+  `status` tinyint(1) NULL DEFAULT 1 COMMENT '状态：0-下线，1-在线，2-忙碌',
+  `audit_status` tinyint(1) NULL DEFAULT 0 COMMENT '审核状态：0-待审核，1-通过，2-拒绝',
+  `audit_remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '审核备注',
+  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `deleted` tinyint(1) NULL DEFAULT 0 COMMENT '逻辑删除：0-未删除，1-已删除',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_user_id`(`user_id`) USING BTREE,
+  INDEX `idx_category_id`(`category_id`) USING BTREE,
+  INDEX `idx_status`(`status`) USING BTREE,
+  INDEX `idx_audit_status`(`audit_status`) USING BTREE,
+  INDEX `idx_rating`(`rating`) USING BTREE,
+  INDEX `idx_is_hot`(`is_hot`) USING BTREE,
+  CONSTRAINT `experts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `experts_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '达人表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for favorites
@@ -344,7 +346,7 @@ CREATE TABLE `orders`  (
   CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`expert_id`) REFERENCES `experts` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `orders_ibfk_3` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '订单表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '订单表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for payment_records
@@ -556,7 +558,7 @@ CREATE TABLE `users`  (
   INDEX `idx_phone`(`phone`) USING BTREE,
   INDEX `idx_status`(`status`) USING BTREE,
   INDEX `idx_is_expert`(`is_expert`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 16 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用户表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1927332176149008387 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用户表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for withdraw_records
@@ -586,6 +588,6 @@ CREATE TABLE `withdraw_records`  (
   INDEX `idx_status`(`status`) USING BTREE,
   INDEX `idx_deleted`(`deleted`) USING BTREE,
   CONSTRAINT `withdraw_records_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '提现记录表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '提现记录表' ROW_FORMAT = DYNAMIC;
 
 SET FOREIGN_KEY_CHECKS = 1;

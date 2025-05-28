@@ -189,6 +189,14 @@
           </template>
         </el-table-column>
 
+        <el-table-column label="热门" width="80">
+          <template #default="{ row }">
+            <el-tag :type="row.isHot === 1 ? 'danger' : 'info'" size="small">
+              {{ row.isHot === 1 ? '热门' : '普通' }}
+            </el-tag>
+          </template>
+        </el-table-column>
+
         <el-table-column label="价格区间" width="120">
           <template #default="{ row }">
             <span v-if="row.priceMin || row.priceMax">
@@ -279,6 +287,9 @@
                     <el-dropdown-item command="status" :icon="Switch">
                       {{ row.status === 1 ? "下线" : "上线" }}
                     </el-dropdown-item>
+                    <el-dropdown-item command="hot" :icon="Star">
+                      {{ row.isHot === 1 ? "取消热门" : "设为热门" }}
+                    </el-dropdown-item>
                     <el-dropdown-item command="delete" :icon="Delete" divided>
                       删除
                     </el-dropdown-item>
@@ -335,6 +346,7 @@ import {
   deleteExpert,
   batchDeleteExperts,
   updateExpertStatus,
+  updateExpertHotStatus,
   auditExpert,
   getStatusText,
   getAuditStatusText,
@@ -617,6 +629,32 @@ const handleAudit = async (expert: Expert) => {
   }
 };
 
+// 设置热门达人
+const handleUpdateHotStatus = async (expert: Expert) => {
+  const newIsHot = expert.isHot === 1 ? 0 : 1;
+  const actionText = newIsHot === 1 ? "设为热门达人" : "取消热门达人";
+
+  try {
+    await ElMessageBox.confirm(
+      `确定要将达人 "${expert.expertName}" ${actionText}吗？`,
+      "确认操作",
+      {
+        type: "warning",
+      }
+    );
+
+    await updateExpertHotStatus(expert.id, newIsHot);
+    ElMessage.success(`${actionText}成功`);
+    loadExpertList();
+    loadStatistics();
+  } catch (error: any) {
+    if (error !== "cancel") {
+      console.error("设置热门状态失败:", error);
+      ElMessage.error("设置热门状态失败");
+    }
+  }
+};
+
 // 下拉菜单命令处理
 const handleDropdownCommand = (command: string, expert: Expert) => {
   switch (command) {
@@ -625,6 +663,9 @@ const handleDropdownCommand = (command: string, expert: Expert) => {
       break;
     case "status":
       handleUpdateStatus(expert);
+      break;
+    case "hot":
+      handleUpdateHotStatus(expert);
       break;
     case "delete":
       handleDelete(expert);

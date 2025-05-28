@@ -110,4 +110,14 @@ public interface ExpertService extends IService<Expert> {
      * 获取待审核达人数量
      */
     Long getPendingExpertCount();
+
+    /**
+     * 设置达人热门状态
+     */
+    boolean updateExpertHotStatus(Long expertId, Integer isHot);
+
+    /**
+     * 批量设置达人热门状态
+     */
+    boolean batchUpdateExpertHotStatus(List<Long> expertIds, Integer isHot);
 }
