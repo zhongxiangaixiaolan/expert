@@ -48,9 +48,14 @@ const requestInterceptor = (options: any) => {
   const requestId = Date.now() + Math.random().toString(36).substr(2, 9)
   options.header['X-Request-ID'] = requestId
 
+  // 添加CORS相关头部
+  options.header['Access-Control-Request-Method'] = options.method
+  options.header['Access-Control-Request-Headers'] = 'Content-Type,X-Request-ID'
+
   console.log(`[请求] ${requestId}:`, {
     url: options.url,
     method: options.method,
+    headers: options.header,
     data: options.data
   })
 
@@ -71,6 +76,21 @@ const responseInterceptor = (response: any): Promise<any> => {
     // HTTP状态码检查
     if (statusCode !== 200) {
       console.error(`[错误] ${requestId}: HTTP请求失败 ${statusCode}`)
+      console.error(`[错误详情] ${requestId}:`, {
+        url: response.config?.url || 'unknown',
+        method: response.config?.method || 'unknown',
+        headers: response.header,
+        data: response.data
+      })
+
+      // 特殊处理403错误
+      if (statusCode === 403) {
+        console.error(`[403错误] ${requestId}: 可能的原因:`)
+        console.error('1. CORS配置问题')
+        console.error('2. 后端权限配置问题')
+        console.error('3. 请求头缺失或错误')
+      }
+
       reject({
         statusCode,
         message: getHttpErrorMessage(statusCode),

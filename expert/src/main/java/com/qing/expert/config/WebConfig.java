@@ -29,11 +29,12 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-                .allowedOrigins(
-                        "http://localhost:3030", // Web前端
-                        "http://localhost:8080", // 本地开发
-                        "http://127.0.0.1:3030", // Web前端备用
-                        "http://127.0.0.1:8080" // 本地开发备用
+                .allowedOriginPatterns(
+                        "http://localhost:*", // 本地开发环境
+                        "http://127.0.0.1:*", // 本地开发环境备用
+                        "https://servicewechat.com", // 微信小程序开发工具
+                        "https://*.servicewechat.com", // 微信小程序相关域名
+                        "*" // 开发环境允许所有来源
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")

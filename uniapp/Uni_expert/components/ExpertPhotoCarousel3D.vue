@@ -2,7 +2,7 @@
   <view class="photo-carousel-3d" v-if="photos && photos.length > 0">
     <view class="carousel-container" :style="containerStyle">
       <!-- 轮播卡片容器 -->
-      <view 
+      <view
         class="carousel-track"
         @touchstart="handleTouchStart"
         @touchmove="handleTouchMove"
@@ -25,12 +25,16 @@
                 mode="aspectFill"
                 @error="handleImageError"
               />
-              <view class="photo-overlay" v-if="index === activeIndex && photo.photoTitle">
-                <view class="photo-title">
-                  {{ photo.photoTitle }}
+              <!-- 达人信息叠加层 - 苹果风格简约设计 -->
+              <view class="expert-info-overlay">
+                <!-- 左下角：达人姓名 -->
+                <view class="expert-name">
+                  {{ photo.expertName || photo.photoTitle || "未知达人" }}
                 </view>
-                <view class="photo-description" v-if="photo.photoDescription">
-                  {{ photo.photoDescription }}
+                <!-- 右下角：评分 -->
+                <view class="expert-rating" v-if="photo.expertRating">
+                  <text class="rating-star">⭐</text>
+                  <text class="rating-score">{{ photo.expertRating }}</text>
                 </view>
               </view>
             </view>
@@ -41,22 +45,19 @@
 
     <!-- 控制按钮 -->
     <view class="carousel-controls" v-if="photos.length > 1 && showControls">
-      <view
-        class="control-btn prev-btn"
-        @tap="prevPhoto"
-      >
+      <view class="control-btn prev-btn" @tap="prevPhoto">
         <text class="control-icon">‹</text>
       </view>
-      <view
-        class="control-btn next-btn"
-        @tap="nextPhoto"
-      >
+      <view class="control-btn next-btn" @tap="nextPhoto">
         <text class="control-icon">›</text>
       </view>
     </view>
 
     <!-- 指示器 -->
-    <view class="carousel-indicators" v-if="photos.length > 1 && showIndicators">
+    <view
+      class="carousel-indicators"
+      v-if="photos.length > 1 && showIndicators"
+    >
       <view
         v-for="(photo, index) in photos"
         :key="index"
@@ -79,6 +80,11 @@ interface Photo {
   photoDescription?: string;
   sortOrder?: number;
   photoUrl?: string;
+  // 达人信息字段
+  expertId?: number;
+  expertName?: string;
+  expertRating?: number;
+  expertDescription?: string;
 }
 
 // Props
@@ -126,15 +132,15 @@ const getPhotoUrl = (photo: Photo): string => {
   return `http://localhost:8080/api/photos/${photo.photoName}`;
 };
 
-// 获取卡片类名
+// 获取卡片类名 - 支持循环和非循环模式
 const getCardClass = (index: number) => {
   const diff = index - activeIndex.value;
   const totalPhotos = props.photos.length;
-  
+
   if (totalPhotos === 0) return [];
-  
+
   let position = diff;
-  
+
   // 循环位置处理
   if (props.infiniteLoop) {
     if (position > totalPhotos / 2) {
@@ -146,26 +152,32 @@ const getCardClass = (index: number) => {
 
   const classes = [];
   if (position === 0) {
-    classes.push('card-active');
-  } else if (position === -1 || (props.infiniteLoop && position === totalPhotos - 1)) {
-    classes.push('card-prev');
-  } else if (position === 1 || (props.infiniteLoop && position === -(totalPhotos - 1))) {
-    classes.push('card-next');
+    classes.push("card-active");
+  } else if (
+    position === -1 ||
+    (props.infiniteLoop && position === totalPhotos - 1)
+  ) {
+    classes.push("card-prev");
+  } else if (
+    position === 1 ||
+    (props.infiniteLoop && position === -(totalPhotos - 1))
+  ) {
+    classes.push("card-next");
   } else {
-    classes.push('card-hidden');
+    classes.push("card-hidden");
   }
 
   return classes;
 };
 
-// 获取卡片样式
+// 获取卡片样式 - 支持循环和非循环模式，增强3D效果
 const getCardStyle = (index: number) => {
   const totalPhotos = props.photos.length;
   if (totalPhotos === 0) return {};
 
   const diff = index - activeIndex.value;
   let position = diff;
-  
+
   // 循环位置处理
   if (props.infiniteLoop) {
     if (position > totalPhotos / 2) {
@@ -175,13 +187,13 @@ const getCardStyle = (index: number) => {
     }
   }
 
-  // 计算变换 - 中间照片1.2倍高度，增加悬浮效果
-  const cardSpacing = 120; // 卡片间距 (rpx)
-  const translateX = position * cardSpacing;
-  const scale = position === 0 ? 1.2 : 0.85;
-  const rotateY = position * 8; // 轻微的Y轴旋转
-  const translateZ = position === 0 ? 30 : -40;
-  const opacity = Math.abs(position) > 2 ? 0 : Math.abs(position) > 1 ? 0.6 : 1;
+  // 计算变换 - 适配更大的照片尺寸
+  const cardSpacing = 220; // 适配280rpx宽度的卡片间距
+  const translateX = position * cardSpacing; // 使用固定rpx间距
+  const scale = position === 0 ? 1.35 : 0.75; // 中间照片更大，侧边照片更小，增强对比
+  const rotateY = position * 15; // 增加Y轴旋转角度，增强3D效果
+  const translateZ = position === 0 ? 60 : -100; // 增大Z轴位移，增强层次感
+  const opacity = Math.abs(position) > 2 ? 0 : Math.abs(position) > 1 ? 0.4 : 1;
 
   return {
     transform: `translateX(${translateX}rpx) scale(${scale}) rotateY(${rotateY}deg) translateZ(${translateZ}rpx)`,
@@ -197,12 +209,13 @@ const setActiveIndex = (index: number) => {
   }
 };
 
-// 上一张照片
+// 上一张照片 - 支持循环和非循环模式
 const prevPhoto = () => {
   if (props.photos.length <= 1) return;
-  
+
   if (props.infiniteLoop) {
-    activeIndex.value = activeIndex.value === 0 ? props.photos.length - 1 : activeIndex.value - 1;
+    activeIndex.value =
+      activeIndex.value === 0 ? props.photos.length - 1 : activeIndex.value - 1;
   } else {
     if (activeIndex.value > 0) {
       activeIndex.value--;
@@ -210,10 +223,10 @@ const prevPhoto = () => {
   }
 };
 
-// 下一张照片
+// 下一张照片 - 支持循环和非循环模式
 const nextPhoto = () => {
   if (props.photos.length <= 1) return;
-  
+
   if (props.infiniteLoop) {
     activeIndex.value = (activeIndex.value + 1) % props.photos.length;
   } else {
@@ -223,11 +236,22 @@ const nextPhoto = () => {
   }
 };
 
-// 自动播放
+// 自动播放 - 支持循环和非循环模式
 const startAutoPlay = () => {
   if (props.autoPlay && props.photos.length > 1) {
     autoPlayTimer = setInterval(() => {
-      nextPhoto();
+      if (props.infiniteLoop) {
+        // 循环模式：直接切换到下一张
+        nextPhoto();
+      } else {
+        // 非循环模式：到最后一张时停止自动播放
+        if (activeIndex.value < props.photos.length - 1) {
+          nextPhoto();
+        } else {
+          // 到达最后一张，停止自动播放
+          stopAutoPlay();
+        }
+      }
     }, props.interval);
   }
 };
@@ -268,7 +292,11 @@ const handleTouchEnd = (event: TouchEvent) => {
   const threshold = 50; // 滑动阈值
   const timeThreshold = 300; // 时间阈值
 
-  if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > threshold && deltaTime < timeThreshold) {
+  if (
+    Math.abs(deltaX) > Math.abs(deltaY) &&
+    Math.abs(deltaX) > threshold &&
+    deltaTime < timeThreshold
+  ) {
     if (deltaX > 0) {
       prevPhoto();
     } else {
@@ -283,15 +311,19 @@ const handleTouchEnd = (event: TouchEvent) => {
 
 // 图片加载错误处理
 const handleImageError = (e: any) => {
-  console.log('照片加载失败:', e);
+  console.log("照片加载失败:", e);
 };
 
 // 监听照片变化
-watch(() => props.photos, () => {
-  if (activeIndex.value >= props.photos.length) {
-    activeIndex.value = 0;
-  }
-}, { immediate: true });
+watch(
+  () => props.photos,
+  () => {
+    if (activeIndex.value >= props.photos.length) {
+      activeIndex.value = 0;
+    }
+  },
+  { immediate: true }
+);
 
 // 生命周期
 onMounted(() => {
@@ -342,16 +374,16 @@ defineExpose({
 
 .carousel-card {
   position: absolute;
-  width: 140rpx;
-  height: 186rpx; /* 3:4比例 */
+  width: 280rpx; /* 显著增大尺寸，减少留白 */
+  height: 373rpx; /* 3:4比例，显著增大 */
   cursor: pointer;
   transform-style: preserve-3d;
   transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   will-change: transform, opacity;
   left: 50%;
   top: 50%;
-  margin-left: -70rpx; /* 宽度的一半 */
-  margin-top: -93rpx; /* 高度的一半 */
+  margin-left: -140rpx; /* 宽度的一半 */
+  margin-top: -186rpx; /* 高度的一半 */
 }
 
 .carousel-card.card-active {
@@ -380,7 +412,9 @@ defineExpose({
 }
 
 .carousel-card.card-active .photo-frame {
-  box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.25), 0 8rpx 24rpx rgba(0, 0, 0, 0.15);
+  /* 增强中间照片的悬浮阴影效果，参考web端 */
+  box-shadow: 0 30rpx 80rpx rgba(0, 0, 0, 0.3), 0 12rpx 32rpx rgba(0, 0, 0, 0.2),
+    0 4rpx 12rpx rgba(0, 0, 0, 0.15);
   border-color: rgba(255, 255, 255, 1);
 }
 
@@ -405,32 +439,70 @@ defineExpose({
   transform: scale(1.02);
 }
 
-.photo-overlay {
+/* 达人信息叠加层 - 苹果风格简约设计 */
+.expert-info-overlay {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
-  color: white;
-  padding: 16rpx;
-  border-radius: 0 0 12rpx 12rpx;
+  padding: 12rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  pointer-events: none;
 }
 
-.photo-title {
-  font-size: 24rpx;
+/* 左下角达人姓名 - 苹果风格简约 */
+.expert-name {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(20rpx);
+  -webkit-backdrop-filter: blur(20rpx);
+  color: #ffffff;
+  font-size: 22rpx;
   font-weight: 600;
-  margin-bottom: 4rpx;
+  padding: 6rpx 12rpx;
+  border-radius: 12rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160rpx;
   line-height: 1.2;
+  letter-spacing: 0.5rpx;
+  border: 0.5rpx solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.3);
+  pointer-events: auto;
 }
 
-.photo-description {
-  font-size: 20rpx;
-  opacity: 0.9;
-  line-height: 1.3;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+/* 右下角评分 - 苹果风格简约 */
+.expert-rating {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20rpx);
+  -webkit-backdrop-filter: blur(20rpx);
+  padding: 4rpx 10rpx;
+  border-radius: 12rpx;
+  border: 0.5rpx solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.15);
+  pointer-events: auto;
+}
+
+/* 评分星星 - 苹果风格 */
+.rating-star {
+  font-size: 18rpx;
+  margin-right: 4rpx;
+  color: #ff9500;
+}
+
+/* 评分数字 - 苹果风格 */
+.rating-score {
+  font-size: 18rpx;
+  font-weight: 600;
+  color: #1d1d1f;
+  letter-spacing: 0.2rpx;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
 }
 
 /* 控制按钮 */
@@ -513,10 +585,10 @@ defineExpose({
 /* 响应式设计 */
 @media (max-width: 768rpx) {
   .carousel-card {
-    width: 120rpx;
-    height: 160rpx;
-    margin-left: -60rpx;
-    margin-top: -80rpx;
+    width: 150rpx; /* 保持比例，适当缩小 */
+    height: 200rpx; /* 3:4比例 */
+    margin-left: -75rpx; /* 宽度的一半 */
+    margin-top: -100rpx; /* 高度的一半 */
   }
 
   .control-btn {
@@ -567,10 +639,10 @@ defineExpose({
 
 @media (max-width: 480rpx) {
   .carousel-card {
-    width: 100rpx;
-    height: 133rpx;
-    margin-left: -50rpx;
-    margin-top: -66rpx;
+    width: 120rpx; /* 保持比例，最小尺寸 */
+    height: 160rpx; /* 3:4比例 */
+    margin-left: -60rpx; /* 宽度的一半 */
+    margin-top: -80rpx; /* 高度的一半 */
   }
 
   .carousel-controls {

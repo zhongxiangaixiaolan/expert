@@ -68,9 +68,9 @@ public class SecurityConfig {
                                 "/announcements", // 公告
                                 "/categories", // 分类列表
                                 "/experts", // 达人列表（公开）
-                                "/experts/*", // 达人详情（公开）
+                                "/experts/**", // 达人详情和照片（公开）
                                 "/services", // 服务列表（公开）
-                                "/services/*", // 服务详情（公开）
+                                "/services/**", // 服务详情（公开）
 
                                 // 静态资源和文件访问
                                 "/static/**", // 允许访问静态资源 (相对于context-path /api)
@@ -107,8 +107,12 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // 允许的源
-        configuration.setAllowedOriginPatterns(List.of("*"));
+        // 允许的源 - 包括微信小程序开发工具
+        configuration.setAllowedOriginPatterns(Arrays.asList(
+                "*", // 允许所有来源（开发环境）
+                "https://servicewechat.com", // 微信小程序开发工具
+                "https://*.servicewechat.com" // 微信小程序相关域名
+        ));
 
         // 允许的HTTP方法
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));

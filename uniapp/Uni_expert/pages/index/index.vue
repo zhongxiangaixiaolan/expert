@@ -73,66 +73,19 @@
           <text>发现优质达人</text>
         </view>
 
-        <!-- 热门达人3D照片轮播展示 -->
-        <view class="hot-experts-container">
-          <view
-            class="hot-expert-card"
-            v-for="(expert, index) in hotExpertList"
-            :key="expert.id || index"
-          >
-            <!-- 达人基本信息 -->
-            <view class="expert-info-header">
-              <view class="expert-name-rating">
-                <text class="expert-name">{{
-                  expert.expertName || "未知达人"
-                }}</text>
-                <view class="expert-rating">
-                  <text class="rating-star">⭐</text>
-                  <text class="rating-score">{{ expert.rating || 5.0 }}</text>
-                </view>
-              </view>
-              <text class="expert-desc">{{
-                expert.description || "暂无描述"
-              }}</text>
-            </view>
-
-            <!-- 3D照片轮播 - 点击跳转详情 -->
-            <view
-              class="photo-carousel-wrapper"
-              v-if="expert.photos && expert.photos.length > 0"
-            >
-              <ExpertPhotoCarousel3D
-                :photos="expert.photos"
-                :auto-play="true"
-                :interval="4000"
-                :infinite-loop="true"
-                :show-controls="false"
-                :show-indicators="true"
-                width="100%"
-                height="320rpx"
-                @photo-click="() => onExpertPhotoClick(expert)"
-              />
-            </view>
-
-            <!-- 无照片时显示头像 -->
-            <view
-              class="fallback-avatar"
-              v-else
-              @click="onExpertPhotoClick(expert)"
-            >
-              <image
-                class="expert-avatar"
-                :src="expert.avatar"
-                mode="aspectFill"
-              ></image>
-              <text class="no-photos-text">点击查看详情</text>
-            </view>
-
-            <!-- 立即预约按钮 -->
-            <view class="book-now-btn" @click="onExpertPhotoClick(expert)">
-              <text class="btn-text">立即预约</text>
-            </view>
-          </view>
+        <!-- 热门达人统一3D照片轮播展示 -->
+        <view class="hot-experts-carousel-container">
+          <ExpertPhotoCarousel3D
+            :photos="hotExpertPhotosWithInfo"
+            :auto-play="true"
+            :interval="4000"
+            :infinite-loop="true"
+            :show-controls="false"
+            :show-indicators="true"
+            width="100%"
+            height="520rpx"
+            @photo-click="onHotExpertPhotoClick"
+          />
         </view>
       </view>
 
@@ -185,10 +138,19 @@ interface Expert {
   photos?: ExpertPhoto[];
 }
 
+// 扩展照片接口，包含达人信息
+interface ExpertPhotoWithInfo extends ExpertPhoto {
+  expertId: number;
+  expertName: string;
+  expertRating: number;
+  expertDescription: string;
+}
+
 // 响应式数据 - 使用明确的类型定义
 const bannerList = ref<Banner[]>([]);
 const noticeList = ref<Notice[]>([]);
 const hotExpertList = ref<Expert[]>([]);
+const hotExpertPhotosWithInfo = ref<ExpertPhotoWithInfo[]>([]); // 合并后的达人照片数据
 const loading = ref<boolean>(true);
 const error = ref<string>("");
 
@@ -219,7 +181,7 @@ const loadPageData = async () => {
     bannerList.value = Array.isArray(banners) ? banners : [];
     noticeList.value = Array.isArray(notices) ? notices : [];
 
-    // 为每个热门达人加载照片
+    // 为每个热门达人加载照片，并合并到统一的照片数组中
     const hotExpertsWithPhotos = await Promise.all(
       (Array.isArray(hotExperts) ? hotExperts : []).map(async (expert) => {
         try {
@@ -233,6 +195,36 @@ const loadPageData = async () => {
     );
 
     hotExpertList.value = hotExpertsWithPhotos;
+
+    // 合并所有达人的照片到统一数组，每张照片包含达人信息
+    const allPhotosWithInfo: ExpertPhotoWithInfo[] = [];
+    hotExpertsWithPhotos.forEach((expert) => {
+      if (expert.photos && expert.photos.length > 0) {
+        // 为每个达人取第一张照片（或者可以取所有照片）
+        const firstPhoto = expert.photos[0];
+        allPhotosWithInfo.push({
+          ...firstPhoto,
+          expertId: expert.id,
+          expertName: expert.expertName,
+          expertRating: expert.rating,
+          expertDescription: expert.description,
+        });
+      } else {
+        // 如果没有照片，使用头像作为照片
+        allPhotosWithInfo.push({
+          id: expert.id,
+          photoName: expert.avatar,
+          photoTitle: expert.expertName,
+          photoDescription: expert.description,
+          expertId: expert.id,
+          expertName: expert.expertName,
+          expertRating: expert.rating,
+          expertDescription: expert.description,
+        });
+      }
+    });
+
+    hotExpertPhotosWithInfo.value = allPhotosWithInfo;
     loading.value = false;
   } catch (err) {
     console.error("加载页面数据失败:", err);
@@ -274,6 +266,15 @@ const onExpertPhotoClick = (expert: Expert) => {
   if (expert && expert.id) {
     uni.navigateTo({
       url: `/pages/expert/detail?id=${expert.id}`,
+    });
+  }
+};
+
+// 热门达人照片轮播点击
+const onHotExpertPhotoClick = (photoWithInfo: ExpertPhotoWithInfo) => {
+  if (photoWithInfo && photoWithInfo.expertId) {
+    uni.navigateTo({
+      url: `/pages/expert/detail?id=${photoWithInfo.expertId}`,
     });
   }
 };
@@ -481,93 +482,17 @@ const onImageError = (e: any) => {
   }
 }
 
-// 热门达人容器样式
-.hot-experts-container {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-xl;
-}
-
-.hot-expert-card {
-  @extend .card;
-  padding: $spacing-xl;
+// 热门达人3D轮播容器样式
+.hot-experts-carousel-container {
+  border-radius: $border-radius-lg;
+  overflow: hidden;
+  box-shadow: $box-shadow-base;
   background: linear-gradient(
     135deg,
     rgba($primary-color, 0.05) 0%,
     rgba($primary-color, 0.02) 100%
   );
-  border-radius: $border-radius-xl;
-  box-shadow: $box-shadow-card;
-  border: 1rpx solid rgba($primary-color, 0.1);
-  transition: all $transition-base;
-
-  &:active {
-    transform: translateY(-4rpx);
-    box-shadow: 0 8rpx 24rpx rgba($primary-color, 0.15);
-  }
-}
-
-.expert-info-header {
-  margin-bottom: $spacing-lg;
-
-  .expert-name-rating {
-    @extend .flex, .justify-between, .items-center;
-    margin-bottom: $spacing-sm;
-
-    .expert-name {
-      font-size: $font-size-lg;
-      font-weight: $font-weight-bold;
-      color: $text-color-primary;
-      flex: 1;
-    }
-
-    .expert-rating {
-      @extend .flex, .items-center;
-      background: linear-gradient(
-        135deg,
-        $warning-color 0%,
-        $warning-light 100%
-      );
-      color: white;
-      padding: 6rpx $spacing-sm;
-      border-radius: $border-radius-full;
-      font-size: $font-size-xs;
-      font-weight: $font-weight-semibold;
-      box-shadow: 0 2rpx 8rpx rgba($warning-color, 0.3);
-
-      .rating-star {
-        margin-right: 4rpx;
-      }
-    }
-  }
-
-  .expert-desc {
-    font-size: $font-size-base;
-    color: $text-color-secondary;
-    line-height: $line-height-relaxed;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-}
-
-.photo-carousel-wrapper {
-  margin-bottom: $spacing-lg;
-  border-radius: $border-radius-lg;
-  overflow: hidden;
-  box-shadow: $box-shadow-base;
-}
-
-.fallback-avatar {
-  @extend .flex-col, .items-center, .justify-center;
-  padding: $spacing-2xl;
-  background: linear-gradient(
-    135deg,
-    rgba($neutral-100, 0.8) 0%,
-    rgba($neutral-50, 0.9) 100%
-  );
-  border-radius: $border-radius-lg;
+  padding: $spacing-base;
   margin-bottom: $spacing-lg;
   transition: all $transition-base;
 
@@ -578,41 +503,6 @@ const onImageError = (e: any) => {
       rgba($primary-color, 0.1) 0%,
       rgba($primary-color, 0.05) 100%
     );
-  }
-
-  .expert-avatar {
-    @extend .avatar;
-    width: 120rpx;
-    height: 120rpx;
-    margin-bottom: $spacing-base;
-    box-shadow: $box-shadow-base;
-  }
-
-  .no-photos-text {
-    font-size: $font-size-sm;
-    color: $text-color-secondary;
-    font-weight: $font-weight-medium;
-  }
-}
-
-.book-now-btn {
-  @extend .btn, .btn-primary;
-  width: 100%;
-  padding: $spacing-base;
-  border-radius: $border-radius-lg;
-  background: $primary-gradient;
-  box-shadow: 0 4rpx 12rpx rgba($primary-color, 0.3);
-  transition: all $transition-base;
-
-  &:active {
-    transform: translateY(2rpx);
-    box-shadow: 0 2rpx 8rpx rgba($primary-color, 0.4);
-  }
-
-  .btn-text {
-    font-size: $font-size-base;
-    font-weight: $font-weight-semibold;
-    color: white;
   }
 }
 
