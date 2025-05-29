@@ -30,18 +30,26 @@ public class PhotoController {
 
     /**
      * 获取照片文件
+     * 
      * @param filename 文件名
      * @return 照片文件
      */
     @GetMapping("/{filename:.+}")
     public ResponseEntity<Resource> getPhoto(@PathVariable String filename) {
         try {
+            log.info("照片访问请求：filename={}", filename);
+            log.info("上传路径配置：uploadPath={}", uploadPath);
+
             // 构建文件路径
             Path filePath = Paths.get(uploadPath, "photos", filename);
             File file = filePath.toFile();
 
+            log.info("完整文件路径：{}", filePath.toAbsolutePath());
+            log.info("文件是否存在：{}", file.exists());
+            log.info("是否为文件：{}", file.isFile());
+
             if (!file.exists() || !file.isFile()) {
-                log.warn("照片文件不存在: {}", filename);
+                log.warn("照片文件不存在: filename={}, fullPath={}", filename, filePath.toAbsolutePath());
                 return ResponseEntity.notFound().build();
             }
 

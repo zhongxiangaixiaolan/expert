@@ -126,7 +126,12 @@ export const getExpertList = (params?: {
   size?: number
   categoryId?: number
   keyword?: string
-}): Promise<{ records: Expert[], total: number }> => {
+  minPrice?: number
+  maxPrice?: number
+  minRating?: number
+  sortField?: string
+  sortOrder?: string
+}): Promise<{ records: Expert[], total: number, current?: number, pages?: number }> => {
   return request.get('/experts', { params }).then((data: any) => {
     // 处理达人头像URL
     const processedRecords = (data.records || []).map((expert: any) => ({
@@ -136,7 +141,9 @@ export const getExpertList = (params?: {
 
     return {
       records: processedRecords,
-      total: data.total || 0
+      total: data.total || 0,
+      current: data.current || 1,
+      pages: data.pages || 1
     }
   })
 }
@@ -156,7 +163,13 @@ const getAvatarImageUrl = (avatar?: string): string => {
 
 // 获取达人详情
 export const getExpertDetail = (id: number): Promise<Expert> => {
-  return request.get(`/experts/${id}`)
+  return request.get(`/experts/${id}`).then((data: any) => {
+    // 处理达人头像URL
+    return {
+      ...data,
+      avatar: getAvatarImageUrl(data.avatar)
+    }
+  })
 }
 
 // 获取公告详情
@@ -212,5 +225,6 @@ const getPhotoImageUrl = (photoName?: string): string => {
   }
 
   // 构建完整的照片访问URL
+  // 注意：后端配置了context-path: /api，所以完整路径是 /api/photos/
   return `http://localhost:8080/api/photos/${photoName}`
 }

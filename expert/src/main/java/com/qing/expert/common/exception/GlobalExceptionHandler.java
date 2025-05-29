@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.beans.TypeMismatchException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import java.util.stream.Collectors;
 
 /**
@@ -68,6 +70,29 @@ public class GlobalExceptionHandler {
                 .map(ConstraintViolation::getMessage)
                 .collect(Collectors.joining(", "));
         LogUtil.warning("约束违反异常: {}", message);
+        return Result.badRequest(message);
+    }
+
+    /**
+     * 参数类型转换异常处理
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Result<Void> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
+        String message = String.format("参数 '%s' 的值 '%s' 无法转换为 %s 类型",
+                e.getName(), e.getValue(), e.getRequiredType().getSimpleName());
+        LogUtil.warning("参数校验异常: {}", message);
+        return Result.badRequest(message);
+    }
+
+    /**
+     * 类型转换异常处理
+     */
+    @ExceptionHandler(TypeMismatchException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Result<Void> handleTypeMismatchException(TypeMismatchException e) {
+        String message = String.format("参数类型转换失败: %s", e.getMessage());
+        LogUtil.warning("参数校验异常: {}", message);
         return Result.badRequest(message);
     }
 

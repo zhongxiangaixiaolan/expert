@@ -209,11 +209,15 @@ const loadOrderList = async (refresh = false) => {
       hasMore.value = true;
     }
 
-    const params = {
+    const params: any = {
       current: pageParams.current,
       size: pageParams.size,
-      status: selectedStatus.value,
     };
+
+    // 只有当status不为undefined时才添加到参数中
+    if (selectedStatus.value !== undefined) {
+      params.status = selectedStatus.value;
+    }
 
     const result = await getUserOrders(params);
 

@@ -10,7 +10,7 @@
       >
         <view
           v-for="(photo, index) in photos"
-          :key="photo.id || index"
+          :key="`${instanceId}-photo-${photo.id || 'idx'}-${index}`"
           class="carousel-card"
           :class="getCardClass(index)"
           :style="getCardStyle(index)"
@@ -60,7 +60,7 @@
     >
       <view
         v-for="(photo, index) in photos"
-        :key="index"
+        :key="`${instanceId}-indicator-${photo.id || 'idx'}-${index}`"
         class="indicator"
         :class="{ active: index === activeIndex }"
         @tap="setActiveIndex(index)"
@@ -97,6 +97,7 @@ interface Props {
   showControls?: boolean;
   showIndicators?: boolean;
   infiniteLoop?: boolean;
+  instanceId?: string; // 新增：组件实例唯一标识
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -108,6 +109,7 @@ const props = withDefaults(defineProps<Props>(), {
   showControls: false,
   showIndicators: true,
   infiniteLoop: true,
+  instanceId: "default",
 });
 
 // 状态
@@ -202,10 +204,17 @@ const getCardStyle = (index: number) => {
   };
 };
 
+// 事件发射
+const emit = defineEmits<{
+  "photo-click": [photo: Photo];
+}>();
+
 // 设置激活索引
 const setActiveIndex = (index: number) => {
   if (index >= 0 && index < props.photos.length) {
     activeIndex.value = index;
+    // 发出照片点击事件
+    emit("photo-click", props.photos[index]);
   }
 };
 
@@ -349,7 +358,6 @@ defineExpose({
   position: relative;
   margin: 0 auto;
   perspective: 1200rpx;
-  user-select: none;
   overflow: hidden;
 }
 
@@ -376,10 +384,8 @@ defineExpose({
   position: absolute;
   width: 280rpx; /* 显著增大尺寸，减少留白 */
   height: 373rpx; /* 3:4比例，显著增大 */
-  cursor: pointer;
   transform-style: preserve-3d;
   transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  will-change: transform, opacity;
   left: 50%;
   top: 50%;
   margin-left: -140rpx; /* 宽度的一半 */
@@ -430,7 +436,6 @@ defineExpose({
 .photo-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
   transition: transform 0.4s ease;
   border-radius: 12rpx;
 }
@@ -573,7 +578,6 @@ defineExpose({
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.5);
   transition: all 0.3s ease;
-  cursor: pointer;
 }
 
 .indicator.active {

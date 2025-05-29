@@ -179,10 +179,10 @@ public class ExpertPhotoServiceImpl extends ServiceImpl<ExpertPhotoMapper, Exper
         try {
             // 查询所有照片
             List<ExpertPhoto> photos = getPhotosByExpertId(expertId);
-            
+
             // 删除数据库记录
             int deletedCount = baseMapper.deleteByExpertId(expertId);
-            
+
             // 删除文件
             for (ExpertPhoto photo : photos) {
                 fileUploadUtil.deletePhotoFile(photo.getPhotoName());
@@ -202,7 +202,8 @@ public class ExpertPhotoServiceImpl extends ServiceImpl<ExpertPhotoMapper, Exper
         if (StrUtil.isBlank(photoName)) {
             return null;
         }
-        // 构建照片访问URL，这里假设有统一的静态资源访问路径
+        // 构建照片访问URL，确保路径正确
+        // 注意：由于后端配置了context-path: /api，所以完整路径是 /api/photos/
         return "/api/photos/" + photoName;
     }
 }

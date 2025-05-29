@@ -502,3 +502,166 @@
 .inline-block {
   display: inline-block;
 }
+
+/* 玻璃拟态样式类 */
+.glass {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.1));
+  -webkit-backdrop-filter: blur($blur-base);
+  backdrop-filter: blur($blur-base);
+  border: 1rpx solid rgba(255, 255, 255, 0.3);
+  box-shadow: $box-shadow-glass;
+}
+
+.glass-light {
+  background: $bg-glass-light;
+  -webkit-backdrop-filter: blur($blur-sm);
+  backdrop-filter: blur($blur-sm);
+  border: 1rpx solid rgba(255, 255, 255, 0.2);
+  box-shadow: $box-shadow-glass-sm;
+}
+
+.glass-strong {
+  background: $bg-glass-white;
+  -webkit-backdrop-filter: blur($blur-lg);
+  backdrop-filter: blur($blur-lg);
+  border: 1rpx solid rgba(255, 255, 255, 0.4);
+  box-shadow: $box-shadow-glass-lg;
+}
+
+/* 新拟物化样式类 */
+.neumorphism {
+  background: $bg-neumorphism;
+  box-shadow: $box-shadow-neumorphism-sm;
+  border: none;
+}
+
+.neumorphism-inset {
+  background: $bg-neumorphism;
+  box-shadow: $box-shadow-neumorphism-inset;
+  border: none;
+}
+
+/* 动画效果类 */
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.animate-bounce {
+  animation: bounce 1s ease-in-out infinite;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out;
+}
+
+/* 动画关键帧 */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10rpx);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-20rpx);
+  }
+  60% {
+    transform: translateY(-10rpx);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(50rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 交互反馈效果 */
+.interactive {
+  transition: all $transition-base $ease-spring;
+  cursor: pointer;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.interactive-lift {
+  transition: all $transition-base $ease-spring;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-4rpx);
+    box-shadow: $box-shadow-float;
+  }
+
+  &:active {
+    transform: translateY(-2rpx) scale(0.98);
+  }
+}
+
+.interactive-glow {
+  transition: all $transition-base $ease-spring;
+  cursor: pointer;
+
+  &:active {
+    box-shadow: $box-shadow-outer-glow;
+    transform: scale(0.98);
+  }
+}

@@ -160,10 +160,28 @@ const getHttpErrorMessage = (statusCode: number): string => {
 const request = {
   get(url: string, params?: any) {
     return new Promise((resolve, reject) => {
+      // 处理GET请求参数，将参数转换为查询字符串
+      let requestUrl = url
+      if (params && Object.keys(params).length > 0) {
+        // 过滤掉undefined值
+        const filteredParams = Object.keys(params).reduce((acc: any, key) => {
+          if (params[key] !== undefined && params[key] !== null) {
+            acc[key] = params[key]
+          }
+          return acc
+        }, {})
+
+        if (Object.keys(filteredParams).length > 0) {
+          const queryString = Object.keys(filteredParams)
+            .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(filteredParams[key])}`)
+            .join('&')
+          requestUrl = `${url}${url.includes('?') ? '&' : '?'}${queryString}`
+        }
+      }
+
       const options = requestInterceptor({
-        url,
+        url: requestUrl,
         method: 'GET',
-        data: params,
         header: config.header,
         timeout: config.timeout
       })

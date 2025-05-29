@@ -125,13 +125,16 @@ public class PublicApiController {
     @GetMapping("/experts/{id}")
     public Result<ExpertDetailVO> getExpertDetail(@Parameter(description = "达人ID") @PathVariable Long id) {
         try {
+            log.info("获取达人详情请求：expertId={}", id);
             ExpertDetailVO expertDetail = expertService.getExpertDetail(id);
             if (expertDetail == null) {
+                log.warn("达人不存在：expertId={}", id);
                 return Result.error("达人不存在");
             }
+            log.info("获取达人详情成功：expertId={}, expertName={}", id, expertDetail.getExpertName());
             return Result.success("获取成功", expertDetail);
         } catch (Exception e) {
-            log.error("获取达人详情失败", e);
+            log.error("获取达人详情失败：expertId={}", id, e);
             return Result.error("获取失败：" + e.getMessage());
         }
     }
@@ -293,7 +296,17 @@ public class PublicApiController {
     @GetMapping("/experts/{expertId}/photos")
     public Result<List<ExpertPhoto>> getExpertPhotos(@Parameter(description = "达人ID") @PathVariable Long expertId) {
         try {
+            log.info("获取达人照片请求：expertId={}", expertId);
             List<ExpertPhoto> photos = expertPhotoService.getPhotosByExpertId(expertId);
+
+            // 为每个照片添加完整的访问URL
+            photos.forEach(photo -> {
+                String photoUrl = expertPhotoService.getPhotoUrl(photo.getPhotoName());
+                // 这里可以添加一个临时字段存储URL，或者在前端处理
+                log.debug("照片URL：photoName={}, photoUrl={}", photo.getPhotoName(), photoUrl);
+            });
+
+            log.info("获取达人照片成功：expertId={}, 照片数量={}", expertId, photos.size());
             return Result.success("获取成功", photos);
         } catch (Exception e) {
             log.error("获取达人照片失败：expertId={}", expertId, e);

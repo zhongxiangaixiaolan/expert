@@ -2,7 +2,7 @@
   <view class="custom-tab-bar">
     <view
       v-for="(item, index) in tabList"
-      :key="index"
+      :key="`tab-item-${index}`"
       class="tab-item"
       :class="{ active: selected === index }"
       @click="switchTab(index)"
@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
+import { ref, onMounted, onBeforeUnmount, nextTick } from "vue";
 
 // 响应式数据
 const selected = ref<number>(0);
@@ -100,11 +100,11 @@ const switchTab = (index: number) => {
       });
     },
     fail: (err) => {
-      console.error('TabBar跳转失败:', err);
+      console.error("TabBar跳转失败:", err);
       // 跳转失败时恢复之前的状态并清除切换标记
       updateSelected();
       isTabSwitching.value = false;
-    }
+    },
   });
 };
 
@@ -119,11 +119,11 @@ const updateSelected = () => {
   const currentRoute = currentPage.route;
 
   // 确保路径格式一致，移除开头的斜杠
-  const normalizedRoute = currentRoute.startsWith('/') ? currentRoute.substring(1) : currentRoute;
+  const normalizedRoute = currentRoute.startsWith("/")
+    ? currentRoute.substring(1)
+    : currentRoute;
 
-  const index = tabList.findIndex(
-    (item) => item.pagePath === normalizedRoute
-  );
+  const index = tabList.findIndex((item) => item.pagePath === normalizedRoute);
 
   if (index !== -1) {
     selected.value = index;
@@ -161,24 +161,25 @@ const stopStatusCheck = () => {
   border-radius: 32rpx;
   display: flex;
   z-index: 999;
-  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.12),
-              0 2rpx 8rpx rgba(0, 0, 0, 0.08),
-              inset 0 1rpx 0 rgba(255, 255, 255, 0.8);
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.12), 0 2rpx 8rpx rgba(0, 0, 0, 0.08),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.8);
   border: 1rpx solid rgba(255, 255, 255, 0.2);
   animation: slideUpFloat 0.6s cubic-bezier(0.25, 1, 0.5, 1);
 
   // 悬浮发光效果
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     top: -2rpx;
     left: -2rpx;
     right: -2rpx;
     bottom: -2rpx;
-    background: linear-gradient(135deg,
+    background: linear-gradient(
+      135deg,
       rgba(0, 122, 255, 0.1) 0%,
       rgba(255, 255, 255, 0.1) 50%,
-      rgba(0, 122, 255, 0.1) 100%);
+      rgba(0, 122, 255, 0.1) 100%
+    );
     border-radius: 34rpx;
     z-index: -1;
     opacity: 0;
@@ -211,9 +212,11 @@ const stopStatusCheck = () => {
 
   // 激活状态
   &.active {
-    background: linear-gradient(135deg,
+    background: linear-gradient(
+      135deg,
       rgba(0, 122, 255, 0.08) 0%,
-      rgba(0, 122, 255, 0.04) 100%);
+      rgba(0, 122, 255, 0.04) 100%
+    );
 
     .tab-icon {
       transform: translateY(-2rpx);
@@ -228,13 +231,17 @@ const stopStatusCheck = () => {
 
   // 点击波纹效果
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 50%;
     left: 50%;
     width: 0;
     height: 0;
-    background: radial-gradient(circle, rgba(0, 122, 255, 0.15) 0%, transparent 70%);
+    background: radial-gradient(
+      circle,
+      rgba(0, 122, 255, 0.15) 0%,
+      transparent 70%
+    );
     border-radius: 50%;
     transform: translate(-50%, -50%);
     transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);

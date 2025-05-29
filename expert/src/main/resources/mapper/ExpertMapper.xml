@@ -103,6 +103,12 @@
                     <when test="sortField == 'createTime'">
                         ORDER BY e.create_time
                     </when>
+                    <when test="sortField == 'price_min'">
+                        ORDER BY e.price_min
+                    </when>
+                    <when test="sortField == 'price_max'">
+                        ORDER BY e.price_max
+                    </when>
                     <otherwise>
                         ORDER BY e.create_time
                     </otherwise>

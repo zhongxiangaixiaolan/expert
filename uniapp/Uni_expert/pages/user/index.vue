@@ -1,10 +1,10 @@
 <template>
   <view class="user-center-container">
     <!-- 用户信息卡片 -->
-    <view class="user-card">
-      <view class="user-info" @click="goToProfile">
+    <view class="user-card animate-fade-in">
+      <view class="user-info interactive" @click="goToProfile">
         <image
-          class="user-avatar"
+          class="user-avatar animate-float"
           :src="userStore.avatar"
           mode="aspectFill"
         ></image>
@@ -33,23 +33,23 @@
     </view>
 
     <!-- 快捷功能 -->
-    <view class="quick-actions">
-      <view class="action-item" @click="goToFavorites">
+    <view class="quick-actions animate-slide-up">
+      <view class="action-item interactive-glow" @click="goToFavorites">
         <text class="action-icon">❤️</text>
         <text class="action-text">我的收藏</text>
       </view>
-      <view class="action-item" @click="goToMessages">
+      <view class="action-item interactive-glow" @click="goToMessages">
         <text class="action-icon">💬</text>
         <text class="action-text">消息中心</text>
-        <view class="message-badge" v-if="unreadCount > 0">{{
+        <view class="message-badge animate-pulse" v-if="unreadCount > 0">{{
           unreadCount
         }}</view>
       </view>
-      <view class="action-item" @click="goToCustomerService">
+      <view class="action-item interactive-glow" @click="goToCustomerService">
         <text class="action-icon">🎧</text>
         <text class="action-text">客服帮助</text>
       </view>
-      <view class="action-item" @click="goToInvite">
+      <view class="action-item interactive-glow" @click="goToInvite">
         <text class="action-icon">🎁</text>
         <text class="action-text">邀请好友</text>
       </view>
@@ -312,44 +312,137 @@ const handleLogout = async () => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/styles/common.scss';
-@import '@/styles/components.scss';
+@import "@/styles/common.scss";
+@import "@/styles/components.scss";
 
 .user-center-container {
   min-height: 100vh;
-  background: linear-gradient(180deg, $primary-color 0%, $bg-color-page 40%);
+  background: linear-gradient(
+    135deg,
+    $primary-color 0%,
+    $primary-light 50%,
+    $bg-color-page 100%
+  );
   padding-bottom: 140rpx;
+  position: relative;
+
+  // 添加动态背景效果
+  &::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60vh;
+    background: radial-gradient(
+      ellipse at top,
+      rgba(0, 122, 255, 0.3) 0%,
+      transparent 70%
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  // 背景装饰圆圈
+  &::after {
+    content: "";
+    position: fixed;
+    top: -200rpx;
+    right: -200rpx;
+    width: 600rpx;
+    height: 600rpx;
+    background: radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.1) 0%,
+      transparent 70%
+    );
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+  }
 }
 
 .user-card {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(20rpx);
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.25),
+    rgba(255, 255, 255, 0.1)
+  );
+  -webkit-backdrop-filter: blur(24rpx);
+  backdrop-filter: blur(24rpx);
   border-radius: $border-radius-2xl;
   padding: $spacing-2xl $spacing-xl;
   margin: $spacing-lg;
   margin-bottom: $spacing-xl;
-  box-shadow: $box-shadow-float;
-  border: 1rpx solid rgba(255, 255, 255, 0.2);
+  box-shadow: $box-shadow-glass, inset 0 1rpx 0 rgba(255, 255, 255, 0.4);
+  border: 1rpx solid rgba(255, 255, 255, 0.3);
+  position: relative;
+  z-index: 1;
+
+  // 顶部高光效果
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1rpx;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.8),
+      transparent
+    );
+    border-radius: $border-radius-2xl $border-radius-2xl 0 0;
+  }
 
   .user-info {
     @extend .flex, .items-center;
     margin-bottom: $spacing-xl;
     cursor: pointer;
-    transition: all $transition-base;
+    transition: all $transition-base $ease-spring;
+    border-radius: $border-radius-lg;
+    padding: $spacing-sm;
+    margin: -$spacing-sm -$spacing-sm $spacing-xl -$spacing-sm;
 
     &:active {
       transform: scale(0.98);
+      background: rgba(255, 255, 255, 0.1);
     }
 
     .user-avatar {
       @extend .avatar, .avatar-xl;
       margin-right: $spacing-lg;
-      border: 6rpx solid rgba(255, 255, 255, 0.3);
-      box-shadow: $box-shadow-lg;
-      transition: all $transition-base;
+      border: 4rpx solid rgba(255, 255, 255, 0.4);
+      box-shadow: $box-shadow-lg, 0 0 20rpx rgba(0, 122, 255, 0.2);
+      transition: all $transition-base $ease-spring;
+      position: relative;
+
+      // 头像发光效果
+      &::after {
+        content: "";
+        position: absolute;
+        top: -4rpx;
+        left: -4rpx;
+        right: -4rpx;
+        bottom: -4rpx;
+        border-radius: $border-radius-full;
+        background: linear-gradient(
+          45deg,
+          rgba(0, 122, 255, 0.3),
+          rgba(255, 255, 255, 0.3)
+        );
+        z-index: -1;
+        opacity: 0;
+        transition: opacity $transition-base;
+      }
 
       &:active {
         transform: scale(1.05);
+
+        &::after {
+          opacity: 1;
+        }
       }
     }
 
@@ -415,15 +508,60 @@ const handleLogout = async () => {
       .balance-btn {
         height: 64rpx;
         padding: 0 $spacing-lg;
-        background-color: rgba(255, 255, 255, 0.2);
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.3),
+          rgba(255, 255, 255, 0.1)
+        );
         color: $text-color-white;
-        border-radius: $border-radius-base;
+        border-radius: $border-radius-xl;
         font-size: $font-size-base;
-        backdrop-filter: blur(10px);
+        font-weight: $font-weight-semibold;
+        -webkit-backdrop-filter: blur(12rpx);
+        backdrop-filter: blur(12rpx);
+        border: 1rpx solid rgba(255, 255, 255, 0.3);
+        box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.4);
+        transition: all $transition-base $ease-spring;
+        position: relative;
+        overflow: hidden;
+
+        // 按钮发光效果
+        &::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(255, 255, 255, 0.3),
+            transparent
+          );
+          transition: left 0.5s ease;
+        }
+
+        &:active {
+          transform: scale(0.95);
+          background: linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.2),
+            rgba(255, 255, 255, 0.05)
+          );
+
+          &::before {
+            left: 100%;
+          }
+        }
 
         &.secondary {
-          background-color: transparent;
-          border: 1rpx solid rgba(255, 255, 255, 0.3);
+          background: rgba(255, 255, 255, 0.1);
+          border: 1rpx solid rgba(255, 255, 255, 0.4);
+
+          &:active {
+            background: rgba(255, 255, 255, 0.05);
+          }
         }
       }
     }
@@ -435,8 +573,19 @@ const handleLogout = async () => {
   grid-template-columns: repeat(4, 1fr);
   gap: $spacing-base;
   padding: $spacing-lg;
-  background-color: $bg-color-white;
-  margin-bottom: $spacing-base;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.9),
+    rgba(255, 255, 255, 0.7)
+  );
+  -webkit-backdrop-filter: blur($blur-base);
+  backdrop-filter: blur($blur-base);
+  border: 1rpx solid rgba(255, 255, 255, 0.3);
+  border-radius: $border-radius-xl;
+  margin: 0 $spacing-lg $spacing-base;
+  box-shadow: $box-shadow-card, inset 0 1rpx 0 rgba(255, 255, 255, 0.6);
+  position: relative;
+  z-index: 1;
 
   .action-item {
     position: relative;
@@ -444,15 +593,37 @@ const handleLogout = async () => {
     flex-direction: column;
     align-items: center;
     padding: $spacing-lg $spacing-base;
+    border-radius: $border-radius-lg;
+    transition: all $transition-base $ease-spring;
+    cursor: pointer;
+
+    &:active {
+      transform: scale(0.95);
+      background: rgba(0, 122, 255, 0.1);
+    }
 
     .action-icon {
       font-size: 48rpx;
       margin-bottom: $spacing-sm;
+      transition: transform $transition-base $ease-spring;
+      filter: drop-shadow(0 2rpx 4rpx rgba(0, 0, 0, 0.1));
     }
 
     .action-text {
       font-size: $font-size-sm;
       color: $text-color-secondary;
+      font-weight: $font-weight-medium;
+      transition: color $transition-base;
+    }
+
+    &:active {
+      .action-icon {
+        transform: scale(1.1);
+      }
+
+      .action-text {
+        color: $primary-color;
+      }
     }
 
     .message-badge {
@@ -461,30 +632,68 @@ const handleLogout = async () => {
       right: $spacing-base;
       min-width: 32rpx;
       height: 32rpx;
-      background-color: $secondary-color;
+      background: linear-gradient(135deg, $secondary-color, $secondary-light);
       color: $text-color-white;
       font-size: $font-size-xs;
+      font-weight: $font-weight-bold;
       border-radius: 16rpx;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 0 8rpx;
+      box-shadow: $box-shadow-sm;
+      border: 2rpx solid rgba(255, 255, 255, 0.8);
+      animation: pulse 2s infinite;
     }
   }
 }
 
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
 .expert-section {
-  background-color: $bg-color-white;
-  margin-bottom: $spacing-base;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.9),
+    rgba(255, 255, 255, 0.7)
+  );
+  -webkit-backdrop-filter: blur($blur-base);
+  backdrop-filter: blur($blur-base);
+  border: 1rpx solid rgba(255, 255, 255, 0.3);
+  border-radius: $border-radius-xl;
+  margin: 0 $spacing-lg $spacing-base;
+  box-shadow: $box-shadow-card, inset 0 1rpx 0 rgba(255, 255, 255, 0.6);
+  position: relative;
+  z-index: 1;
 
   .section-header {
     padding: $spacing-lg $spacing-lg $spacing-base;
-    border-bottom: 1rpx solid $border-color-light;
+    border-bottom: 1rpx solid rgba(255, 255, 255, 0.3);
+    position: relative;
 
     .section-title {
       font-size: $font-size-lg;
-      font-weight: bold;
+      font-weight: $font-weight-bold;
       color: $text-color-primary;
+      position: relative;
+
+      &::after {
+        content: "";
+        position: absolute;
+        bottom: -$spacing-sm;
+        left: 0;
+        width: 60rpx;
+        height: 4rpx;
+        background: $primary-gradient;
+        border-radius: 2rpx;
+      }
     }
   }
 
@@ -492,21 +701,44 @@ const handleLogout = async () => {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     padding: $spacing-lg;
+    gap: $spacing-sm;
 
     .expert-item {
       display: flex;
       flex-direction: column;
       align-items: center;
       padding: $spacing-base;
+      border-radius: $border-radius-lg;
+      transition: all $transition-base $ease-spring;
+      cursor: pointer;
+
+      &:active {
+        transform: scale(0.95);
+        background: rgba(0, 122, 255, 0.1);
+      }
 
       .expert-icon {
         font-size: 48rpx;
         margin-bottom: $spacing-sm;
+        transition: transform $transition-base $ease-spring;
+        filter: drop-shadow(0 2rpx 4rpx rgba(0, 0, 0, 0.1));
       }
 
       .expert-text {
         font-size: $font-size-sm;
         color: $text-color-secondary;
+        font-weight: $font-weight-medium;
+        transition: color $transition-base;
+      }
+
+      &:active {
+        .expert-icon {
+          transform: scale(1.1);
+        }
+
+        .expert-text {
+          color: $primary-color;
+        }
       }
     }
   }
@@ -522,68 +754,167 @@ const handleLogout = async () => {
       $secondary-color 0%,
       $secondary-light 100%
     );
-    border-radius: $border-radius-lg;
-    padding: $spacing-lg;
+    border-radius: $border-radius-xl;
+    padding: $spacing-xl;
     display: flex;
     align-items: center;
+    box-shadow: $box-shadow-lg, inset 0 1rpx 0 rgba(255, 255, 255, 0.3);
+    border: 1rpx solid rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+    transition: all $transition-base $ease-spring;
+
+    // 背景装饰
+    &::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.1) 0%,
+        transparent 70%
+      );
+      animation: rotate 20s linear infinite;
+    }
+
+    &:active {
+      transform: scale(0.98);
+      box-shadow: $box-shadow-base;
+    }
 
     .become-expert-content {
       flex: 1;
+      position: relative;
+      z-index: 1;
 
       .become-expert-title {
         display: block;
         font-size: $font-size-lg;
-        font-weight: bold;
+        font-weight: $font-weight-bold;
         color: $text-color-white;
         margin-bottom: $spacing-xs;
+        text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.2);
       }
 
       .become-expert-desc {
         display: block;
         font-size: $font-size-base;
-        color: rgba(255, 255, 255, 0.8);
+        color: rgba(255, 255, 255, 0.9);
+        text-shadow: 0 1rpx 2rpx rgba(0, 0, 0, 0.1);
       }
     }
 
     .become-expert-btn {
-      padding: $spacing-sm $spacing-lg;
-      background-color: rgba(255, 255, 255, 0.2);
+      padding: $spacing-sm $spacing-xl;
+      background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.3),
+        rgba(255, 255, 255, 0.1)
+      );
       color: $text-color-white;
-      border-radius: $border-radius-base;
+      border-radius: $border-radius-xl;
       font-size: $font-size-base;
-      backdrop-filter: blur(10px);
+      font-weight: $font-weight-semibold;
+      -webkit-backdrop-filter: blur(12rpx);
+      backdrop-filter: blur(12rpx);
+      border: 1rpx solid rgba(255, 255, 255, 0.4);
+      box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.5);
+      transition: all $transition-base $ease-spring;
+      position: relative;
+      z-index: 1;
+
+      &:active {
+        transform: scale(0.95);
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.2),
+          rgba(255, 255, 255, 0.05)
+        );
+      }
     }
   }
 }
 
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .menu-section {
-  background-color: $bg-color-white;
-  margin-bottom: $spacing-base;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.9),
+    rgba(255, 255, 255, 0.7)
+  );
+  -webkit-backdrop-filter: blur($blur-base);
+  backdrop-filter: blur($blur-base);
+  border: 1rpx solid rgba(255, 255, 255, 0.3);
+  border-radius: $border-radius-xl;
+  margin: 0 $spacing-lg $spacing-base;
+  box-shadow: $box-shadow-card, inset 0 1rpx 0 rgba(255, 255, 255, 0.6);
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
 
   .menu-item {
     display: flex;
     align-items: center;
     padding: $spacing-lg;
-    border-bottom: 1rpx solid $border-color-light;
+    border-bottom: 1rpx solid rgba(255, 255, 255, 0.3);
+    transition: all $transition-base $ease-spring;
+    cursor: pointer;
+    position: relative;
 
     &:last-child {
       border-bottom: none;
     }
 
+    &:active {
+      background: rgba(0, 122, 255, 0.1);
+      transform: scale(0.98);
+    }
+
     .menu-icon {
       font-size: $font-size-xl;
       margin-right: $spacing-base;
+      transition: transform $transition-base $ease-spring;
+      filter: drop-shadow(0 2rpx 4rpx rgba(0, 0, 0, 0.1));
     }
 
     .menu-text {
       flex: 1;
       font-size: $font-size-base;
       color: $text-color-primary;
+      font-weight: $font-weight-medium;
+      transition: color $transition-base;
     }
 
     .menu-arrow {
       font-size: $font-size-xl;
       color: $text-color-placeholder;
+      transition: all $transition-base $ease-spring;
+    }
+
+    &:active {
+      .menu-icon {
+        transform: scale(1.1);
+      }
+
+      .menu-text {
+        color: $primary-color;
+      }
+
+      .menu-arrow {
+        color: $primary-color;
+        transform: translateX(4rpx);
+      }
     }
   }
 }
@@ -594,11 +925,41 @@ const handleLogout = async () => {
   .logout-btn {
     width: 100%;
     height: 88rpx;
-    background-color: transparent;
+    background: $bg-neumorphism;
     color: $secondary-color;
-    border: 1rpx solid $secondary-color;
-    border-radius: $border-radius-base;
+    border: none;
+    border-radius: $border-radius-xl;
     font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    box-shadow: $box-shadow-neumorphism-sm;
+    transition: all $transition-base $ease-spring;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 107, 53, 0.2),
+        transparent
+      );
+      transition: left 0.5s ease;
+    }
+
+    &:active {
+      box-shadow: $box-shadow-neumorphism-inset;
+      transform: translateY(1rpx);
+
+      &::before {
+        left: 100%;
+      }
+    }
   }
 }
 </style>

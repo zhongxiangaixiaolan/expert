@@ -84,6 +84,7 @@
             :show-indicators="true"
             width="100%"
             height="520rpx"
+            instance-id="homepage-hot-experts"
             @photo-click="onHotExpertPhotoClick"
           />
         </view>
@@ -198,7 +199,7 @@ const loadPageData = async () => {
 
     // 合并所有达人的照片到统一数组，每张照片包含达人信息
     const allPhotosWithInfo: ExpertPhotoWithInfo[] = [];
-    hotExpertsWithPhotos.forEach((expert) => {
+    hotExpertsWithPhotos.forEach((expert, expertIndex) => {
       if (expert.photos && expert.photos.length > 0) {
         // 为每个达人取第一张照片（或者可以取所有照片）
         const firstPhoto = expert.photos[0];
@@ -211,8 +212,9 @@ const loadPageData = async () => {
         });
       } else {
         // 如果没有照片，使用头像作为照片
+        // 使用负数ID确保与真实照片ID不冲突，并加上expertIndex确保唯一性
         allPhotosWithInfo.push({
-          id: expert.id,
+          id: -(expert.id * 1000 + expertIndex), // 确保唯一的负数ID
           photoName: expert.avatar,
           photoTitle: expert.expertName,
           photoDescription: expert.description,
@@ -272,9 +274,43 @@ const onExpertPhotoClick = (expert: Expert) => {
 
 // 热门达人照片轮播点击
 const onHotExpertPhotoClick = (photoWithInfo: ExpertPhotoWithInfo) => {
+  console.log("🔥 热门达人照片点击事件：", photoWithInfo);
+  console.log("📋 照片信息详情：", {
+    expertId: photoWithInfo?.expertId,
+    expertName: photoWithInfo?.expertName,
+    photoName: photoWithInfo?.photoName,
+    id: photoWithInfo?.id,
+  });
+
   if (photoWithInfo && photoWithInfo.expertId) {
+    const targetUrl = `/pages/expert/detail?id=${photoWithInfo.expertId}`;
+    console.log("🚀 准备跳转到达人详情页：", {
+      expertId: photoWithInfo.expertId,
+      targetUrl: targetUrl,
+    });
+
     uni.navigateTo({
-      url: `/pages/expert/detail?id=${photoWithInfo.expertId}`,
+      url: targetUrl,
+      success: (res) => {
+        console.log("✅ 页面跳转成功：", res);
+      },
+      fail: (err) => {
+        console.error("❌ 页面跳转失败：", err);
+        uni.showToast({
+          title: "跳转失败",
+          icon: "none",
+        });
+      },
+    });
+  } else {
+    console.error("❌ 热门达人照片点击失败：缺少expertId", {
+      photoWithInfo,
+      hasExpertId: !!photoWithInfo?.expertId,
+      expertId: photoWithInfo?.expertId,
+    });
+    uni.showToast({
+      title: "跳转失败：缺少达人信息",
+      icon: "none",
     });
   }
 };
@@ -291,9 +327,32 @@ const onImageError = (e: any) => {
 @import "@/styles/components.scss";
 
 .home-container {
-  background: linear-gradient(180deg, $bg-color-page 0%, $bg-color-white 100%);
+  background: linear-gradient(
+    135deg,
+    $bg-color-page 0%,
+    rgba(0, 122, 255, 0.05) 50%,
+    $bg-color-white 100%
+  );
   min-height: 100vh;
   padding-bottom: calc(120rpx + env(safe-area-inset-bottom));
+  position: relative;
+
+  // 添加动态背景效果
+  &::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 40vh;
+    background: radial-gradient(
+      ellipse at top center,
+      rgba(0, 122, 255, 0.1) 0%,
+      transparent 70%
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
 }
 
 // 加载状态样式
@@ -361,19 +420,23 @@ const onImageError = (e: any) => {
 
 .banner-section {
   margin: $spacing-base;
-  border-radius: $border-radius-xl;
+  border-radius: $border-radius-2xl;
   overflow: hidden;
-  box-shadow: $box-shadow-card;
+  box-shadow: $box-shadow-glass, inset 0 1rpx 0 rgba(255, 255, 255, 0.4);
+  border: 1rpx solid rgba(255, 255, 255, 0.3);
+  position: relative;
+  z-index: 1;
 
   .banner-swiper {
     height: 400rpx;
-    border-radius: $border-radius-xl;
+    border-radius: $border-radius-2xl;
+    position: relative;
 
     .banner-image {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: transform $transition-slow;
+      transition: transform $transition-slow $ease-spring;
 
       &:active {
         transform: scale(1.02);
@@ -403,17 +466,22 @@ const onImageError = (e: any) => {
 }
 
 .notice-section {
-  @extend .flex, .items-center, .card;
+  @extend .flex, .items-center;
   margin: $spacing-base;
   padding: $spacing-lg $spacing-xl;
   background: linear-gradient(
-    135deg,
-    rgba($info-color, 0.15) 0%,
-    rgba($info-color, 0.08) 100%
+    145deg,
+    rgba(255, 255, 255, 0.9),
+    rgba(255, 255, 255, 0.7)
   );
+  -webkit-backdrop-filter: blur($blur-base);
+  backdrop-filter: blur($blur-base);
+  border: 1rpx solid rgba(255, 255, 255, 0.3);
   border-left: 6rpx solid $info-color;
-  border-radius: $border-radius-lg;
-  box-shadow: 0 4rpx 12rpx rgba($info-color, 0.1);
+  border-radius: $border-radius-xl;
+  box-shadow: $box-shadow-glass-sm, inset 0 1rpx 0 rgba(255, 255, 255, 0.6);
+  position: relative;
+  z-index: 1;
 
   .notice-icon {
     margin-right: $spacing-base;
@@ -422,6 +490,20 @@ const onImageError = (e: any) => {
     @extend .flex, .items-center, .justify-center;
     background: linear-gradient(135deg, $info-color 0%, $info-light 100%);
     border-radius: $border-radius-full;
+    box-shadow: $box-shadow-sm, 0 0 12rpx rgba($info-color, 0.3);
+    position: relative;
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: -2rpx;
+      left: -2rpx;
+      right: -2rpx;
+      bottom: -2rpx;
+      border-radius: $border-radius-full;
+      background: linear-gradient(45deg, rgba($info-color, 0.3), transparent);
+      z-index: -1;
+    }
 
     .notice-icon-img {
       width: 24rpx;
@@ -449,16 +531,24 @@ const onImageError = (e: any) => {
 }
 
 .expert-section {
-  @extend .card;
   margin: $spacing-base;
   padding: $spacing-xl;
-  background: $bg-color-white;
-  border-radius: $border-radius-xl;
-  box-shadow: $box-shadow-card;
-  transition: all $transition-base;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.9),
+    rgba(255, 255, 255, 0.7)
+  );
+  -webkit-backdrop-filter: blur($blur-base);
+  backdrop-filter: blur($blur-base);
+  border: 1rpx solid rgba(255, 255, 255, 0.3);
+  border-radius: $border-radius-2xl;
+  box-shadow: $box-shadow-glass, inset 0 1rpx 0 rgba(255, 255, 255, 0.6);
+  transition: all $transition-base $ease-spring;
+  position: relative;
+  z-index: 1;
 
   &:active {
-    transform: translateY(2rpx);
+    transform: translateY(2rpx) scale(0.98);
     box-shadow: $box-shadow-sm;
   }
 }

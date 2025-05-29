@@ -8,6 +8,7 @@
           class="search-input"
           placeholder="搜索达人或服务"
           v-model="searchKeyword"
+          @input="onSearchInput"
           @confirm="onSearch"
         />
       </view>
@@ -61,19 +62,39 @@
           ></image>
           <view class="expert-info">
             <view class="expert-header">
-              <text class="expert-name">{{ expert.name }}</text>
+              <text class="expert-name">{{
+                expert.expertName || expert.name
+              }}</text>
               <view class="expert-rating">
                 <text class="rating-star">⭐</text>
-                <text class="rating-score">{{ expert.rating }}</text>
+                <text class="rating-score">{{ expert.rating || 0 }}</text>
               </view>
             </view>
             <text class="expert-desc">{{ expert.description }}</text>
             <view class="expert-meta">
-              <text class="expert-category">{{ expert.categoryName }}</text>
-              <text class="expert-orders">已接{{ expert.orderCount }}单</text>
+              <text class="expert-category">{{
+                expert.category?.name || expert.categoryName
+              }}</text>
+              <text class="expert-orders"
+                >已接{{ expert.orderCount || 0 }}单</text
+              >
             </view>
             <view class="expert-footer">
-              <text class="expert-price">¥{{ expert.servicePrice }}/次</text>
+              <text class="expert-price">
+                <template
+                  v-if="
+                    expert.priceMin &&
+                    expert.priceMax &&
+                    expert.priceMin !== expert.priceMax
+                  "
+                >
+                  ¥{{ expert.priceMin }}-{{ expert.priceMax }}
+                </template>
+                <template v-else-if="expert.priceMin">
+                  ¥{{ expert.priceMin }}起
+                </template>
+                <template v-else> 价格面议 </template>
+              </text>
               <view class="expert-actions">
                 <text
                   class="action-btn favorite"
@@ -245,6 +266,34 @@ const loadExpertList = async (refresh = false) => {
       hasMore.value = true;
     }
 
+    // 处理排序参数
+    let sortField = "";
+    let sortOrder = "desc";
+
+    if (filterData.sortBy) {
+      switch (filterData.sortBy) {
+        case "rating":
+          sortField = "rating";
+          sortOrder = "desc";
+          break;
+        case "price_asc":
+          sortField = "price_min";
+          sortOrder = "asc";
+          break;
+        case "price_desc":
+          sortField = "price_min";
+          sortOrder = "desc";
+          break;
+        case "orders":
+          sortField = "orderCount";
+          sortOrder = "desc";
+          break;
+        default:
+          sortField = "rating";
+          sortOrder = "desc";
+      }
+    }
+
     const params = {
       current: pageParams.current,
       size: pageParams.size,
@@ -253,7 +302,8 @@ const loadExpertList = async (refresh = false) => {
       minPrice: filterData.minPrice || undefined,
       maxPrice: filterData.maxPrice || undefined,
       minRating: filterData.minRating || undefined,
-      sortBy: filterData.sortBy,
+      sortField: sortField,
+      sortOrder: sortOrder,
     };
 
     const result = await getExpertList(params);
@@ -275,10 +325,15 @@ const loadExpertList = async (refresh = false) => {
   }
 };
 
-// 搜索
-const onSearch = debounce(() => {
+// 搜索输入
+const onSearchInput = debounce(() => {
   loadExpertList(true);
-}, 500);
+}, 800);
+
+// 搜索确认
+const onSearch = () => {
+  loadExpertList(true);
+};
 
 // 选择分类
 const selectCategory = (categoryId: number) => {
@@ -337,20 +392,50 @@ const contactExpert = (expert: any) => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/styles/common.scss';
-@import '@/styles/components.scss';
+@import "@/styles/common.scss";
+@import "@/styles/components.scss";
 
 .expert-list-container {
   height: 100vh;
   @extend .flex-col;
-  background: linear-gradient(180deg, $bg-color-white 0%, $bg-color-page 100%);
+  background: linear-gradient(
+    135deg,
+    $bg-color-white 0%,
+    rgba(0, 122, 255, 0.03) 50%,
+    $bg-color-page 100%
+  );
+  position: relative;
+
+  // 添加动态背景效果
+  &::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 30vh;
+    background: radial-gradient(
+      ellipse at top center,
+      rgba(0, 122, 255, 0.08) 0%,
+      transparent 70%
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
 }
 
 .search-section {
   @extend .flex, .items-center;
   padding: $spacing-lg;
-  background: $bg-color-white;
-  box-shadow: $box-shadow-xs;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.95),
+    rgba(255, 255, 255, 0.8)
+  );
+  -webkit-backdrop-filter: blur($blur-lg);
+  backdrop-filter: blur($blur-lg);
+  border-bottom: 1rpx solid rgba(255, 255, 255, 0.3);
+  box-shadow: $box-shadow-glass-sm;
   position: sticky;
   top: 0;
   z-index: $z-index-sticky;
@@ -358,17 +443,28 @@ const contactExpert = (expert: any) => {
   .search-box {
     flex: 1;
     @extend .flex, .items-center;
-    background: $bg-color-light;
+    background: linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.8),
+      rgba(255, 255, 255, 0.6)
+    );
+    -webkit-backdrop-filter: blur($blur-base);
+    backdrop-filter: blur($blur-base);
     border-radius: $border-radius-2xl;
     padding: 0 $spacing-lg;
     margin-right: $spacing-base;
-    border: 2rpx solid transparent;
-    transition: all $transition-base;
+    border: 2rpx solid rgba(255, 255, 255, 0.3);
+    transition: all $transition-base $ease-spring;
+    box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.6);
 
     &:focus-within {
       border-color: $primary-color;
-      background: $bg-color-white;
-      box-shadow: $box-shadow-sm;
+      background: linear-gradient(
+        145deg,
+        rgba(255, 255, 255, 0.95),
+        rgba(255, 255, 255, 0.8)
+      );
+      box-shadow: $box-shadow-sm, 0 0 20rpx rgba(0, 122, 255, 0.2);
     }
 
     .search-icon {
@@ -526,7 +622,7 @@ const contactExpert = (expert: any) => {
 
       .expert-price {
         font-size: $font-size-lg;
-        color: $primary-color;
+        color: #ff4757; // 红色
         font-weight: bold;
       }
 
