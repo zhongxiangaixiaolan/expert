@@ -41,57 +41,105 @@
         </swiper>
       </view>
 
-    <!-- 公告通知 -->
-    <view class="notice-section" v-if="noticeList && noticeList.length > 0">
-      <view class="notice-icon">
-        <image class="notice-icon-img" src="/static/icons/info.svg"></image>
-      </view>
-      <swiper
-        class="notice-swiper"
-        :vertical="true"
-        :autoplay="true"
-        :interval="3000"
-        :duration="500"
-      >
-        <swiper-item v-for="(notice, index) in noticeList" :key="notice.id || index">
-          <text class="notice-text" @click="onNoticeClick(notice)">{{
-            notice.title
-          }}</text>
-        </swiper-item>
-      </swiper>
-    </view>
-
-
-
-    <!-- 推荐达人 -->
-    <view class="expert-section">
-      <view class="section-title">
-        <text>推荐达人</text>
-        <text class="more-btn" @click="goToExpertList">更多</text>
-      </view>
-      <view class="expert-list">
-        <view
-          class="expert-item"
-          v-for="(expert, index) in expertList"
-          :key="expert.id || index"
-          @click="onExpertClick(expert)"
+      <!-- 公告通知 -->
+      <view class="notice-section" v-if="noticeList && noticeList.length > 0">
+        <view class="notice-icon">
+          <image class="notice-icon-img" src="/static/icons/info.svg"></image>
+        </view>
+        <swiper
+          class="notice-swiper"
+          :vertical="true"
+          :autoplay="true"
+          :interval="3000"
+          :duration="500"
         >
-          <image
-            class="expert-avatar"
-            :src="expert.avatar"
-            mode="aspectFill"
-          ></image>
-          <view class="expert-info">
-            <text class="expert-name">{{ expert.expertName || '未知达人' }}</text>
-            <text class="expert-desc">{{ expert.description || '暂无描述' }}</text>
-            <view class="expert-meta">
-              <text class="expert-rating">⭐ {{ expert.rating || 0 }}</text>
-              <text class="expert-price">¥{{ expert.priceMin || 0 }}-{{ expert.priceMax || 0 }}/次</text>
+          <swiper-item
+            v-for="(notice, index) in noticeList"
+            :key="notice.id || index"
+          >
+            <text class="notice-text" @click="onNoticeClick(notice)">{{
+              notice.title
+            }}</text>
+          </swiper-item>
+        </swiper>
+      </view>
+
+      <!-- 发现优质达人 -->
+      <view
+        class="expert-section"
+        v-if="hotExpertList && hotExpertList.length > 0"
+      >
+        <view class="section-title">
+          <text>发现优质达人</text>
+        </view>
+
+        <!-- 热门达人3D照片轮播展示 -->
+        <view class="hot-experts-container">
+          <view
+            class="hot-expert-card"
+            v-for="(expert, index) in hotExpertList"
+            :key="expert.id || index"
+          >
+            <!-- 达人基本信息 -->
+            <view class="expert-info-header">
+              <view class="expert-name-rating">
+                <text class="expert-name">{{
+                  expert.expertName || "未知达人"
+                }}</text>
+                <view class="expert-rating">
+                  <text class="rating-star">⭐</text>
+                  <text class="rating-score">{{ expert.rating || 5.0 }}</text>
+                </view>
+              </view>
+              <text class="expert-desc">{{
+                expert.description || "暂无描述"
+              }}</text>
+            </view>
+
+            <!-- 3D照片轮播 - 点击跳转详情 -->
+            <view
+              class="photo-carousel-wrapper"
+              v-if="expert.photos && expert.photos.length > 0"
+            >
+              <ExpertPhotoCarousel3D
+                :photos="expert.photos"
+                :auto-play="true"
+                :interval="4000"
+                :infinite-loop="true"
+                :show-controls="false"
+                :show-indicators="true"
+                width="100%"
+                height="320rpx"
+                @photo-click="() => onExpertPhotoClick(expert)"
+              />
+            </view>
+
+            <!-- 无照片时显示头像 -->
+            <view
+              class="fallback-avatar"
+              v-else
+              @click="onExpertPhotoClick(expert)"
+            >
+              <image
+                class="expert-avatar"
+                :src="expert.avatar"
+                mode="aspectFill"
+              ></image>
+              <text class="no-photos-text">点击查看详情</text>
+            </view>
+
+            <!-- 立即预约按钮 -->
+            <view class="book-now-btn" @click="onExpertPhotoClick(expert)">
+              <text class="btn-text">立即预约</text>
             </view>
           </view>
         </view>
       </view>
-    </view>
+
+      <!-- 无热门达人时的提示 -->
+      <view class="no-experts-tip" v-else-if="!loading">
+        <text class="tip-text">暂无热门达人推荐</text>
+      </view>
     </view>
 
     <!-- 底部导航栏 -->
@@ -105,8 +153,12 @@ import {
   getBannerList,
   getExpertList,
   getNoticeList,
+  getHotExperts,
+  getExpertPhotos,
+  type ExpertPhoto,
 } from "@/api/home";
 import Tabbar from "@/components/Tabbar.vue";
+import ExpertPhotoCarousel3D from "@/components/ExpertPhotoCarousel3D.vue";
 
 // 定义数据类型接口
 interface Banner {
@@ -122,8 +174,6 @@ interface Notice {
   content?: string;
 }
 
-
-
 interface Expert {
   id: number;
   expertName: string;
@@ -132,18 +182,19 @@ interface Expert {
   rating: number;
   priceMin: number;
   priceMax: number;
+  photos?: ExpertPhoto[];
 }
 
 // 响应式数据 - 使用明确的类型定义
 const bannerList = ref<Banner[]>([]);
 const noticeList = ref<Notice[]>([]);
-const expertList = ref<Expert[]>([]);
+const hotExpertList = ref<Expert[]>([]);
 const loading = ref<boolean>(true);
-const error = ref<string>('');
+const error = ref<string>("");
 
 // 页面加载
 onMounted(() => {
-  console.log('首页组件挂载完成');
+  console.log("首页组件挂载完成");
   loadPageData();
 });
 
@@ -151,40 +202,47 @@ onMounted(() => {
 const loadPageData = async () => {
   try {
     loading.value = true;
-    error.value = '';
+    error.value = "";
 
-    console.log('开始加载页面数据...');
+    console.log("开始加载页面数据...");
 
     // 并行加载数据
-    const [banners, notices, experts] = await Promise.all([
+    const [banners, notices, hotExperts] = await Promise.all([
       getBannerList(),
       getNoticeList(),
-      getExpertList({ size: 6 }),
+      getHotExperts(), // 获取所有热门达人，不限制数量
     ]);
 
-    console.log('数据加载成功:', { banners, notices, experts });
+    console.log("数据加载成功:", { banners, notices, hotExperts });
 
     // 安全地设置数据，确保数据类型正确
     bannerList.value = Array.isArray(banners) ? banners : [];
     noticeList.value = Array.isArray(notices) ? notices : [];
 
-    // 处理专家列表数据
-    let expertData = experts;
-    if (experts && typeof experts === 'object' && experts.records) {
-      expertData = experts.records;
-    }
-    expertList.value = Array.isArray(expertData) ? expertData : [];
+    // 为每个热门达人加载照片
+    const hotExpertsWithPhotos = await Promise.all(
+      (Array.isArray(hotExperts) ? hotExperts : []).map(async (expert) => {
+        try {
+          const photos = await getExpertPhotos(expert.id);
+          return { ...expert, photos: Array.isArray(photos) ? photos : [] };
+        } catch (error) {
+          console.error(`获取达人${expert.id}照片失败:`, error);
+          return { ...expert, photos: [] };
+        }
+      })
+    );
 
+    hotExpertList.value = hotExpertsWithPhotos;
     loading.value = false;
   } catch (err) {
     console.error("加载页面数据失败:", err);
     loading.value = false;
-    error.value = '数据加载失败，请检查网络连接';
+    error.value = "数据加载失败，请检查网络连接";
 
     // 设置空数组防止渲染错误
     bannerList.value = [];
     noticeList.value = [];
-    expertList.value = [];
+    hotExpertList.value = [];
 
     // 不显示toast，改为在页面上显示错误信息
     // uni.showToast({
@@ -211,10 +269,8 @@ const onNoticeClick = (notice: Notice) => {
   }
 };
 
-
-
-// 达人点击
-const onExpertClick = (expert: Expert) => {
+// 达人照片点击
+const onExpertPhotoClick = (expert: Expert) => {
   if (expert && expert.id) {
     uni.navigateTo({
       url: `/pages/expert/detail?id=${expert.id}`,
@@ -222,33 +278,22 @@ const onExpertClick = (expert: Expert) => {
   }
 };
 
-// 查看更多达人
-const goToExpertList = () => {
-  uni.switchTab({
-    url: "/pages/expert/list",
-  });
-};
-
 // 图片加载错误处理
 const onImageError = (e: any) => {
-  console.log('图片加载失败:', e);
+  console.log("图片加载失败:", e);
   // 可以在这里设置默认图片
 };
-
-
 </script>
 
 <style lang="scss" scoped>
-@import '@/styles/common.scss';
-@import '@/styles/components.scss';
+@import "@/styles/common.scss";
+@import "@/styles/components.scss";
 
 .home-container {
   background: linear-gradient(180deg, $bg-color-page 0%, $bg-color-white 100%);
   min-height: 100vh;
   padding-bottom: calc(120rpx + env(safe-area-inset-bottom));
 }
-
-
 
 // 加载状态样式
 .loading-container {
@@ -274,8 +319,12 @@ const onImageError = (e: any) => {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 // 错误状态样式
@@ -356,7 +405,11 @@ const onImageError = (e: any) => {
   @extend .flex, .items-center, .card;
   margin: $spacing-base;
   padding: $spacing-lg $spacing-xl;
-  background: linear-gradient(135deg, rgba($info-color, 0.15) 0%, rgba($info-color, 0.08) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba($info-color, 0.15) 0%,
+    rgba($info-color, 0.08) 100%
+  );
   border-left: 6rpx solid $info-color;
   border-radius: $border-radius-lg;
   box-shadow: 0 4rpx 12rpx rgba($info-color, 0.1);
@@ -410,7 +463,6 @@ const onImageError = (e: any) => {
 }
 
 .section-title {
-  @extend .flex, .justify-between, .items-center;
   font-size: $font-size-lg;
   font-weight: $font-weight-bold;
   color: $text-color-primary;
@@ -418,7 +470,7 @@ const onImageError = (e: any) => {
   position: relative;
 
   &::after {
-    content: '';
+    content: "";
     position: absolute;
     bottom: -$spacing-sm;
     left: 0;
@@ -427,167 +479,155 @@ const onImageError = (e: any) => {
     background: $primary-gradient;
     border-radius: $border-radius-sm;
   }
+}
 
-  .more-btn {
-    font-size: $font-size-base;
-    color: $primary-color;
-    font-weight: $font-weight-medium;
-    padding: $spacing-xs $spacing-sm;
-    border-radius: $border-radius-base;
-    transition: all $transition-base;
-    position: relative;
+// 热门达人容器样式
+.hot-experts-container {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xl;
+}
 
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba($primary-color, 0.1);
-      border-radius: $border-radius-base;
-      opacity: 0;
-      transition: opacity $transition-base;
-    }
+.hot-expert-card {
+  @extend .card;
+  padding: $spacing-xl;
+  background: linear-gradient(
+    135deg,
+    rgba($primary-color, 0.05) 0%,
+    rgba($primary-color, 0.02) 100%
+  );
+  border-radius: $border-radius-xl;
+  box-shadow: $box-shadow-card;
+  border: 1rpx solid rgba($primary-color, 0.1);
+  transition: all $transition-base;
 
-    &:active {
-      color: $primary-dark;
-
-      &::before {
-        opacity: 1;
-      }
-    }
+  &:active {
+    transform: translateY(-4rpx);
+    box-shadow: 0 8rpx 24rpx rgba($primary-color, 0.15);
   }
 }
 
+.expert-info-header {
+  margin-bottom: $spacing-lg;
 
+  .expert-name-rating {
+    @extend .flex, .justify-between, .items-center;
+    margin-bottom: $spacing-sm;
 
-.expert-list {
-  .expert-item {
-    @extend .flex;
-    padding: $spacing-lg 0;
-    border-bottom: 1rpx solid $border-color-light;
-    border-radius: $border-radius-lg;
-    transition: all $transition-base;
-    cursor: pointer;
-    position: relative;
-
-    &:last-child {
-      border-bottom: none;
-    }
-
-    &:active {
-      transform: translateX(8rpx);
-      background-color: rgba($primary-color, 0.02);
-    }
-
-    &::before {
-      content: '';
-      position: absolute;
-      left: -$spacing-xl;
-      top: 0;
-      bottom: 0;
-      width: 6rpx;
-      background: $primary-gradient;
-      border-radius: 0 $border-radius-sm $border-radius-sm 0;
-      opacity: 0;
-      transition: opacity $transition-base;
-    }
-
-    &:active::before {
-      opacity: 1;
-    }
-
-    .expert-avatar {
-      @extend .avatar, .avatar-lg;
-      margin-right: $spacing-lg;
-      box-shadow: $box-shadow-sm;
-      transition: all $transition-base;
-      position: relative;
-
-      &::after {
-        content: '';
-        position: absolute;
-        top: -4rpx;
-        left: -4rpx;
-        right: -4rpx;
-        bottom: -4rpx;
-        background: $primary-gradient;
-        border-radius: $border-radius-full;
-        opacity: 0;
-        z-index: -1;
-        transition: opacity $transition-base;
-      }
-    }
-
-    &:active .expert-avatar {
-      transform: scale(1.05);
-
-      &::after {
-        opacity: 0.2;
-      }
-    }
-
-    .expert-info {
+    .expert-name {
+      font-size: $font-size-lg;
+      font-weight: $font-weight-bold;
+      color: $text-color-primary;
       flex: 1;
-
-      .expert-name {
-        font-size: $font-size-lg;
-        font-weight: $font-weight-bold;
-        color: $text-color-primary;
-        display: block;
-        margin-bottom: $spacing-xs;
-        transition: color $transition-base;
-      }
-
-      .expert-desc {
-        font-size: $font-size-base;
-        color: $text-color-secondary;
-        display: block;
-        margin-bottom: $spacing-base;
-        @extend .text-ellipsis;
-        line-height: $line-height-relaxed;
-      }
-
-      .expert-meta {
-        @extend .flex, .justify-between, .items-center;
-
-        .expert-rating {
-          @extend .tag, .tag-warning;
-          font-size: $font-size-xs;
-          padding: 6rpx $spacing-xs;
-
-          &::before {
-            content: '⭐';
-            margin-right: 4rpx;
-          }
-        }
-
-        .expert-price {
-          font-size: $font-size-lg;
-          color: $primary-color;
-          font-weight: $font-weight-bold;
-
-          &::before {
-            content: '¥';
-            font-size: $font-size-base;
-            margin-right: 2rpx;
-          }
-
-          &::after {
-            content: '/次';
-            font-size: $font-size-sm;
-            color: $text-color-tertiary;
-            font-weight: $font-weight-normal;
-            margin-left: 4rpx;
-          }
-        }
-      }
     }
 
-    &:active .expert-info .expert-name {
-      color: $primary-color;
+    .expert-rating {
+      @extend .flex, .items-center;
+      background: linear-gradient(
+        135deg,
+        $warning-color 0%,
+        $warning-light 100%
+      );
+      color: white;
+      padding: 6rpx $spacing-sm;
+      border-radius: $border-radius-full;
+      font-size: $font-size-xs;
+      font-weight: $font-weight-semibold;
+      box-shadow: 0 2rpx 8rpx rgba($warning-color, 0.3);
+
+      .rating-star {
+        margin-right: 4rpx;
+      }
     }
+  }
+
+  .expert-desc {
+    font-size: $font-size-base;
+    color: $text-color-secondary;
+    line-height: $line-height-relaxed;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+.photo-carousel-wrapper {
+  margin-bottom: $spacing-lg;
+  border-radius: $border-radius-lg;
+  overflow: hidden;
+  box-shadow: $box-shadow-base;
+}
+
+.fallback-avatar {
+  @extend .flex-col, .items-center, .justify-center;
+  padding: $spacing-2xl;
+  background: linear-gradient(
+    135deg,
+    rgba($neutral-100, 0.8) 0%,
+    rgba($neutral-50, 0.9) 100%
+  );
+  border-radius: $border-radius-lg;
+  margin-bottom: $spacing-lg;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+    background: linear-gradient(
+      135deg,
+      rgba($primary-color, 0.1) 0%,
+      rgba($primary-color, 0.05) 100%
+    );
+  }
+
+  .expert-avatar {
+    @extend .avatar;
+    width: 120rpx;
+    height: 120rpx;
+    margin-bottom: $spacing-base;
+    box-shadow: $box-shadow-base;
+  }
+
+  .no-photos-text {
+    font-size: $font-size-sm;
+    color: $text-color-secondary;
+    font-weight: $font-weight-medium;
+  }
+}
+
+.book-now-btn {
+  @extend .btn, .btn-primary;
+  width: 100%;
+  padding: $spacing-base;
+  border-radius: $border-radius-lg;
+  background: $primary-gradient;
+  box-shadow: 0 4rpx 12rpx rgba($primary-color, 0.3);
+  transition: all $transition-base;
+
+  &:active {
+    transform: translateY(2rpx);
+    box-shadow: 0 2rpx 8rpx rgba($primary-color, 0.4);
+  }
+
+  .btn-text {
+    font-size: $font-size-base;
+    font-weight: $font-weight-semibold;
+    color: white;
+  }
+}
+
+.no-experts-tip {
+  @extend .flex, .items-center, .justify-center;
+  padding: $spacing-2xl;
+  margin: $spacing-base;
+  background: rgba($neutral-100, 0.5);
+  border-radius: $border-radius-lg;
+  border: 2rpx dashed $border-color-light;
+
+  .tip-text {
+    font-size: $font-size-base;
+    color: $text-color-secondary;
+    font-weight: $font-weight-medium;
   }
 }
 </style>

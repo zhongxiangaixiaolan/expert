@@ -835,24 +835,34 @@ onMounted(() => {
   font-weight: var(--font-weight-medium);
   padding: var(--spacing-xs) var(--spacing-sm);
   border: none;
+  transition: all var(--transition-fast);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 :deep(.el-tag--success) {
-  background: linear-gradient(
-    135deg,
-    var(--success-500) 0%,
-    var(--success-400) 100%
-  );
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
   color: white;
+  font-weight: var(--font-weight-semibold);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+:deep(.el-tag--success:hover) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
 }
 
 :deep(.el-tag--danger) {
-  background: linear-gradient(
-    135deg,
-    var(--error-500) 0%,
-    var(--error-400) 100%
-  );
+  background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
   color: white;
+  font-weight: var(--font-weight-semibold);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+:deep(.el-tag--danger:hover) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
 }
 
 /* 响应式设计 */

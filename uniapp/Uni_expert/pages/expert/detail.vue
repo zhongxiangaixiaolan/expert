@@ -39,6 +39,23 @@
 				</view>
 			</view>
 
+			<!-- 达人照片展示 -->
+			<view class="photos-section" v-if="expertPhotos && expertPhotos.length > 0">
+				<view class="section-title">达人照片</view>
+				<view class="photos-carousel-wrapper">
+					<ExpertPhotoCarousel3D
+						:photos="expertPhotos"
+						:auto-play="true"
+						:interval="4000"
+						:infinite-loop="false"
+						:show-controls="true"
+						:show-indicators="true"
+						width="100%"
+						height="400rpx"
+					/>
+				</view>
+			</view>
+
 			<!-- 服务信息 -->
 			<view class="service-section">
 				<view class="section-title">服务信息</view>
@@ -147,8 +164,9 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { getExpertDetail, type Expert } from '@/api/home'
+import { getExpertDetail, getExpertPhotos, type Expert } from '@/api/home'
 import { formatTime, showError, previewImage, requireAuth } from '@/utils/index'
+import ExpertPhotoCarousel3D from '@/components/ExpertPhotoCarousel3D.vue'
 
 // 获取页面参数
 const pages = getCurrentPages()
@@ -157,6 +175,7 @@ const options = currentPage.options || {}
 
 // 状态
 const expertInfo = ref<Expert | null>(null)
+const expertPhotos = ref([])
 const portfolioList = ref([])
 const reviewList = ref([])
 const isLoading = ref(false)
@@ -167,6 +186,7 @@ onMounted(() => {
 	const id = options.id
 	if (id) {
 		loadExpertDetail(Number(id))
+		loadExpertPhotos(Number(id))
 		loadPortfolio(Number(id))
 		loadReviews(Number(id))
 	} else {
@@ -194,6 +214,17 @@ const loadExpertDetail = async (id?: number) => {
 		showError('加载失败')
 	} finally {
 		isLoading.value = false
+	}
+}
+
+// 加载达人照片
+const loadExpertPhotos = async (expertId: number) => {
+	try {
+		const photos = await getExpertPhotos(expertId)
+		expertPhotos.value = Array.isArray(photos) ? photos : []
+	} catch (error) {
+		console.error('加载达人照片失败:', error)
+		expertPhotos.value = []
 	}
 }
 
@@ -417,6 +448,7 @@ const createOrder = () => {
 	}
 }
 
+.photos-section,
 .service-section,
 .detail-section,
 .portfolio-section,
@@ -424,6 +456,14 @@ const createOrder = () => {
 	background-color: $bg-color-white;
 	margin-bottom: $spacing-base;
 	padding: $spacing-lg;
+}
+
+.photos-section {
+	.photos-carousel-wrapper {
+		border-radius: $border-radius-lg;
+		overflow: hidden;
+		box-shadow: $box-shadow-sm;
+	}
 }
 
 .section-title {

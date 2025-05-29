@@ -9,6 +9,7 @@ import com.qing.expert.dto.order.OrderCreateDTO;
 import com.qing.expert.entity.Announcement;
 import com.qing.expert.entity.Banner;
 import com.qing.expert.entity.Category;
+import com.qing.expert.entity.ExpertPhoto;
 import com.qing.expert.service.*;
 import com.qing.expert.util.SecurityUtil;
 import com.qing.expert.vo.ExpertDetailVO;
@@ -41,6 +42,7 @@ public class PublicApiController {
     private final ExpertService expertService;
     private final OrderService orderService;
     private final ServiceService serviceService;
+    private final ExpertPhotoService expertPhotoService;
 
     @Operation(summary = "获取轮播图列表", description = "获取启用状态的轮播图列表")
     @GetMapping("/banners")
@@ -270,6 +272,31 @@ public class PublicApiController {
             return Result.success("获取成功", services);
         } catch (Exception e) {
             log.error("获取达人服务失败", e);
+            return Result.error("获取失败：" + e.getMessage());
+        }
+    }
+
+    @Operation(summary = "获取热门达人", description = "获取热门达人列表")
+    @GetMapping("/experts/hot")
+    public Result<List<ExpertDetailVO>> getHotExperts(
+            @Parameter(description = "数量限制") @RequestParam(defaultValue = "10") Integer limit) {
+        try {
+            List<ExpertDetailVO> hotExperts = expertService.getHotExperts(limit);
+            return Result.success("获取成功", hotExperts);
+        } catch (Exception e) {
+            log.error("获取热门达人失败", e);
+            return Result.error("获取失败：" + e.getMessage());
+        }
+    }
+
+    @Operation(summary = "获取达人照片", description = "获取指定达人的照片列表")
+    @GetMapping("/experts/{expertId}/photos")
+    public Result<List<ExpertPhoto>> getExpertPhotos(@Parameter(description = "达人ID") @PathVariable Long expertId) {
+        try {
+            List<ExpertPhoto> photos = expertPhotoService.getPhotosByExpertId(expertId);
+            return Result.success("获取成功", photos);
+        } catch (Exception e) {
+            log.error("获取达人照片失败：expertId={}", expertId, e);
             return Result.error("获取失败：" + e.getMessage());
         }
     }

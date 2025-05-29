@@ -163,3 +163,54 @@ export const getExpertDetail = (id: number): Promise<Expert> => {
 export const getNoticeDetail = (id: number): Promise<Notice> => {
   return request.get(`/announcements/${id}`)
 }
+
+// 获取热门达人列表
+export const getHotExperts = (limit?: number): Promise<Expert[]> => {
+  return request.get('/experts/hot', { params: limit ? { limit } : {} }).then((data: Expert[]) => {
+    // 处理达人头像URL
+    return data.map(expert => ({
+      ...expert,
+      avatar: getAvatarImageUrl(expert.avatar)
+    }))
+  })
+}
+
+// 达人照片接口
+export interface ExpertPhoto {
+  id: number
+  expertId: number
+  photoName: string
+  photoTitle?: string
+  photoDescription?: string
+  sortOrder: number
+  fileSize?: number
+  width?: number
+  height?: number
+  createTime?: string
+  updateTime?: string
+  photoUrl?: string
+}
+
+// 获取达人照片列表
+export const getExpertPhotos = (expertId: number): Promise<ExpertPhoto[]> => {
+  return request.get(`/experts/${expertId}/photos`).then((data: ExpertPhoto[]) => {
+    // 处理照片URL
+    return data.map(photo => ({
+      ...photo,
+      photoUrl: getPhotoImageUrl(photo.photoName)
+    }))
+  })
+}
+
+// 构建照片图片URL
+const getPhotoImageUrl = (photoName?: string): string => {
+  if (!photoName) return ''
+
+  // 如果已经是完整URL，直接返回
+  if (photoName.startsWith('http://') || photoName.startsWith('https://')) {
+    return photoName
+  }
+
+  // 构建完整的照片访问URL
+  return `http://localhost:8080/api/photos/${photoName}`
+}

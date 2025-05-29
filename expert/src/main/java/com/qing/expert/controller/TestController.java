@@ -41,13 +41,13 @@ public class TestController {
             // 测试读取系统配置
             String systemName = systemConfigService.getConfigValue("system_name", "默认系统名称");
             String contactPhone = systemConfigService.getConfigValue("contact_phone", "未设置");
-            
+
             Map<String, Object> data = new HashMap<>();
             data.put("database_status", "连接正常");
             data.put("system_name", systemName);
             data.put("contact_phone", contactPhone);
             data.put("config_count", systemConfigService.count());
-            
+
             return Result.success("数据库连接测试通过", data);
         } catch (Exception e) {
             return Result.error("数据库连接测试失败：" + e.getMessage());
@@ -60,12 +60,12 @@ public class TestController {
         try {
             // 测试缓存功能
             String testValue = systemConfigService.getConfigValue("system_name");
-            
+
             Map<String, Object> data = new HashMap<>();
             data.put("redis_status", "连接正常");
             data.put("cache_test", "缓存读取成功");
             data.put("test_value", testValue);
-            
+
             return Result.success("Redis连接测试通过", data);
         } catch (Exception e) {
             return Result.error("Redis连接测试失败：" + e.getMessage());
@@ -77,12 +77,12 @@ public class TestController {
     public Result<Map<String, Object>> testConfig() {
         try {
             Map<String, Object> data = new HashMap<>();
-            
+
             // 测试各个配置分组
             data.put("wechat_configs", systemConfigService.getWeChatConfigs());
             data.put("storage_configs", systemConfigService.getStorageConfigs());
             data.put("system_configs", systemConfigService.getSystemConfigs());
-            
+
             return Result.success("配置管理测试通过", data);
         } catch (Exception e) {
             return Result.error("配置管理测试失败：" + e.getMessage());
