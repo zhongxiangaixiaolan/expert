@@ -111,13 +111,6 @@
 			}
 		},
 		{
-			"path": "pages/user/change-password",
-			"style": {
-				"navigationBarTitleText": "修改密码",
-				"navigationStyle": "custom"
-			}
-		},
-		{
 			"path": "pages/user/favorites",
 			"style": {
 				"navigationBarTitleText": "我的收藏"

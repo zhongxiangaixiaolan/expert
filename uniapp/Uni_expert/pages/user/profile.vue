@@ -1,5 +1,14 @@
 <template>
   <view class="profile-container">
+    <!-- 自定义导航栏 -->
+    <view class="custom-navbar">
+      <view class="navbar-content">
+        <text class="back-btn" @click="goBack">‹</text>
+        <text class="navbar-title">个人信息</text>
+        <view class="navbar-placeholder"></view>
+      </view>
+    </view>
+
     <scroll-view class="profile-scroll" scroll-y>
       <!-- 用户信息卡片 -->
       <view class="user-card">
@@ -21,10 +30,6 @@
             <text class="user-phone">{{
               userInfo.phone || "未绑定手机号"
             }}</text>
-            <view class="user-balance">
-              <text class="balance-label">余额：</text>
-              <text class="balance-amount">¥{{ userInfo.balance || 0 }}</text>
-            </view>
           </view>
         </view>
       </view>
@@ -86,15 +91,6 @@
       <view class="info-section">
         <view class="section-title">账户安全</view>
         <view class="info-list">
-          <view class="info-item" @click="changePassword">
-            <text class="info-label">修改密码</text>
-            <view class="info-value">
-              <image
-                class="arrow-icon"
-                src="/static/icons/arrow-right.svg"
-              ></image>
-            </view>
-          </view>
           <view class="info-item" @click="bindWechat">
             <text class="info-label">微信绑定</text>
             <view class="info-value">
@@ -324,11 +320,9 @@ const uploadAvatarFile = async (filePath: string) => {
   }
 };
 
-// 修改密码
-const changePassword = () => {
-  uni.navigateTo({
-    url: "/pages/user/change-password",
-  });
+// 返回上一页
+const goBack = () => {
+  uni.navigateBack();
 };
 
 // 绑定微信
@@ -383,18 +377,76 @@ const logout = () => {
 <style lang="scss" scoped>
 .profile-container {
   min-height: 100vh;
-  background-color: $bg-color-page;
+  background: linear-gradient(
+    135deg,
+    $primary-color 0%,
+    $primary-light 50%,
+    $bg-color-page 100%
+  );
+  position: relative;
+}
+
+.custom-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: $z-index-popup;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.9),
+    rgba(255, 255, 255, 0.7)
+  );
+  -webkit-backdrop-filter: blur(24rpx);
+  backdrop-filter: blur(24rpx);
+  border-bottom: 1rpx solid rgba(255, 255, 255, 0.3);
+
+  .navbar-content {
+    height: 60rpx;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 $spacing-base;
+
+    .back-btn {
+      font-size: 48rpx;
+      color: $primary-color;
+      width: 80rpx;
+      font-weight: bold;
+    }
+
+    .navbar-title {
+      font-size: $font-size-lg;
+      font-weight: bold;
+      color: $text-color-primary;
+    }
+
+    .navbar-placeholder {
+      width: 80rpx;
+    }
+  }
 }
 
 .profile-scroll {
   height: 100vh;
-  padding-bottom: 120rpx;
+  padding-top: 60rpx;
+  padding-bottom: 80rpx;
 }
 
 .user-card {
-  background-color: $bg-color-white;
-  margin-bottom: $spacing-base;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.9),
+    rgba(255, 255, 255, 0.7)
+  );
+  -webkit-backdrop-filter: blur(24rpx);
+  backdrop-filter: blur(24rpx);
+  border-radius: $border-radius-2xl;
+  margin: $spacing-base $spacing-lg;
+  margin-bottom: $spacing-lg;
   padding: $spacing-lg;
+  box-shadow: $box-shadow-glass, inset 0 1rpx 0 rgba(255, 255, 255, 0.4);
+  border: 1rpx solid rgba(255, 255, 255, 0.3);
 
   .user-info {
     display: flex;
@@ -405,26 +457,42 @@ const logout = () => {
       margin-right: $spacing-lg;
 
       .user-avatar {
-        width: 120rpx;
-        height: 120rpx;
+        width: 100rpx;
+        height: 100rpx;
         border-radius: 50%;
+        border: 3rpx solid rgba(255, 255, 255, 0.6);
+        box-shadow: $box-shadow-lg, 0 0 20rpx rgba(0, 122, 255, 0.3);
+        transition: all $transition-base $ease-spring;
       }
 
       .avatar-edit {
         position: absolute;
         bottom: 0;
         right: 0;
-        width: 40rpx;
-        height: 40rpx;
-        background-color: $primary-color;
+        width: 32rpx;
+        height: 32rpx;
+        background: linear-gradient(
+          135deg,
+          $primary-color 0%,
+          $primary-light 100%
+        );
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
+        box-shadow: $box-shadow-sm;
+        border: 2rpx solid rgba(255, 255, 255, 0.8);
+        transition: all $transition-base $ease-spring;
+
+        &:active {
+          transform: scale(0.95);
+          box-shadow: $box-shadow-xs;
+        }
 
         .edit-icon {
-          width: 24rpx;
-          height: 24rpx;
+          width: 20rpx;
+          height: 20rpx;
+          filter: brightness(0) invert(1);
         }
       }
     }
@@ -444,40 +512,48 @@ const logout = () => {
         display: block;
         font-size: $font-size-base;
         color: $text-color-secondary;
-        margin-bottom: $spacing-base;
-      }
-
-      .user-balance {
-        display: flex;
-        align-items: center;
-
-        .balance-label {
-          font-size: $font-size-base;
-          color: $text-color-secondary;
-        }
-
-        .balance-amount {
-          font-size: $font-size-lg;
-          font-weight: bold;
-          color: $error-color;
-        }
       }
     }
   }
 }
 
 .info-section {
-  background-color: $bg-color-white;
-  margin-bottom: $spacing-base;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.9),
+    rgba(255, 255, 255, 0.7)
+  );
+  -webkit-backdrop-filter: blur(24rpx);
+  backdrop-filter: blur(24rpx);
+  border-radius: $border-radius-2xl;
+  margin: 0 $spacing-lg $spacing-lg;
   padding: $spacing-lg;
+  box-shadow: $box-shadow-glass, inset 0 1rpx 0 rgba(255, 255, 255, 0.4);
+  border: 1rpx solid rgba(255, 255, 255, 0.3);
 
   .section-title {
     font-size: $font-size-lg;
     font-weight: bold;
     color: $text-color-primary;
-    margin-bottom: $spacing-lg;
-    padding-bottom: $spacing-sm;
-    border-bottom: 1rpx solid $border-color-light;
+    margin-bottom: $spacing-base;
+    padding-bottom: $spacing-xs;
+    border-bottom: 1rpx solid rgba(255, 255, 255, 0.3);
+    position: relative;
+
+    &::after {
+      content: "";
+      position: absolute;
+      bottom: -1rpx;
+      left: 0;
+      width: 60rpx;
+      height: 3rpx;
+      background: linear-gradient(
+        90deg,
+        $primary-color 0%,
+        $primary-light 100%
+      );
+      border-radius: 2rpx;
+    }
   }
 
   .info-list {
@@ -486,10 +562,20 @@ const logout = () => {
       align-items: center;
       justify-content: space-between;
       padding: $spacing-base 0;
-      border-bottom: 1rpx solid $border-color-light;
+      border-bottom: 1rpx solid rgba(255, 255, 255, 0.3);
+      transition: all $transition-base $ease-spring;
+      border-radius: $border-radius-lg;
+      margin: 0 -$spacing-sm;
+      padding-left: $spacing-sm;
+      padding-right: $spacing-sm;
 
       &:last-child {
         border-bottom: none;
+      }
+
+      &:active {
+        background: rgba(0, 122, 255, 0.1);
+        transform: scale(0.98);
       }
 
       .info-label {
@@ -517,16 +603,25 @@ const logout = () => {
 }
 
 .logout-section {
-  padding: $spacing-lg;
+  padding: 0 $spacing-lg;
+  margin-bottom: $spacing-lg;
 
   .logout-btn {
     width: 100%;
-    background-color: $error-color;
+    height: 80rpx;
+    background: linear-gradient(135deg, $error-color 0%, $error-light 100%);
     color: $text-color-white;
     border: none;
-    border-radius: $border-radius-lg;
-    padding: $spacing-lg;
-    font-size: $font-size-base;
+    border-radius: $border-radius-2xl;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    box-shadow: $box-shadow-lg;
+    transition: all $transition-base $ease-spring;
+
+    &:active {
+      transform: scale(0.98);
+      box-shadow: $box-shadow-base;
+    }
   }
 }
 
@@ -543,10 +638,18 @@ const logout = () => {
   z-index: $z-index-popup;
 
   .modal-content {
-    background-color: $bg-color-white;
-    border-radius: $border-radius-lg;
+    background: linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.95),
+      rgba(255, 255, 255, 0.85)
+    );
+    -webkit-backdrop-filter: blur(24rpx);
+    backdrop-filter: blur(24rpx);
+    border-radius: $border-radius-2xl;
     width: 600rpx;
     max-width: 90%;
+    box-shadow: $box-shadow-glass, inset 0 1rpx 0 rgba(255, 255, 255, 0.6);
+    border: 1rpx solid rgba(255, 255, 255, 0.4);
 
     .modal-header {
       display: flex;
@@ -572,23 +675,43 @@ const logout = () => {
 
       .modal-input {
         width: 100%;
-        padding: $spacing-base;
-        border: 1rpx solid $border-color;
-        border-radius: $border-radius-base;
+        padding: $spacing-lg;
+        border: 1rpx solid rgba(255, 255, 255, 0.4);
+        border-radius: $border-radius-lg;
         font-size: $font-size-base;
+        background: rgba(255, 255, 255, 0.6);
+        -webkit-backdrop-filter: blur(12rpx);
+        backdrop-filter: blur(12rpx);
+        transition: all $transition-base;
+
+        &:focus {
+          border-color: $primary-color;
+          background: rgba(255, 255, 255, 0.8);
+          box-shadow: 0 0 0 4rpx rgba(0, 122, 255, 0.1);
+        }
       }
 
       .picker-view {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: $spacing-base;
-        border: 1rpx solid $border-color;
-        border-radius: $border-radius-base;
+        padding: $spacing-lg;
+        border: 1rpx solid rgba(255, 255, 255, 0.4);
+        border-radius: $border-radius-lg;
+        background: rgba(255, 255, 255, 0.6);
+        -webkit-backdrop-filter: blur(12rpx);
+        backdrop-filter: blur(12rpx);
+        transition: all $transition-base;
+
+        &:active {
+          background: rgba(255, 255, 255, 0.8);
+          border-color: $primary-color;
+        }
 
         .arrow-icon {
           width: 24rpx;
           height: 24rpx;
+          transition: transform $transition-base;
         }
       }
     }
@@ -601,21 +724,42 @@ const logout = () => {
       .cancel-btn,
       .confirm-btn {
         flex: 1;
-        padding: $spacing-base;
-        border-radius: $border-radius-base;
+        height: 80rpx;
+        border-radius: $border-radius-xl;
         font-size: $font-size-base;
+        font-weight: $font-weight-medium;
+        transition: all $transition-base $ease-spring;
+        border: none;
       }
 
       .cancel-btn {
-        background-color: $bg-color-gray;
+        background: rgba(255, 255, 255, 0.6);
         color: $text-color-primary;
-        border: none;
+        -webkit-backdrop-filter: blur(12rpx);
+        backdrop-filter: blur(12rpx);
+        border: 1rpx solid rgba(255, 255, 255, 0.4);
+
+        &:active {
+          transform: scale(0.98);
+          background: rgba(255, 255, 255, 0.8);
+        }
       }
 
       .confirm-btn {
-        background-color: $primary-color;
+        background: linear-gradient(
+          135deg,
+          $primary-color 0%,
+          $primary-light 100%
+        );
         color: $text-color-white;
         border: none;
+        box-shadow: $box-shadow-sm;
+        transition: all $transition-base $ease-spring;
+
+        &:active {
+          transform: scale(0.98);
+          box-shadow: $box-shadow-xs;
+        }
       }
     }
   }

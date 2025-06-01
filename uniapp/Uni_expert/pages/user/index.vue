@@ -93,11 +93,6 @@
 
     <!-- 功能菜单 -->
     <view class="menu-section">
-      <view class="menu-item" @click="goToSettings">
-        <text class="menu-icon">⚙️</text>
-        <text class="menu-text">设置</text>
-        <text class="menu-arrow">›</text>
-      </view>
       <view class="menu-item" @click="goToAbout">
         <text class="menu-icon">ℹ️</text>
         <text class="menu-text">关于我们</text>
@@ -264,15 +259,6 @@ const goToEarnings = () => {
 const goToExpertApply = () => {
   uni.navigateTo({
     url: "/pages/expert/apply",
-  });
-};
-
-// 设置
-const goToSettings = () => {
-  // TODO: 跳转设置页面
-  uni.showToast({
-    title: "功能开发中",
-    icon: "none",
   });
 };
 
