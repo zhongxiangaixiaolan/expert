@@ -14,6 +14,7 @@ import com.qing.expert.entity.User;
 import com.qing.expert.mapper.PaymentRecordMapper;
 import com.qing.expert.service.PaymentService;
 import com.qing.expert.service.UserService;
+import com.qing.expert.service.WechatPayService;
 import com.qing.expert.vo.PaymentRecordVO;
 import com.qing.expert.vo.PaymentResultVO;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,7 @@ public class PaymentServiceImpl extends ServiceImpl<PaymentRecordMapper, Payment
         implements PaymentService {
 
     private final UserService userService;
+    private final WechatPayService wechatPayService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -107,26 +109,32 @@ public class PaymentServiceImpl extends ServiceImpl<PaymentRecordMapper, Payment
     @Override
     @Transactional(rollbackFor = Exception.class)
     public PaymentResultVO wechatPay(PaymentCreateDTO dto) {
-        // 创建支付记录
-        PaymentRecord paymentRecord = createPaymentRecord(dto);
-        save(paymentRecord);
+        try {
+            // 创建支付记录
+            PaymentRecord paymentRecord = createPaymentRecord(dto);
+            paymentRecord.setPaymentType("WECHAT_PAY");
+            save(paymentRecord);
 
-        // TODO: 调用微信支付API
-        // 这里需要集成微信支付SDK
-        log.info("调用微信支付API，支付单号：{}", paymentRecord.getPaymentNo());
+            // 调用微信支付服务创建支付订单
+            var wechatPayVO = wechatPayService.createMiniAppPayment(dto, paymentRecord.getPaymentNo());
 
-        // 构建返回结果
-        PaymentResultVO result = new PaymentResultVO();
-        result.setPaymentNo(paymentRecord.getPaymentNo());
-        result.setPaymentStatus(PaymentStatusEnum.PENDING.getCode());
-        result.setPaymentStatusDesc(PaymentStatusEnum.PENDING.getDesc());
-        result.setPaymentAmount(dto.getPaymentAmount());
-        result.setExpireTime(paymentRecord.getExpireTime());
+            // 构建返回结果
+            PaymentResultVO result = new PaymentResultVO();
+            result.setPaymentNo(wechatPayVO.getPaymentNo());
+            result.setPaymentStatus(PaymentStatusEnum.PENDING.getCode());
+            result.setPaymentStatusDesc(PaymentStatusEnum.PENDING.getDesc());
+            result.setPaymentAmount(dto.getPaymentAmount());
 
-        // TODO: 设置微信支付参数
-        // result.setPaymentParams(wechatPayParams);
+            // 设置微信支付参数
+            result.setPaymentParams(wechatPayVO);
 
-        return result;
+            log.info("微信支付订单创建成功，支付单号：{}", wechatPayVO.getPaymentNo());
+            return result;
+
+        } catch (Exception e) {
+            log.error("微信支付订单创建失败", e);
+            throw new BusinessException("微信支付创建失败：" + e.getMessage());
+        }
     }
 
     @Override
@@ -357,5 +365,77 @@ public class PaymentServiceImpl extends ServiceImpl<PaymentRecordMapper, Payment
     @Override
     public Map<String, Object> getPlatformPaymentSummary(LocalDateTime startTime, LocalDateTime endTime) {
         return baseMapper.selectPlatformPaymentSummary(startTime, endTime);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updatePaymentSuccess(String paymentNo, String thirdPartyNo) {
+        PaymentRecord paymentRecord = getByPaymentNo(paymentNo);
+        if (paymentRecord == null) {
+            log.error("更新支付成功状态失败，支付记录不存在：{}", paymentNo);
+            return false;
+        }
+
+        LambdaUpdateWrapper<PaymentRecord> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(PaymentRecord::getId, paymentRecord.getId())
+                .set(PaymentRecord::getPaymentStatus, PaymentStatusEnum.SUCCESS.getCode())
+                .set(PaymentRecord::getThirdPartyNo, thirdPartyNo)
+                .set(PaymentRecord::getActualAmount, paymentRecord.getPaymentAmount())
+                .set(PaymentRecord::getPaymentTime, LocalDateTime.now())
+                .set(PaymentRecord::getUpdateTime, LocalDateTime.now());
+
+        boolean success = update(updateWrapper);
+        if (success) {
+            log.info("支付成功状态更新完成，支付单号：{}，第三方单号：{}", paymentNo, thirdPartyNo);
+        }
+        return success;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updatePaymentFailed(String paymentNo, String failReason) {
+        PaymentRecord paymentRecord = getByPaymentNo(paymentNo);
+        if (paymentRecord == null) {
+            log.error("更新支付失败状态失败，支付记录不存在：{}", paymentNo);
+            return false;
+        }
+
+        LambdaUpdateWrapper<PaymentRecord> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(PaymentRecord::getId, paymentRecord.getId())
+                .set(PaymentRecord::getPaymentStatus, PaymentStatusEnum.FAILED.getCode())
+                .set(PaymentRecord::getRemark, failReason)
+                .set(PaymentRecord::getUpdateTime, LocalDateTime.now());
+
+        boolean success = update(updateWrapper);
+        if (success) {
+            log.info("支付失败状态更新完成，支付单号：{}，失败原因：{}", paymentNo, failReason);
+        }
+        return success;
+    }
+
+    @Override
+    public PaymentRecordVO convertToVO(PaymentRecord record) {
+        if (record == null) {
+            return null;
+        }
+
+        PaymentRecordVO vo = new PaymentRecordVO();
+        vo.setId(record.getId());
+        vo.setPaymentNo(record.getPaymentNo());
+        vo.setUserId(record.getUserId());
+        vo.setOrderId(record.getOrderId());
+        vo.setPaymentAmount(record.getPaymentAmount());
+        vo.setActualAmount(record.getActualAmount());
+        vo.setPaymentType(record.getPaymentType());
+        vo.setPaymentStatus(record.getPaymentStatus());
+        vo.setPaymentDesc(record.getPaymentDesc());
+        vo.setThirdPartyNo(record.getThirdPartyNo());
+        vo.setPaymentTime(record.getPaymentTime());
+        vo.setExpireTime(record.getExpireTime());
+        vo.setRemark(record.getRemark());
+        vo.setCreateTime(record.getCreateTime());
+        vo.setUpdateTime(record.getUpdateTime());
+
+        return vo;
     }
 }

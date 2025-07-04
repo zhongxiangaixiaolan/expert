@@ -23,12 +23,14 @@
           <el-form
             ref="wechatFormRef"
             :model="wechatConfig"
-            label-width="120px"
+            label-width="150px"
             class="config-form"
           >
+            <el-divider content-position="left">小程序配置</el-divider>
+
             <el-form-item label="小程序AppID">
               <el-input
-                v-model="wechatConfig.wx_appid"
+                v-model="wechatConfig.wechat_miniapp_app_id"
                 placeholder="请输入微信小程序AppID"
                 clearable
               />
@@ -36,7 +38,7 @@
 
             <el-form-item label="小程序AppSecret">
               <el-input
-                v-model="wechatConfig.wx_appsecret"
+                v-model="wechatConfig.wechat_miniapp_app_secret"
                 type="password"
                 placeholder="请输入微信小程序AppSecret"
                 show-password
@@ -44,20 +46,67 @@
               />
             </el-form-item>
 
+            <el-divider content-position="left">微信支付配置</el-divider>
+
+            <el-form-item label="启用微信支付配置验证">
+              <el-switch
+                v-model="wechatConfig.wechat_pay_config_enabled"
+                active-value="true"
+                inactive-value="false"
+                active-text="开启"
+                inactive-text="关闭"
+              />
+              <div style="font-size: 12px; color: #999; margin-top: 4px;">
+                关闭后应用可在未配置微信支付时正常启动，但支付功能将不可用
+              </div>
+            </el-form-item>
+
             <el-form-item label="商户号">
               <el-input
-                v-model="wechatConfig.wx_mch_id"
+                v-model="wechatConfig.wechat_pay_mch_id"
                 placeholder="请输入微信支付商户号"
                 clearable
               />
             </el-form-item>
 
-            <el-form-item label="支付密钥">
+            <el-form-item label="API V3密钥">
               <el-input
-                v-model="wechatConfig.wx_api_key"
+                v-model="wechatConfig.wechat_pay_api_v3_key"
                 type="password"
-                placeholder="请输入微信支付API密钥"
+                placeholder="请输入微信支付API V3密钥"
                 show-password
+                clearable
+              />
+            </el-form-item>
+
+            <el-form-item label="证书序列号">
+              <el-input
+                v-model="wechatConfig.wechat_pay_cert_serial_no"
+                placeholder="请输入微信支付证书序列号"
+                clearable
+              />
+            </el-form-item>
+
+            <el-form-item label="私钥文件路径">
+              <el-input
+                v-model="wechatConfig.wechat_pay_private_key_path"
+                placeholder="请输入私钥文件路径，如：/path/to/apiclient_key.pem"
+                clearable
+              />
+            </el-form-item>
+
+            <el-form-item label="证书文件路径">
+              <el-input
+                v-model="wechatConfig.wechat_pay_private_cert_path"
+                placeholder="请输入证书文件路径，如：/path/to/apiclient_cert.pem"
+                clearable
+              />
+            </el-form-item>
+
+            <el-form-item label="支付回调地址">
+              <el-input
+                v-model="wechatConfig.wechat_pay_notify_url"
+                placeholder="请输入支付回调地址，如：https://yourdomain.com/api/user/payment/callback/wechat"
                 clearable
               />
             </el-form-item>
@@ -247,10 +296,15 @@ const refreshing = ref(false);
 
 // 各配置分组数据
 const wechatConfig = reactive({
-  wx_appid: "",
-  wx_appsecret: "",
-  wx_mch_id: "",
-  wx_api_key: "",
+  wechat_miniapp_app_id: "",
+  wechat_miniapp_app_secret: "",
+  wechat_pay_config_enabled: "",
+  wechat_pay_mch_id: "",
+  wechat_pay_api_v3_key: "",
+  wechat_pay_cert_serial_no: "",
+  wechat_pay_private_key_path: "",
+  wechat_pay_private_cert_path: "",
+  wechat_pay_notify_url: "",
 });
 
 const storageConfig = reactive({

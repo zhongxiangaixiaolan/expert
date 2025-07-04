@@ -224,6 +224,11 @@ const getPhotoImageUrl = (photoName?: string): string => {
     return photoName
   }
 
+  // 如果已经是以/api/开头的路径，说明后端已经处理过，只需要加上域名
+  if (photoName.startsWith('/api/')) {
+    return `http://localhost:8080${photoName}`
+  }
+
   // 构建完整的照片访问URL
   // 注意：后端配置了context-path: /api，所以完整路径是 /api/photos/
   return `http://localhost:8080/api/photos/${photoName}`

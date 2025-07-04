@@ -48,14 +48,14 @@ public interface PaymentService extends IService<PaymentRecord> {
      * 分页查询支付记录列表
      */
     IPage<PaymentRecordVO> getPaymentRecordPage(Page<PaymentRecordVO> page,
-                                                Long userId,
-                                                Long orderId,
-                                                String paymentType,
-                                                String paymentStatus,
-                                                String userNickname,
-                                                String userPhone,
-                                                LocalDateTime startTime,
-                                                LocalDateTime endTime);
+            Long userId,
+            Long orderId,
+            String paymentType,
+            String paymentStatus,
+            String userNickname,
+            String userPhone,
+            LocalDateTime startTime,
+            LocalDateTime endTime);
 
     /**
      * 根据ID查询支付记录详情
@@ -106,4 +106,19 @@ public interface PaymentService extends IService<PaymentRecord> {
      * 支付宝支付
      */
     PaymentResultVO alipay(PaymentCreateDTO dto);
+
+    /**
+     * 更新支付成功状态
+     */
+    boolean updatePaymentSuccess(String paymentNo, String thirdPartyNo);
+
+    /**
+     * 更新支付失败状态
+     */
+    boolean updatePaymentFailed(String paymentNo, String failReason);
+
+    /**
+     * 转换为VO对象
+     */
+    PaymentRecordVO convertToVO(PaymentRecord record);
 }

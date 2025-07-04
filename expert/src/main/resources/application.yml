@@ -47,6 +47,12 @@ spring:
     time-zone: GMT+8
     default-property-inclusion: non_null
 
+# 微信支付配置开关（默认禁用，需要时可在生产环境启用）
+wechat:
+  pay:
+    config:
+      enabled: false
+
 # MyBatis Plus配置
 mybatis-plus:
   configuration:
@@ -156,6 +162,25 @@ expert:
       api-key:
       cert-path:
       notify-url: ${server.servlet.context-path}/wechat/pay/notify
+
+# WxJava 微信小程序配置（保留小程序功能）
+wx:
+  miniapp:
+    appid: ${expert.wechat.miniapp.app-id:wxc9b98294ace36519}
+    secret: ${expert.wechat.miniapp.app-secret:34887a584a83a6a53b010ae59ccc9f19}
+    token: ${expert.wechat.miniapp.token:}
+    aesKey: ${expert.wechat.miniapp.aes-key:}
+    msgDataFormat: JSON
+    use-stable-access-token: false
+    config-storage:
+      type: RedisTemplate
+      key-prefix: wx:miniapp
+      redis:
+        host: ${spring.data.redis.host:localhost}
+        port: ${spring.data.redis.port:6379}
+        password: ${spring.data.redis.password:}
+
+# 微信支付配置（使用官方wechatpay-java SDK，配置从数据库读取）
 
   # 阿里云OSS配置（默认值，可通过数据库动态配置覆盖）
   oss:

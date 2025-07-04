@@ -222,6 +222,8 @@ import {
   getOrderStatusColor,
   OrderStatus,
   PaymentStatus,
+  payOrder,
+  queryPaymentStatus,
   type Order,
 } from "@/api/order";
 import {
@@ -231,6 +233,7 @@ import {
   showConfirm,
   previewImage,
 } from "@/utils/index";
+import { useUserStore } from "@/store/user";
 
 // 获取页面参数
 const pages = getCurrentPages();
@@ -437,9 +440,71 @@ const cancelOrder = async () => {
 };
 
 // 支付订单
-const payOrder = () => {
-  // TODO: 跳转支付页面
-  console.log("支付订单");
+const payOrder = async () => {
+  try {
+    if (!orderInfo.value) return;
+
+    uni.showLoading({ title: "创建支付订单..." });
+
+    // 获取用户openid
+    const userStore = useUserStore();
+    const openid = userStore.userInfo?.openid;
+
+    if (!openid) {
+      uni.hideLoading();
+      uni.showToast({ title: "请先登录", icon: "none" });
+      return;
+    }
+
+    // 创建支付订单
+    const paymentData = {
+      orderId: orderInfo.value.id,
+      paymentType: "WECHAT_PAY",
+      paymentAmount: orderInfo.value.amount,
+      paymentDesc: `订单支付-${orderInfo.value.serviceName}`,
+      openid: openid,
+    };
+
+    const payResult = await payOrder(paymentData);
+    uni.hideLoading();
+
+    if (payResult.paymentParams) {
+      // 调用微信支付
+      uni.requestPayment({
+        provider: "wxpay",
+        timeStamp: payResult.paymentParams.timeStamp,
+        nonceStr: payResult.paymentParams.nonceStr,
+        package: payResult.paymentParams.packageValue,
+        signType: payResult.paymentParams.signType,
+        paySign: payResult.paymentParams.paySign,
+        success: async (res) => {
+          console.log("支付成功", res);
+          uni.showToast({ title: "支付成功", icon: "success" });
+
+          // 查询支付状态确认
+          setTimeout(async () => {
+            try {
+              await queryPaymentStatus(payResult.paymentNo);
+              // 刷新订单信息
+              await loadOrderDetail();
+            } catch (error) {
+              console.error("查询支付状态失败", error);
+            }
+          }, 2000);
+        },
+        fail: (err) => {
+          console.error("支付失败", err);
+          if (err.errMsg !== "requestPayment:fail cancel") {
+            uni.showToast({ title: "支付失败", icon: "none" });
+          }
+        },
+      });
+    }
+  } catch (error) {
+    uni.hideLoading();
+    console.error("创建支付订单失败", error);
+    uni.showToast({ title: "支付失败，请重试", icon: "none" });
+  }
 };
 
 // 确认完成

@@ -206,8 +206,24 @@ export const getOrderStatusColor = (status: OrderStatus): string => {
 }
 
 // 支付订单
-export const payOrder = (orderId: number, paymentMethod: string = 'wechat'): Promise<{
+export const payOrder = (data: {
+  orderId: number
+  paymentType: string
+  paymentAmount: number
+  paymentDesc?: string
+  openid?: string
+}): Promise<{
+  paymentNo: string
   paymentParams: any
 }> => {
-  return request.post(`/orders/${orderId}/pay`, { paymentMethod })
+  return request.post('/user/payment/create', data)
+}
+
+// 查询支付状态
+export const queryPaymentStatus = (paymentNo: string): Promise<{
+  paymentStatus: string
+  paymentTime?: string
+  thirdPartyNo?: string
+}> => {
+  return request.get(`/user/payment/status/${paymentNo}`)
 }

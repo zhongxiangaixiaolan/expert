@@ -130,6 +130,22 @@ const containerStyle = computed(() => ({
 // 获取照片URL
 const getPhotoUrl = (photo: Photo): string => {
   if (!photo.photoName) return "";
+
+  // 如果是头像（从首页传来的头像数据），直接返回
+  if ((photo as any).isAvatar) {
+    return photo.photoName; // 头像已经是完整URL
+  }
+
+  // 如果已经是完整URL，直接返回
+  if (photo.photoName.startsWith('http://') || photo.photoName.startsWith('https://')) {
+    return photo.photoName;
+  }
+
+  // 如果已经是以/api/开头的路径，说明后端已经处理过，只需要加上域名
+  if (photo.photoName.startsWith('/api/')) {
+    return `http://localhost:8080${photo.photoName}`;
+  }
+
   // 构建照片访问URL - 使用正确的后端照片访问路径
   return `http://localhost:8080/api/photos/${photo.photoName}`;
 };

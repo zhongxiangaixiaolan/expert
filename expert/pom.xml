@@ -26,7 +26,8 @@
         <hutool.version>5.8.22</hutool.version>
         <fastjson2.version>2.0.43</fastjson2.version>
         <jjwt.version>0.12.3</jjwt.version>
-        <weixin-java.version>4.4.8.B</weixin-java.version>
+        <weixin-java.version>4.6.0</weixin-java.version>
+        <wechatpay-java.version>0.2.12</wechatpay-java.version>
         <aliyun-oss.version>3.18.1</aliyun-oss.version>
         <springdoc.version>2.3.0</springdoc.version>
     </properties>
@@ -103,16 +104,17 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- WeChat SDK：更新到最新版本 -->
+        <!-- WeChat SDK：使用官方SDK -->
         <dependency>
             <groupId>com.github.binarywang</groupId>
-            <artifactId>weixin-java-miniapp</artifactId>
+            <artifactId>wx-java-miniapp-spring-boot-starter</artifactId>
             <version>${weixin-java.version}</version>
         </dependency>
+        <!-- 官方微信支付SDK -->
         <dependency>
-            <groupId>com.github.binarywang</groupId>
-            <artifactId>weixin-java-pay</artifactId>
-            <version>${weixin-java.version}</version>
+            <groupId>com.github.wechatpay-apiv3</groupId>
+            <artifactId>wechatpay-java</artifactId>
+            <version>${wechatpay-java.version}</version>
         </dependency>
 
         <!-- File Upload -->

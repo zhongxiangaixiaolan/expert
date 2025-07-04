@@ -145,6 +145,7 @@ interface ExpertPhotoWithInfo extends ExpertPhoto {
   expertName: string;
   expertRating: number;
   expertDescription: string;
+  isAvatar?: boolean; // 标记是否为头像
 }
 
 // 响应式数据 - 使用明确的类型定义
@@ -215,13 +216,14 @@ const loadPageData = async () => {
         // 使用负数ID确保与真实照片ID不冲突，并加上expertIndex确保唯一性
         allPhotosWithInfo.push({
           id: -(expert.id * 1000 + expertIndex), // 确保唯一的负数ID
-          photoName: expert.avatar,
+          photoName: expert.avatar, // 这里已经是完整的头像URL
           photoTitle: expert.expertName,
           photoDescription: expert.description,
           expertId: expert.id,
           expertName: expert.expertName,
           expertRating: expert.rating,
           expertDescription: expert.description,
+          isAvatar: true, // 标记这是头像，不是真实照片
         });
       }
     });

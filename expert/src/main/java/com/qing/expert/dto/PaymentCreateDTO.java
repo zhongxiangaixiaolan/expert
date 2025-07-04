@@ -61,4 +61,9 @@ public class PaymentCreateDTO {
      * 备注
      */
     private String remark;
+
+    /**
+     * 微信用户openid（微信支付必填）
+     */
+    private String openid;
 }

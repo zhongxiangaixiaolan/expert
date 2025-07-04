@@ -29,12 +29,17 @@ public class ConfigConstant {
      * 微信配置键
      */
     public static class WeChat {
-        public static final String APP_ID = "wx_appid";
-        public static final String APP_SECRET = "wx_appsecret";
-        public static final String MCH_ID = "wx_mch_id";
-        public static final String API_KEY = "wx_api_key";
-        public static final String CERT_PATH = "wx_cert_path";
-        public static final String NOTIFY_URL = "wx_notify_url";
+        public static final String MINIAPP_APP_ID = "wechat_miniapp_app_id";
+        public static final String MINIAPP_APP_SECRET = "wechat_miniapp_app_secret";
+        public static final String MINIAPP_TOKEN = "wechat_miniapp_token";
+        public static final String MINIAPP_AES_KEY = "wechat_miniapp_aes_key";
+        public static final String PAY_MCH_ID = "wechat_pay_mch_id";
+        public static final String PAY_API_V3_KEY = "wechat_pay_api_v3_key";
+        public static final String PAY_CERT_SERIAL_NO = "wechat_pay_cert_serial_no";
+        public static final String PAY_PRIVATE_KEY_PATH = "wechat_pay_private_key_path";
+        public static final String PAY_PRIVATE_CERT_PATH = "wechat_pay_private_cert_path";
+        public static final String PAY_NOTIFY_URL = "wechat_pay_notify_url";
+        public static final String PAY_CONFIG_ENABLED = "wechat_pay_config_enabled";
     }
 
     /**
