@@ -166,7 +166,7 @@ import {
   PaymentStatus,
   type Order,
 } from "@/api/order";
-import { formatTime, showError, showConfirm } from "@/utils/index";
+import { formatTime, showError, showConfirm, requireAuth } from "@/utils/index";
 import Tabbar from "@/components/Tabbar.vue";
 
 // 状态
@@ -193,7 +193,19 @@ const statusTabs = ref([
 ]);
 
 // 页面加载
-onMounted(() => {
+onMounted(async () => {
+  console.log('订单页面加载，检查认证状态...');
+
+  // 检查本地存储的认证信息
+  const token = uni.getStorageSync('token');
+  const userInfo = uni.getStorageSync('userInfo');
+  console.log('本地token:', token ? '存在' : '不存在');
+  console.log('本地userInfo:', userInfo ? '存在' : '不存在');
+  console.log('userStore状态:', userStore.isLoggedIn);
+
+  const isAuthenticated = await requireAuth();
+  if (!isAuthenticated) return;
+
   loadOrderList();
 });
 

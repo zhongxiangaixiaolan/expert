@@ -11,7 +11,7 @@
  Target Server Version : 80400
  File Encoding         : 65001
 
- Date: 29/05/2025 10:18:06
+ Date: 05/07/2025 01:44:46
 */
 
 SET NAMES utf8mb4;
@@ -40,12 +40,12 @@ CREATE TABLE `admins`  (
   UNIQUE INDEX `username`(`username`) USING BTREE,
   INDEX `idx_username`(`username`) USING BTREE,
   INDEX `idx_status`(`status`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '管理员表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '管理员表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of admins
 -- ----------------------------
-INSERT INTO `admins` VALUES (1, 'admin', '$2a$10$lbTc4N60cczI6VODWCJpGud6mo4c3fdB7bkLPYnDKGAek1fdU5Ks.', '超级管理员', '15478654785', '25746qwe8@qq.com', '322cb157-27a6-4773-9bca-3d50e1ac0d62.png', 'SUPER_ADMIN', 1, '2025-05-28 19:39:15', '127.0.0.1', '2025-05-23 20:25:30', '2025-05-28 19:39:15', 0);
+INSERT INTO `admins` VALUES (1, 'admin', '$2a$10$lbTc4N60cczI6VODWCJpGud6mo4c3fdB7bkLPYnDKGAek1fdU5Ks.', '超级管理员', '15478654785', '25746qwe8@qq.com', '322cb157-27a6-4773-9bca-3d50e1ac0d62.png', 'SUPER_ADMIN', 1, '2025-07-04 07:58:51', '127.0.0.1', '2025-05-23 20:25:30', '2025-07-04 07:58:51', 0);
 
 -- ----------------------------
 -- Table structure for announcements
@@ -69,7 +69,7 @@ CREATE TABLE `announcements`  (
   INDEX `idx_type`(`type`) USING BTREE,
   INDEX `idx_sort_order`(`sort_order`) USING BTREE,
   INDEX `idx_deleted`(`deleted`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '通告表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1927682325056458754 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '通告表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of announcements
@@ -112,7 +112,7 @@ CREATE TABLE `audit_records`  (
   INDEX `idx_audit_time`(`audit_time`) USING BTREE,
   INDEX `idx_create_time`(`create_time`) USING BTREE,
   INDEX `idx_deleted`(`deleted`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '审核记录表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '审核记录表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of audit_records
@@ -145,7 +145,7 @@ CREATE TABLE `banners`  (
   INDEX `idx_status`(`status`) USING BTREE,
   INDEX `idx_sort_order`(`sort_order`) USING BTREE,
   INDEX `idx_deleted`(`deleted`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '轮播图表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1927707554822627329 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '轮播图表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of banners
@@ -175,7 +175,7 @@ CREATE TABLE `categories`  (
   INDEX `idx_status`(`status`) USING BTREE,
   INDEX `idx_sort_order`(`sort_order`) USING BTREE,
   INDEX `idx_deleted`(`deleted`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '服务分类表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '服务分类表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of categories
@@ -207,7 +207,7 @@ CREATE TABLE `chat_messages`  (
   INDEX `idx_create_time`(`create_time`) USING BTREE,
   CONSTRAINT `chat_messages_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `chat_messages_ibfk_2` FOREIGN KEY (`admin_id`) REFERENCES `admins` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '客服聊天表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '客服聊天表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of chat_messages
@@ -260,7 +260,7 @@ CREATE TABLE `expert_photos`  (
   INDEX `idx_expert_id`(`expert_id`) USING BTREE,
   INDEX `idx_sort_order`(`sort_order`) USING BTREE,
   CONSTRAINT `expert_photos_ibfk_1` FOREIGN KEY (`expert_id`) REFERENCES `experts` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 1927602935773786115 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '达人照片表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1927708051424026625 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '达人照片表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of expert_photos
@@ -312,7 +312,7 @@ CREATE TABLE `experts`  (
   INDEX `idx_is_hot`(`is_hot`) USING BTREE,
   CONSTRAINT `experts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `experts_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '达人表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '达人表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of experts
@@ -341,7 +341,7 @@ CREATE TABLE `favorites`  (
   INDEX `idx_favorite_type`(`favorite_type`) USING BTREE,
   INDEX `idx_target_id`(`target_id`) USING BTREE,
   INDEX `idx_create_time`(`create_time`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '收藏表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '收藏表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of favorites
@@ -426,7 +426,7 @@ CREATE TABLE `orders`  (
   CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`expert_id`) REFERENCES `experts` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `orders_ibfk_3` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '订单表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '订单表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of orders
@@ -597,15 +597,11 @@ CREATE TABLE `system_configs`  (
   INDEX `idx_config_group`(`config_group`) USING BTREE,
   INDEX `idx_config_key`(`config_key`) USING BTREE,
   INDEX `idx_deleted`(`deleted`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 27 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '系统配置表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 38 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '系统配置表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of system_configs
 -- ----------------------------
-INSERT INTO `system_configs` VALUES (1, 'wx_appid', 'wxc9b98294ace36519', 'STRING', 'WECHAT', '微信小程序AppID', 0, '2025-05-23 20:25:30', '2025-05-23 20:25:30', 0);
-INSERT INTO `system_configs` VALUES (2, 'wx_appsecret', '34887a584a83a6a53b010ae59ccc9f19', 'STRING', 'WECHAT', '微信小程序AppSecret', 1, '2025-05-23 20:25:30', '2025-05-23 20:25:30', 0);
-INSERT INTO `system_configs` VALUES (3, 'wx_mch_id', '', 'STRING', 'WECHAT', '微信支付商户号', 0, '2025-05-23 20:25:30', '2025-05-23 20:25:30', 0);
-INSERT INTO `system_configs` VALUES (4, 'wx_api_key', '', 'STRING', 'WECHAT', '微信支付API密钥', 1, '2025-05-23 20:25:30', '2025-05-23 20:25:30', 0);
 INSERT INTO `system_configs` VALUES (5, 'storage_type', 'LOCAL', 'STRING', 'STORAGE', '文件存储类型：LOCAL,OSS', 0, '2025-05-23 20:25:30', '2025-05-24 11:03:19', 0);
 INSERT INTO `system_configs` VALUES (6, 'oss_endpoint', '', 'STRING', 'STORAGE', 'OSS端点地址', 0, '2025-05-23 20:25:30', '2025-05-24 11:03:19', 0);
 INSERT INTO `system_configs` VALUES (7, 'oss_access_key', '', 'STRING', 'STORAGE', 'OSS访问密钥', 1, '2025-05-23 20:25:30', '2025-05-24 11:03:19', 0);
@@ -616,6 +612,17 @@ INSERT INTO `system_configs` VALUES (11, 'contact_phone', '400-888-88881', 'STRI
 INSERT INTO `system_configs` VALUES (12, 'system_logo', '', 'STRING', 'SYSTEM', '系统Logo地址', 0, '2025-05-24 10:53:03', '2025-05-24 10:54:04', 0);
 INSERT INTO `system_configs` VALUES (13, 'platform_commission_rate', '12', 'NUMBER', 'BUSINESS', '平台抽成比例（%）', 0, '2025-05-24 10:53:03', '2025-05-27 19:08:30', 0);
 INSERT INTO `system_configs` VALUES (14, 'min_withdraw_amount', '100', 'NUMBER', 'BUSINESS', '最小提现金额（元）', 0, '2025-05-24 10:53:03', '2025-05-27 19:08:30', 0);
+INSERT INTO `system_configs` VALUES (27, 'wechat_miniapp_app_id', 'wx52c058048a9d15bb', 'STRING', 'WECHAT', '微信小程序AppID', 0, '2025-07-02 12:42:02', '2025-07-04 22:51:49', 0);
+INSERT INTO `system_configs` VALUES (28, 'wechat_miniapp_app_secret', '9c9b2613c4a8193ff1d746ca366b5aa7', 'STRING', 'WECHAT', '微信小程序AppSecret', 0, '2025-07-02 12:42:02', '2025-07-04 22:51:58', 0);
+INSERT INTO `system_configs` VALUES (29, 'wechat_miniapp_token', '', 'STRING', 'WECHAT', '微信小程序Token（可选）', 0, '2025-07-02 12:42:02', '2025-07-02 12:42:02', 0);
+INSERT INTO `system_configs` VALUES (30, 'wechat_miniapp_aes_key', '', 'STRING', 'WECHAT', '微信小程序AES密钥（可选）', 0, '2025-07-02 12:42:02', '2025-07-02 12:42:02', 0);
+INSERT INTO `system_configs` VALUES (31, 'wechat_pay_mch_id', '', 'STRING', 'WECHAT', '微信支付商户号', 0, '2025-07-02 12:42:02', '2025-07-02 12:42:02', 0);
+INSERT INTO `system_configs` VALUES (32, 'wechat_pay_api_v3_key', '', 'STRING', 'WECHAT', '微信支付API V3密钥', 0, '2025-07-02 12:42:02', '2025-07-02 12:42:02', 0);
+INSERT INTO `system_configs` VALUES (33, 'wechat_pay_cert_serial_no', '', 'STRING', 'WECHAT', '微信支付证书序列号', 0, '2025-07-02 12:42:02', '2025-07-02 12:42:02', 0);
+INSERT INTO `system_configs` VALUES (34, 'wechat_pay_private_key_path', '', 'STRING', 'WECHAT', '微信支付私钥文件路径', 0, '2025-07-02 12:42:02', '2025-07-02 12:42:02', 0);
+INSERT INTO `system_configs` VALUES (35, 'wechat_pay_private_cert_path', '', 'STRING', 'WECHAT', '微信支付证书文件路径', 0, '2025-07-02 12:42:02', '2025-07-02 12:42:02', 0);
+INSERT INTO `system_configs` VALUES (36, 'wechat_pay_notify_url', 'https://yourdomain.com/api/user/payment/callback/wechat', 'STRING', 'WECHAT', '微信支付回调地址', 0, '2025-07-02 12:42:02', '2025-07-02 12:42:02', 0);
+INSERT INTO `system_configs` VALUES (37, 'wechat_pay_config_enabled', 'false', 'BOOLEAN', 'WECHAT', '是否启用微信支付配置验证', 0, '2025-07-03 19:13:13', '2025-07-03 19:13:13', 0);
 
 -- ----------------------------
 -- Table structure for transaction_records
@@ -645,7 +652,7 @@ CREATE TABLE `transaction_records`  (
   INDEX `idx_status`(`status`) USING BTREE,
   INDEX `idx_create_time`(`create_time`) USING BTREE,
   INDEX `idx_order_id`(`order_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '交易记录表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '交易记录表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of transaction_records
@@ -685,7 +692,7 @@ CREATE TABLE `users`  (
   INDEX `idx_phone`(`phone`) USING BTREE,
   INDEX `idx_status`(`status`) USING BTREE,
   INDEX `idx_is_expert`(`is_expert`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1927332176149008387 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用户表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1927332176149008386 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用户表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of users
@@ -705,8 +712,7 @@ INSERT INTO `users` VALUES (12, 'wx_openid_012', 'wx_unionid_012', '林十四', 
 INSERT INTO `users` VALUES (13, 'wx_openid_013', 'wx_unionid_013', '黄十五', '1.png', 1, '13800138013', '黄十五', 2500.00, 5000.00, 2500.00, 1, 0, '2024-01-05 16:45:00', '2024-01-20 12:10:20', '2025-05-24 11:24:22', '2025-05-24 12:33:04', 0);
 INSERT INTO `users` VALUES (14, 'wx_openid_014', 'wx_unionid_014', '刘十六', '1.png', 1, '13800138014', '刘十六', 3200.50, 8000.00, 4799.50, 1, 1, '2024-01-03 13:30:00', '2024-01-20 18:45:30', '2025-05-24 11:24:22', '2025-05-24 12:33:06', 0);
 INSERT INTO `users` VALUES (15, 'wx_openid_015', 'wx_unionid_015', '游客用户', '0.png', 0, NULL, NULL, 0.00, 0.00, 0.00, 1, 0, '2024-01-18 22:30:00', '2024-01-18 22:30:00', '2025-05-24 11:24:22', '2025-05-24 12:33:19', 0);
-INSERT INTO `users` VALUES (1927329306829893634, 'test_openid_123456', NULL, '微信用户', 'https://thirdwx.qlogo.cn/mmopen/vi_32/POgEwh4mIHO4nibH0KlMECNjjGxQUq24ZEaGT4poC6icRiccVGKSyXwibcPq4BWmiaIGuG1icwxaQX6grC9VemZoJ8rg/132', 0, NULL, NULL, 0.00, 0.00, 0.00, 1, 0, '2025-05-27 19:41:29', '2025-05-27 19:42:33', '2025-05-27 19:41:29', '2025-05-27 19:41:29', 0);
-INSERT INTO `users` VALUES (1927332176149008386, 'oPRKV67Nl3VqKDYLVljtpat5WDpc', NULL, '微信用户', 'https://thirdwx.qlogo.cn/mmopen/vi_32/POgEwh4mIHO4nibH0KlMECNjjGxQUq24ZEaGT4poC6icRiccVGKSyXwibcPq4BWmiaIGuG1icwxaQX6grC9VemZoJ8rg/132', 0, NULL, NULL, 0.00, 0.00, 0.00, 1, 0, '2025-05-27 19:52:54', '2025-05-28 20:22:26', '2025-05-27 19:52:54', '2025-05-27 19:52:54', 0);
+INSERT INTO `users` VALUES (1927332176149008386, 'oPRKV67Nl3VqKDYLVljtpat5WDpc', NULL, '1234', 'https://thirdwx.qlogo.cn/mmopen/vi_32/POgEwh4mIHO4nibH0KlMECNjjGxQUq24ZEaGT4poC6icRiccVGKSyXwibcPq4BWmiaIGuG1icwxaQX6grC9VemZoJ8rg/132', 0, NULL, NULL, 0.00, 0.00, 0.00, 1, 0, '2025-05-27 19:52:54', '2025-05-29 15:11:00', '2025-05-27 19:52:54', '2025-05-29 15:11:16', 0);
 
 -- ----------------------------
 -- Table structure for withdraw_records
@@ -736,7 +742,7 @@ CREATE TABLE `withdraw_records`  (
   INDEX `idx_status`(`status`) USING BTREE,
   INDEX `idx_deleted`(`deleted`) USING BTREE,
   CONSTRAINT `withdraw_records_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '提现记录表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '提现记录表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of withdraw_records

@@ -16,20 +16,35 @@ public class BasePageDTO {
     @Schema(description = "每页大小", example = "10")
     private Integer pageSize = 10;
 
+    // 兼容小程序端的参数名
+    @Schema(description = "页码(兼容current)", example = "1")
+    private Integer current;
+
+    @Schema(description = "每页大小(兼容size)", example = "10")
+    private Integer size;
+
     /**
-     * 获取页码，最小为1
+     * 获取页码，最小为1，兼容current参数
      */
     public Integer getPageNum() {
-        return pageNum == null || pageNum < 1 ? 1 : pageNum;
+        Integer page = pageNum;
+        if (page == null && current != null) {
+            page = current;
+        }
+        return page == null || page < 1 ? 1 : page;
     }
 
     /**
-     * 获取每页大小，默认10，最大100
+     * 获取每页大小，默认10，最大100，兼容size参数
      */
     public Integer getPageSize() {
-        if (pageSize == null || pageSize < 1) {
+        Integer size = pageSize;
+        if (size == null && this.size != null) {
+            size = this.size;
+        }
+        if (size == null || size < 1) {
             return 10;
         }
-        return Math.min(pageSize, 100);
+        return Math.min(size, 100);
     }
 }

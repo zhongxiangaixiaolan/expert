@@ -33,6 +33,11 @@ public class UserOrderController {
     public Result<IPage<OrderVO>> getUserOrders(@Validated OrderQueryDTO queryDTO) {
         try {
             Long currentUserId = SecurityUtil.getCurrentUserId();
+            if (currentUserId == null) {
+                log.error("用户未认证，无法获取订单列表");
+                return Result.error("用户未认证，请重新登录");
+            }
+
             queryDTO.setUserId(currentUserId);
 
             IPage<OrderVO> page = orderService.getOrderPage(queryDTO);

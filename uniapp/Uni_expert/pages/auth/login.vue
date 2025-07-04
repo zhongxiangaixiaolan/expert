@@ -338,10 +338,30 @@ const showTerms = () => {
 </script>
 
 <style lang="scss" scoped>
+/* 重写页面背景，移除全局背景色 */
+page {
+  background: none !important;
+}
+
 .login-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-image: url('/static/images/uniapp_bg.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   position: relative;
+
+  // 添加半透明遮罩层以确保文字可读性
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 1;
+  }
 }
 
 .custom-navbar {
@@ -349,7 +369,7 @@ const showTerms = () => {
   top: 0;
   left: 0;
   right: 0;
-  z-index: $z-index-popup;
+  z-index: 100;
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
 
@@ -368,11 +388,12 @@ const showTerms = () => {
 }
 
 .login-content {
-  padding-top: 200rpx;
   padding: 200rpx 60rpx 60rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
+  z-index: 2;
 }
 
 .logo-section {
@@ -446,6 +467,7 @@ const showTerms = () => {
   background: #ffffff;
   border-radius: 32rpx 32rpx 0 0;
   padding: 60rpx 40rpx 40rpx;
+  z-index: 3;
 
   .role-title {
     text-align: center;

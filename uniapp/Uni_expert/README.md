@@ -152,7 +152,7 @@ uniapp/Uni_expert/
 
 1. **微信小程序配置**
 
-   - AppID: `wxc9b98294ace36519`
+   - AppID: `wx52c058048a9d15bb`
    - 在 `manifest.json` 中配置
 
 2. **API 接口配置**

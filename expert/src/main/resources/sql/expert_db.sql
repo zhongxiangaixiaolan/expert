@@ -11,7 +11,7 @@
  Target Server Version : 80400
  File Encoding         : 65001
 
- Date: 29/05/2025 10:18:13
+ Date: 05/07/2025 01:45:03
 */
 
 SET NAMES utf8mb4;
@@ -40,7 +40,7 @@ CREATE TABLE `admins`  (
   UNIQUE INDEX `username`(`username`) USING BTREE,
   INDEX `idx_username`(`username`) USING BTREE,
   INDEX `idx_status`(`status`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '管理员表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '管理员表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for announcements
@@ -64,7 +64,7 @@ CREATE TABLE `announcements`  (
   INDEX `idx_type`(`type`) USING BTREE,
   INDEX `idx_sort_order`(`sort_order`) USING BTREE,
   INDEX `idx_deleted`(`deleted`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '通告表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1927682325056458754 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '通告表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for audit_records
@@ -102,7 +102,7 @@ CREATE TABLE `audit_records`  (
   INDEX `idx_audit_time`(`audit_time`) USING BTREE,
   INDEX `idx_create_time`(`create_time`) USING BTREE,
   INDEX `idx_deleted`(`deleted`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '审核记录表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '审核记录表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for banners
@@ -126,7 +126,7 @@ CREATE TABLE `banners`  (
   INDEX `idx_status`(`status`) USING BTREE,
   INDEX `idx_sort_order`(`sort_order`) USING BTREE,
   INDEX `idx_deleted`(`deleted`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '轮播图表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1927707554822627329 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '轮播图表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for categories
@@ -148,7 +148,7 @@ CREATE TABLE `categories`  (
   INDEX `idx_status`(`status`) USING BTREE,
   INDEX `idx_sort_order`(`sort_order`) USING BTREE,
   INDEX `idx_deleted`(`deleted`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '服务分类表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '服务分类表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for chat_messages
@@ -170,7 +170,7 @@ CREATE TABLE `chat_messages`  (
   INDEX `idx_create_time`(`create_time`) USING BTREE,
   CONSTRAINT `chat_messages_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `chat_messages_ibfk_2` FOREIGN KEY (`admin_id`) REFERENCES `admins` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '客服聊天表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '客服聊天表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for contracts
@@ -215,7 +215,7 @@ CREATE TABLE `expert_photos`  (
   INDEX `idx_expert_id`(`expert_id`) USING BTREE,
   INDEX `idx_sort_order`(`sort_order`) USING BTREE,
   CONSTRAINT `expert_photos_ibfk_1` FOREIGN KEY (`expert_id`) REFERENCES `experts` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 1927602935773786115 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '达人照片表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1927708051424026625 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '达人照片表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for experts
@@ -250,7 +250,7 @@ CREATE TABLE `experts`  (
   INDEX `idx_is_hot`(`is_hot`) USING BTREE,
   CONSTRAINT `experts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `experts_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '达人表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '达人表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for favorites
@@ -269,7 +269,7 @@ CREATE TABLE `favorites`  (
   INDEX `idx_favorite_type`(`favorite_type`) USING BTREE,
   INDEX `idx_target_id`(`target_id`) USING BTREE,
   INDEX `idx_create_time`(`create_time`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '收藏表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '收藏表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for file_records
@@ -346,7 +346,7 @@ CREATE TABLE `orders`  (
   CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`expert_id`) REFERENCES `experts` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `orders_ibfk_3` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '订单表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '订单表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for payment_records
@@ -497,7 +497,7 @@ CREATE TABLE `system_configs`  (
   INDEX `idx_config_group`(`config_group`) USING BTREE,
   INDEX `idx_config_key`(`config_key`) USING BTREE,
   INDEX `idx_deleted`(`deleted`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 27 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '系统配置表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 38 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '系统配置表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for transaction_records
@@ -527,7 +527,7 @@ CREATE TABLE `transaction_records`  (
   INDEX `idx_status`(`status`) USING BTREE,
   INDEX `idx_create_time`(`create_time`) USING BTREE,
   INDEX `idx_order_id`(`order_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '交易记录表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '交易记录表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for users
@@ -558,7 +558,7 @@ CREATE TABLE `users`  (
   INDEX `idx_phone`(`phone`) USING BTREE,
   INDEX `idx_status`(`status`) USING BTREE,
   INDEX `idx_is_expert`(`is_expert`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1927332176149008387 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用户表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1927332176149008386 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用户表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Table structure for withdraw_records
@@ -588,6 +588,6 @@ CREATE TABLE `withdraw_records`  (
   INDEX `idx_status`(`status`) USING BTREE,
   INDEX `idx_deleted`(`deleted`) USING BTREE,
   CONSTRAINT `withdraw_records_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '提现记录表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '提现记录表' ROW_FORMAT = DYNAMIC;
 
 SET FOREIGN_KEY_CHECKS = 1;

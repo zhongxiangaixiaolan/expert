@@ -136,8 +136,9 @@ const currentList = computed(() => {
 });
 
 // 页面加载
-onMounted(() => {
-  if (!requireAuth()) return;
+onMounted(async () => {
+  const isAuthenticated = await requireAuth();
+  if (!isAuthenticated) return;
   loadFavoriteList();
 });
 

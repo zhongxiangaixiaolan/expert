@@ -77,10 +77,8 @@
             <appender-ref ref="ERROR_FILE"/>
         </logger>
 
-        <!-- SQL日志 - 只记录到文件，不在控制台显示 -->
-        <logger name="com.qing.expert.mapper" level="DEBUG" additivity="false">
-            <appender-ref ref="SQL_FILE"/>
-        </logger>
+        <!-- SQL日志 - 已关闭以简化日志输出 -->
+        <logger name="com.qing.expert.mapper" level="OFF" additivity="false"/>
     </springProfile>
 
     <!-- 禁用文件日志时的配置 -->

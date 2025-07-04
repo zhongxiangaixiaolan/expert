@@ -60,7 +60,7 @@ mybatis-plus:
     cache-enabled: false
     call-setters-on-nulls: true
     jdbc-type-for-null: "null"
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 开启MyBatis控制台SQL日志用于调试
+    # log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # SQL日志已关闭，如需调试可取消注释
   global-config:
     db-config:
       id-type: ASSIGN_ID
@@ -152,33 +152,9 @@ expert:
     max-size: 10485760 # 10MB
     allowed-types: jpg,jpeg,png,gif,pdf,doc,docx
 
-  # 微信小程序配置（默认值，可通过数据库动态配置覆盖）
-  wechat:
-    miniapp:
-      app-id: wxc9b98294ace36519
-      app-secret: 34887a584a83a6a53b010ae59ccc9f19
-    pay:
-      mch-id:
-      api-key:
-      cert-path:
-      notify-url: ${server.servlet.context-path}/wechat/pay/notify
+  # 微信配置已迁移到数据库动态配置，通过系统配置管理
 
-# WxJava 微信小程序配置（保留小程序功能）
-wx:
-  miniapp:
-    appid: ${expert.wechat.miniapp.app-id:wxc9b98294ace36519}
-    secret: ${expert.wechat.miniapp.app-secret:34887a584a83a6a53b010ae59ccc9f19}
-    token: ${expert.wechat.miniapp.token:}
-    aesKey: ${expert.wechat.miniapp.aes-key:}
-    msgDataFormat: JSON
-    use-stable-access-token: false
-    config-storage:
-      type: RedisTemplate
-      key-prefix: wx:miniapp
-      redis:
-        host: ${spring.data.redis.host:localhost}
-        port: ${spring.data.redis.port:6379}
-        password: ${spring.data.redis.password:}
+# WxJava 微信小程序配置已迁移到自定义配置类，从数据库动态读取
 
 # 微信支付配置（使用官方wechatpay-java SDK，配置从数据库读取）
 
@@ -201,8 +177,11 @@ spring:
 
 logging:
   level:
-    root: info
-    com.qing.expert: debug
+    root: warn
+    com.qing.expert: info
+    # SQL 日志简化配置
+    com.baomidou.mybatisplus: warn
+    org.mybatis: warn
 
 ---
 # 生产环境配置

@@ -48,10 +48,6 @@ const requestInterceptor = (options: any) => {
   const requestId = Date.now() + Math.random().toString(36).substr(2, 9)
   options.header['X-Request-ID'] = requestId
 
-  // 添加CORS相关头部
-  options.header['Access-Control-Request-Method'] = options.method
-  options.header['Access-Control-Request-Headers'] = 'Content-Type,X-Request-ID'
-
   console.log(`[请求] ${requestId}:`, {
     url: options.url,
     method: options.method,

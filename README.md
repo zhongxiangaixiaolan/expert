@@ -1302,8 +1302,8 @@ uniapp/Uni_expert/            # 小程序项目 ✅ 完成度: 85%
 
 ## 微信小程序配置信息
 
-- **AppID**: wxc9b98294ace36519
-- **AppSecret**: 34887a584a83a6a53b010ae59ccc9f19
+- **AppID**: wx52c058048a9d15bb
+- **AppSecret**: 9c9b2613c4a8193ff1d746ca366b5aa7
 - **配置方式**: 通过管理端动态配置（存储在 system_configs 表）
 
 ## 系统配置管理

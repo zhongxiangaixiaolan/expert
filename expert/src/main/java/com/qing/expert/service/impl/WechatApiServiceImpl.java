@@ -1,14 +1,15 @@
 package com.qing.expert.service.impl;
 
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.symmetric.AES;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.qing.expert.common.constant.ConfigConstant;
 import com.qing.expert.common.exception.BusinessException;
+import com.qing.expert.service.SystemConfigService;
 import com.qing.expert.service.WechatApiService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.Cipher;
@@ -24,11 +25,8 @@ import java.util.Base64;
 @Service
 public class WechatApiServiceImpl implements WechatApiService {
 
-    @Value("${expert.wechat.miniapp.app-id}")
-    private String appId;
-
-    @Value("${expert.wechat.miniapp.app-secret}")
-    private String appSecret;
+    @Autowired
+    private SystemConfigService systemConfigService;
 
     private static final String WECHAT_CODE2SESSION_URL = "https://api.weixin.qq.com/sns/jscode2session";
 
@@ -39,6 +37,14 @@ public class WechatApiServiceImpl implements WechatApiService {
         }
 
         try {
+            // 从数据库获取微信小程序配置
+            String appId = systemConfigService.getConfigValue(ConfigConstant.WeChat.MINIAPP_APP_ID);
+            String appSecret = systemConfigService.getConfigValue(ConfigConstant.WeChat.MINIAPP_APP_SECRET);
+
+            if (StrUtil.isBlank(appId) || StrUtil.isBlank(appSecret)) {
+                throw new BusinessException("微信小程序配置未设置，请联系管理员");
+            }
+
             // 构建请求参数
             String url = String.format("%s?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code",
                     WECHAT_CODE2SESSION_URL, appId, appSecret, code);

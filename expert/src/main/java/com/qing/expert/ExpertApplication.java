@@ -1,5 +1,6 @@
 package com.qing.expert;
 
+import com.binarywang.spring.starter.wxjava.miniapp.config.WxMaAutoConfiguration;
 import com.qing.expert.common.util.LogUtil;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
@@ -10,7 +11,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 /**
  * 达人接单小程序启动类
  */
-@SpringBootApplication
+@SpringBootApplication(exclude = { WxMaAutoConfiguration.class })
 @MapperScan("com.qing.expert.mapper")
 @EnableCaching
 public class ExpertApplication {

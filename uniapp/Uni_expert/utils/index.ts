@@ -246,8 +246,9 @@ export const goToLogin = (): void => {
 }
 
 // 路由守卫 - 需要登录的页面
-export const requireAuth = (): boolean => {
+export const requireAuth = async (): Promise<boolean> => {
   if (!checkLogin()) {
+    console.log('本地登录检查失败，跳转登录页面')
     uni.showToast({
       title: '请先登录',
       icon: 'none'
@@ -257,7 +258,28 @@ export const requireAuth = (): boolean => {
     }, 1500)
     return false
   }
-  return true
+
+  // 验证token是否有效
+  try {
+    const { getUserInfo } = await import('@/api/auth')
+    await getUserInfo()
+    console.log('token验证成功')
+    return true
+  } catch (error) {
+    console.log('token验证失败，清除本地数据并跳转登录页面', error)
+    // token无效，清除本地数据
+    uni.removeStorageSync('token')
+    uni.removeStorageSync('userInfo')
+
+    uni.showToast({
+      title: '登录已过期，请重新登录',
+      icon: 'none'
+    })
+    setTimeout(() => {
+      goToLogin()
+    }, 1500)
+    return false
+  }
 }
 
 // 获取当前页面路径
