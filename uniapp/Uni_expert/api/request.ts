@@ -30,13 +30,20 @@ const getBaseURL = () => {
 
 // 请求拦截器
 const requestInterceptor = (options: any) => {
+  // 添加请求ID用于调试
+  const requestId = Date.now() + Math.random().toString(36).substr(2, 9)
+
+  // 初始化header
+  options.header = options.header || {}
+  options.header['X-Request-ID'] = requestId
+
   // 添加token
   const token = uni.getStorageSync('token')
   if (token) {
-    options.header = {
-      ...options.header,
-      'Authorization': `Bearer ${token}`
-    }
+    options.header['Authorization'] = `Bearer ${token}`
+    console.log(`[请求] ${requestId}: 已添加token`, token.substring(0, 20) + '...')
+  } else {
+    console.warn(`[请求] ${requestId}: 未找到token，可能需要登录`)
   }
 
   // 添加基础URL
@@ -44,19 +51,15 @@ const requestInterceptor = (options: any) => {
     options.url = getBaseURL() + options.url
   }
 
-  // 添加请求ID用于调试
-  const requestId = Date.now() + Math.random().toString(36).substr(2, 9)
-  options.header['X-Request-ID'] = requestId
-
-  // 添加CORS相关头部
-  options.header['Access-Control-Request-Method'] = options.method
-  options.header['Access-Control-Request-Headers'] = 'Content-Type,X-Request-ID'
+  // 不要手动设置CORS相关头部，这些应该由浏览器自动处理
+  // 移除了错误的CORS头部设置
 
   console.log(`[请求] ${requestId}:`, {
     url: options.url,
     method: options.method,
     headers: options.header,
-    data: options.data
+    data: options.data,
+    hasToken: !!token
   })
 
   return options
@@ -83,12 +86,35 @@ const responseInterceptor = (response: any): Promise<any> => {
         data: response.data
       })
 
-      // 特殊处理403错误
-      if (statusCode === 403) {
-        console.error(`[403错误] ${requestId}: 可能的原因:`)
+      // 特殊处理401和403错误
+      if (statusCode === 401) {
+        console.error(`[401错误] ${requestId}: 未授权访问 - Token可能无效或过期`)
+        // 清除本地存储的认证信息
+        uni.removeStorageSync('token')
+        uni.removeStorageSync('userInfo')
+        // 跳转到登录页
+        uni.reLaunch({
+          url: '/pages/auth/login'
+        })
+      } else if (statusCode === 403) {
+        console.error(`[403错误] ${requestId}: 拒绝访问`)
+        console.error('可能的原因:')
         console.error('1. CORS配置问题')
         console.error('2. 后端权限配置问题')
         console.error('3. 请求头缺失或错误')
+        console.error('4. Token无效或用户权限不足')
+
+        // 检查是否有token
+        const token = uni.getStorageSync('token')
+        if (!token) {
+          console.error(`[403错误] ${requestId}: 未找到token，跳转登录页`)
+          uni.reLaunch({
+            url: '/pages/auth/login'
+          })
+        } else {
+          console.error(`[403错误] ${requestId}: 有token但被拒绝，token可能无效`)
+          console.error(`[403错误] ${requestId}: Token前20位: ${token.substring(0, 20)}...`)
+        }
       }
 
       reject({
@@ -118,8 +144,9 @@ const responseInterceptor = (response: any): Promise<any> => {
     if (responseData && responseData.code !== undefined && responseData.code !== 200) {
       console.error(`[错误] ${requestId}: 业务请求失败`, responseData)
 
-      // token过期，跳转登录
+      // token过期或无效，跳转登录
       if (responseData.code === 401) {
+        console.warn(`[认证失败] ${requestId}: Token过期或无效，跳转登录页`)
         uni.removeStorageSync('token')
         uni.removeStorageSync('userInfo')
         uni.reLaunch({

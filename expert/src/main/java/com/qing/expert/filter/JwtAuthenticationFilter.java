@@ -47,17 +47,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = getTokenFromRequest(request);
 
             if (StringUtils.hasText(token)) {
+                log.debug("找到JWT令牌，开始验证: {}...", token.substring(0, Math.min(20, token.length())));
                 // 验证令牌并设置认证信息
                 if (validateTokenAndSetAuthentication(token, request)) {
                     log.debug("JWT令牌验证成功，用户已认证");
                 } else {
-                    log.debug("JWT令牌验证失败");
+                    log.warn("JWT令牌验证失败，请求URI: {}", requestURI);
                 }
             } else {
-                log.debug("请求中未找到JWT令牌");
+                log.debug("请求中未找到JWT令牌，请求URI: {}", requestURI);
+                // 检查是否为需要认证的接口
+                if (isAuthRequiredRequest(requestURI)) {
+                    log.warn("需要认证的接口但未提供token: {}", requestURI);
+                }
             }
         } catch (Exception e) {
-            log.error("JWT认证过滤器处理异常：{}", e.getMessage());
+            log.error("JWT认证过滤器处理异常，请求URI: {}, 异常: {}", requestURI, e.getMessage());
         }
 
         // 继续过滤器链
@@ -137,6 +142,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             Long userId = jwtUtil.getUserIdFromToken(token);
             String role = jwtUtil.getRoleFromToken(token);
 
+            log.debug("从JWT令牌中解析用户信息：username={}, userId={}, role={}", username, userId, role);
+
             // 验证令牌
             if (StringUtils.hasText(username) && jwtUtil.validateToken(token, username)) {
                 // 创建认证对象
@@ -156,9 +163,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 log.debug("用户认证成功：username={}, userId={}, role={}", username, userId, role);
                 return true;
+            } else {
+                log.warn("JWT令牌验证失败：username={}, token有效性={}",
+                    username, jwtUtil.validateToken(token, username));
             }
         } catch (Exception e) {
-            log.error("验证JWT令牌时发生异常：{}", e.getMessage());
+            log.error("验证JWT令牌时发生异常：{}", e.getMessage(), e);
         }
         return false;
     }
@@ -211,5 +221,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     ", sessionId='" + sessionId + '\'' +
                     '}';
         }
+    }
+
+    /**
+     * 判断是否为需要认证的请求
+     */
+    private boolean isAuthRequiredRequest(String requestURI) {
+        // 用户端需要认证的接口
+        if (requestURI.startsWith("/api/user/") && !requestURI.equals("/api/user/login")) {
+            return true;
+        }
+
+        // 达人端需要认证的接口
+        if (requestURI.startsWith("/api/expert/")) {
+            return true;
+        }
+
+        // 管理员端需要认证的接口
+        if (requestURI.startsWith("/api/admin/") && !requestURI.startsWith("/api/admin/auth/")) {
+            return true;
+        }
+
+        return false;
     }
 }
