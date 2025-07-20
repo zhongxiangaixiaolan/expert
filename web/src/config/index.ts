@@ -3,21 +3,37 @@
  * 统一管理所有环境变量和配置项
  */
 
-// 环境变量配置
+// 统一环境变量配置
 export const ENV_CONFIG = {
-  // API基础URL
-  API_BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
+  // 应用信息
+  APP_TITLE: import.meta.env.VITE_APP_TITLE || '达人接单管理系统',
+  APP_VERSION: import.meta.env.VITE_APP_VERSION || '1.0.0',
+  APP_DESCRIPTION: import.meta.env.VITE_APP_DESCRIPTION || '达人服务接单平台管理系统',
 
-  // 静态资源基础URL
-  STATIC_BASE_URL: import.meta.env.VITE_STATIC_BASE_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
+  // API配置
+  API_BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:9090',
+  API_TIMEOUT: Number(import.meta.env.VITE_API_TIMEOUT) || 10000,
 
-  // 开发模式
+  // 静态资源配置
+  STATIC_BASE_URL: import.meta.env.VITE_STATIC_BASE_URL || 'http://localhost:9090',
+
+  // 文件上传配置
+  UPLOAD_SIZE_LIMIT: Number(import.meta.env.VITE_UPLOAD_SIZE_LIMIT) || 10485760,
+  UPLOAD_ALLOWED_TYPES: import.meta.env.VITE_UPLOAD_ALLOWED_TYPES || 'jpg,jpeg,png,gif,pdf,doc,docx',
+
+  // 功能开关
+  ENABLE_MOCK: import.meta.env.VITE_ENABLE_MOCK === 'true',
+  ENABLE_DEVTOOLS: import.meta.env.VITE_ENABLE_DEVTOOLS === 'true',
+  ENABLE_CONSOLE_LOG: import.meta.env.VITE_ENABLE_CONSOLE_LOG === 'true',
+  ENABLE_VCONSOLE: import.meta.env.VITE_ENABLE_VCONSOLE === 'true',
+
+  // 调试配置
+  DEBUG_MODE: import.meta.env.VITE_DEBUG_MODE === 'true',
+  LOG_LEVEL: import.meta.env.VITE_LOG_LEVEL || 'info',
+
+  // 环境判断
   DEV: import.meta.env.DEV,
-
-  // 生产模式
   PROD: import.meta.env.PROD,
-
-  // 应用模式
   MODE: import.meta.env.MODE
 }
 

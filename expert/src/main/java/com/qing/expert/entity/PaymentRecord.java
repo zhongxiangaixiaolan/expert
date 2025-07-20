@@ -46,7 +46,7 @@ public class PaymentRecord {
     private Long orderId;
 
     /**
-     * 支付类型（WECHAT_PAY-微信支付，BALANCE_PAY-余额支付，ALIPAY-支付宝支付）
+     * 支付类型（WECHAT_PAY-微信支付，BALANCE_PAY-余额支付）
      */
     @TableField("payment_type")
     private String paymentType;

@@ -56,19 +56,21 @@ export default defineConfig({
   },
   server: {
     host: 'localhost',
-    port: 5173,
+    port: 3000,
     fs: {
       strict: false
     },
     proxy: {
+      // 代理 /api 请求到后端服务器
+      // 前端请求 /api/xxx -> 后端 http://localhost:9090/api/xxx
+      // 注意：后端配置了 context-path: /api，所以不需要重写路径
       '/api': {
-        target: process.env.VITE_API_BASE_URL || 'http://localhost:8080',
+        target: 'http://localhost:9090',
         changeOrigin: true,
-        // 不需要重写路径，因为后端已经配置了context-path: /api
+        // 不需要重写路径，直接转发到后端的 /api 路径
         configure: (proxy) => {
-          const targetUrl = process.env.VITE_API_BASE_URL || 'http://localhost:8080'
           proxy.on('proxyReq', (_, req) => {
-            console.log('代理请求:', req.method, req.url, '->', targetUrl + req.url);
+            console.log('代理请求:', req.method, req.url, '-> http://localhost:9090' + req.url);
           });
           proxy.on('proxyRes', (proxyRes, req) => {
             console.log('代理响应:', req.url, '状态码:', proxyRes.statusCode);

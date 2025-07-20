@@ -1,14 +1,12 @@
 /**
  * 网络请求封装
  */
+import { ENV_CONFIG, buildApiUrl, Logger } from '../config/env'
 
 // 请求配置
 const config = {
-  // 开发环境 - 后端配置了context-path: /api
-  baseURL: 'http://localhost:8080/api',
-  // 生产环境
-  // baseURL: 'https://your-domain.com/api',
-  timeout: 15000, // 增加超时时间
+  baseURL: buildApiUrl('/api'), // 使用环境配置构建API URL
+  timeout: ENV_CONFIG.API_TIMEOUT,
   header: {
     'Content-Type': 'application/json'
   }
@@ -16,15 +14,6 @@ const config = {
 
 // 获取当前环境的baseURL
 const getBaseURL = () => {
-  // 可以根据不同环境返回不同的URL
-  // #ifdef MP-WEIXIN
-  return config.baseURL
-  // #endif
-
-  // #ifdef H5
-  return config.baseURL
-  // #endif
-
   return config.baseURL
 }
 
@@ -64,15 +53,15 @@ const responseInterceptor = (response: any): Promise<any> => {
     const requestId = response.header?.['X-Request-ID'] || 'unknown'
     const { statusCode, data } = response
 
-    console.log(`[响应] ${requestId}:`, {
+    Logger.debug(`[响应] ${requestId}:`, {
       statusCode,
       data: typeof data === 'string' ? JSON.parse(data || '{}') : data
     })
 
     // HTTP状态码检查
     if (statusCode !== 200) {
-      console.error(`[错误] ${requestId}: HTTP请求失败 ${statusCode}`)
-      console.error(`[错误详情] ${requestId}:`, {
+      Logger.error(`[错误] ${requestId}: HTTP请求失败 ${statusCode}`)
+      Logger.error(`[错误详情] ${requestId}:`, {
         url: response.config?.url || 'unknown',
         method: response.config?.method || 'unknown',
         headers: response.header,
@@ -81,10 +70,10 @@ const responseInterceptor = (response: any): Promise<any> => {
 
       // 特殊处理403错误
       if (statusCode === 403) {
-        console.error(`[403错误] ${requestId}: 可能的原因:`)
-        console.error('1. CORS配置问题')
-        console.error('2. 后端权限配置问题')
-        console.error('3. 请求头缺失或错误')
+        Logger.error(`[403错误] ${requestId}: 可能的原因:`)
+        Logger.error('1. CORS配置问题')
+        Logger.error('2. 后端权限配置问题')
+        Logger.error('3. 请求头缺失或错误')
       }
 
       reject({

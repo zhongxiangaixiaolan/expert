@@ -26,6 +26,6 @@ public class RechargeCreateDTO {
 
     @Schema(description = "支付方式", required = true)
     @NotBlank(message = "支付方式不能为空")
-    @Pattern(regexp = "^(WECHAT|ALIPAY)$", message = "支付方式只能是WECHAT或ALIPAY")
+    @Pattern(regexp = "^(WECHAT)$", message = "支付方式只能是WECHAT")
     private String payType;
 }

@@ -48,7 +48,6 @@
             CASE pr.payment_type
                 WHEN 'WECHAT_PAY' THEN '微信支付'
                 WHEN 'BALANCE_PAY' THEN '余额支付'
-                WHEN 'ALIPAY' THEN '支付宝支付'
                 ELSE '未知类型'
             END as payment_type_desc,
             pr.payment_amount,

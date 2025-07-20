@@ -66,7 +66,7 @@
       <!-- 顶部导航 -->
       <el-header class="header">
         <div class="header-left">
-          <el-button type="text" @click="toggleCollapse">
+          <el-button link @click="toggleCollapse">
             <el-icon size="20">
               <Expand v-if="isCollapse" />
               <Fold v-else />

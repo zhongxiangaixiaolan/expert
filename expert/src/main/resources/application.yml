@@ -1,18 +1,18 @@
 server:
-  port: 8080
+  port: ${SERVER_PORT:9090}
   servlet:
-    context-path: /api
+    context-path: ${SERVER_CONTEXT_PATH:/api}
 
 spring:
   application:
-    name: expert
+    name: ${APP_NAME:expert}
 
   # 数据库配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/expert_db?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
-    username: root
-    password: 1234
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:expert_db}?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:1234}
     hikari:
       maximum-pool-size: 20
       minimum-idle: 5
@@ -23,10 +23,10 @@ spring:
   # Redis配置
   data:
     redis:
-      host: localhost
-      port: 6379
-      password:
-      database: 0
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: ${REDIS_DATABASE:0}
       timeout: 10000ms
       lettuce:
         pool:
@@ -69,7 +69,6 @@ mybatis-plus:
       logic-not-delete-value: 0
   mapper-locations:
     - classpath:mapper/**/*Mapper.xml
-    - classpath*:mapper/**/*Mapper.xml
   type-aliases-package: com.qing.expert.entity
 
 # Swagger配置
@@ -82,119 +81,74 @@ springdoc:
     operations-sorter: alpha
   packages-to-scan: com.qing.expert.controller
 
-# 日志配置 - 极简控制台输出
-logging:
-  level:
-    root: error # 根日志只显示错误
-    com.qing.expert: info # 应用程序日志保持info
-    # 框架日志完全关闭或只显示错误
-    org.springframework: "off"
-    org.springframework.boot: error
-    org.springframework.boot.logging: "off" # 关闭Spring Boot日志系统的日志
-    org.apache.catalina: "off"
-    org.apache.tomcat: "off"
-    org.hibernate: "off"
-    com.baomidou.mybatisplus: "off"
-    org.mybatis: "off"
-    com.zaxxer.hikari: "off"
-    com.mysql.cj: "off"
-    io.lettuce: "off"
-    io.netty: "off"
-    ch.qos.logback: "off" # 关闭Logback自身日志
-    org.slf4j: "off"
-  pattern:
-    # 极简控制台日志格式
-    console: "%clr(%d{HH:mm:ss}){faint} %clr(%5p){bold,red} %clr(%logger{15}){cyan} %clr(%m){green}%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
-  file:
-    name: logs/expert.log
 
-# 自定义配置
-app:
-  # 日志文件开关
-  log:
-    file-enabled: false # 设置为false可禁用日志文件生成
-  logback:
-    rollingpolicy:
-      max-file-size: 100MB
-      max-history: 30
-      total-size-cap: 3GB
 
 # 自定义配置
 expert:
   # 日志配置
   log:
-    # 是否启用文件日志 (true: 生成日志文件, false: 仅控制台输出)
-    file-enabled: false
-    # 日志文件路径
-    file-path: logs/
-    # 是否启用SQL日志文件
-    sql-file-enabled: false
-    # 是否启用错误日志文件
-    error-file-enabled: false
-    # 日志文件最大大小
-    max-file-size: 100MB
-    # 日志文件保留天数
-    max-history: 30
-    # 日志总大小限制
-    total-size-cap: 3GB
+    file-enabled: ${LOG_FILE_ENABLED:false}
+    file-path: ${LOG_FILE_PATH:logs/}
+    sql-file-enabled: ${LOG_SQL_ENABLED:false}
+    error-file-enabled: ${LOG_ERROR_FILE_ENABLED:false}
+    max-file-size: ${LOG_MAX_FILE_SIZE:100MB}
+    max-history: ${LOG_MAX_HISTORY:30}
+    total-size-cap: ${LOG_TOTAL_SIZE_CAP:3GB}
 
   # JWT配置
   jwt:
-    secret: expert-jwt-secret-key-2024-secure-256-bit-hmac-sha-algorithm-compatible
-    expiration: 86400000 # 24小时
-    header: Authorization
-    prefix: Bearer
+    secret: ${JWT_SECRET:mySecretKeyForDevelopmentOnlyPleaseChangeInProduction1234567890}
+    expiration: ${JWT_EXPIRATION:86400000}
+    header: ${JWT_HEADER:Authorization}
+    prefix: ${JWT_PREFIX:Bearer }
 
   # 文件存储配置
   file:
-    upload-path: src/main/resources/static/
-    max-size: 10485760 # 10MB
-    allowed-types: jpg,jpeg,png,gif,pdf,doc,docx
+    upload-path: ${UPLOAD_PATH:uploads/}
+    max-size: ${UPLOAD_MAX_SIZE:10485760}
+    allowed-types: ${UPLOAD_ALLOWED_TYPES:jpg,jpeg,png,gif,pdf,doc,docx}
 
-  # 微信配置已迁移到数据库动态配置，通过系统配置管理
+  # 微信小程序配置 (已迁移到数据库管理)
+  # 微信配置不再从环境变量读取，而是从数据库system_configs表中动态加载
+  # 请通过管理后台 -> 系统配置 -> 微信配置 进行设置
 
-# WxJava 微信小程序配置已迁移到自定义配置类，从数据库动态读取
+  # 微信支付配置
+  wechat-pay:
+    mchid: ${WECHAT_PAY_MCHID:}
+    private-key-path: ${WECHAT_PAY_PRIVATE_KEY_PATH:}
+    merchant-serial-number: ${WECHAT_PAY_MERCHANT_SERIAL_NUMBER:}
+    api-v3-key: ${WECHAT_PAY_API_V3_KEY:}
 
-# 微信支付配置（使用官方wechatpay-java SDK，配置从数据库读取）
-
-  # 阿里云OSS配置（默认值，可通过数据库动态配置覆盖）
+  # 阿里云OSS配置
   oss:
-    endpoint:
-    access-key-id:
-    access-key-secret:
-    bucket-name:
-    domain:
+    endpoint: ${OSS_ENDPOINT:}
+    access-key-id: ${OSS_ACCESS_KEY_ID:}
+    access-key-secret: ${OSS_ACCESS_KEY_SECRET:}
+    bucket-name: ${OSS_BUCKET_NAME:}
+    domain: ${OSS_DOMAIN:}
 
----
-# 开发环境配置
-spring:
-  config:
-    activate:
-      on-profile: dev
-  datasource:
-    url: jdbc:mysql://localhost:3306/expert_db?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=GMT%2B8
+  # 邮件配置
+  mail:
+    host: ${MAIL_HOST:}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    from: ${MAIL_FROM:}
 
+  # 短信配置
+  sms:
+    access-key-id: ${SMS_ACCESS_KEY_ID:}
+    access-key-secret: ${SMS_ACCESS_KEY_SECRET:}
+    sign-name: ${SMS_SIGN_NAME:}
+    template-code: ${SMS_TEMPLATE_CODE:}
+
+# 日志配置
 logging:
   level:
-    root: warn
+    root: ${LOG_LEVEL:info}
     com.qing.expert: info
-    # SQL 日志简化配置
     com.baomidou.mybatisplus: warn
     org.mybatis: warn
-
----
-# 生产环境配置
-spring:
-  config:
-    activate:
-      on-profile: prod
-  datasource:
-    url: jdbc:mysql://localhost:3306/expert_db?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
-
-logging:
-  level:
-    root: warn
-    com.qing.expert: info
-  file:
-    name: logs/expert.log
+  pattern:
+    console: "%clr(%d{HH:mm:ss.SSS}){faint} %clr(%-5level){bold} %clr(%logger{36}){cyan} %clr(%msg){green}%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"

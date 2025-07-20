@@ -11,8 +11,7 @@ import lombok.Getter;
 public enum PaymentTypeEnum {
 
     WECHAT_PAY("WECHAT_PAY", "微信支付"),
-    BALANCE_PAY("BALANCE_PAY", "余额支付"),
-    ALIPAY("ALIPAY", "支付宝支付");
+    BALANCE_PAY("BALANCE_PAY", "余额支付");
 
     private final String code;
     private final String desc;
@@ -41,12 +40,5 @@ public enum PaymentTypeEnum {
      */
     public static boolean isBalancePay(String type) {
         return BALANCE_PAY.getCode().equals(type);
-    }
-
-    /**
-     * 判断是否支付宝支付
-     */
-    public static boolean isAlipay(String type) {
-        return ALIPAY.getCode().equals(type);
     }
 }

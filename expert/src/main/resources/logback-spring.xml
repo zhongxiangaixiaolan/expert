@@ -8,88 +8,30 @@
     <conversionRule conversionWord="wex" converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter" />
     <conversionRule conversionWord="wEx" converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter" />
 
-    <!-- 使用系统属性而不是springProperty -->
-    <property name="LOG_FILE_PATH" value="${LOG_FILE:-logs/}"/>
-    <property name="MAX_FILE_SIZE" value="${LOGBACK_ROLLINGPOLICY_MAX_FILE_SIZE:-100MB}"/>
-    <property name="MAX_HISTORY" value="${LOGBACK_ROLLINGPOLICY_MAX_HISTORY:-30}"/>
-    <property name="TOTAL_SIZE_CAP" value="${LOGBACK_ROLLINGPOLICY_TOTAL_SIZE_CAP:-3GB}"/>
+    <!-- 使用环境变量 -->
+    <property name="LOG_FILE_PATH" value="${LOG_FILE_PATH:-logs}"/>
+    <property name="LOG_FILE_ENABLED" value="${LOG_FILE_ENABLED:-false}"/>
+    <property name="LOG_ERROR_FILE_ENABLED" value="${LOG_ERROR_FILE_ENABLED:-false}"/>
+    <property name="LOG_SQL_ENABLED" value="${LOG_SQL_ENABLED:-false}"/>
+    <property name="MAX_FILE_SIZE" value="${LOG_MAX_FILE_SIZE:-100MB}"/>
+    <property name="MAX_HISTORY" value="${LOG_MAX_HISTORY:-30}"/>
+    <property name="TOTAL_SIZE_CAP" value="${LOG_TOTAL_SIZE_CAP:-3GB}"/>
 
-    <!-- 控制台输出 - 极简格式，只显示关键信息 -->
+    <!-- 控制台输出 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%clr(%d{HH:mm:ss}){faint} %clr(%5p){bold,red} %clr(%logger{15}){cyan} %clr(%m){green}%n</pattern>
+            <pattern>%clr(%d{HH:mm:ss.SSS}){faint} %clr(%-5level){bold} %clr(%logger{36}){cyan} %clr(%msg){green}%n</pattern>
             <charset>UTF-8</charset>
         </encoder>
     </appender>
 
-    <!-- 文件输出 -->
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_FILE_PATH}/expert.log</file>
-        <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
-            <charset>UTF-8</charset>
-        </encoder>
-        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_FILE_PATH}/expert.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-            <maxFileSize>${MAX_FILE_SIZE}</maxFileSize>
-            <maxHistory>${MAX_HISTORY}</maxHistory>
-            <totalSizeCap>${TOTAL_SIZE_CAP}</totalSizeCap>
-        </rollingPolicy>
-    </appender>
+    <!-- 应用程序日志 -->
+    <logger name="com.qing.expert" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
 
-    <!-- 错误日志单独输出 -->
-    <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_FILE_PATH}/error.log</file>
-        <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <level>ERROR</level>
-            <onMatch>ACCEPT</onMatch>
-            <onMismatch>DENY</onMismatch>
-        </filter>
-        <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
-            <charset>UTF-8</charset>
-        </encoder>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_FILE_PATH}/error.%d{yyyy-MM-dd}.log</fileNamePattern>
-            <maxHistory>${MAX_HISTORY}</maxHistory>
-            <totalSizeCap>${TOTAL_SIZE_CAP}</totalSizeCap>
-        </rollingPolicy>
-    </appender>
-
-    <!-- SQL日志单独输出 -->
-    <appender name="SQL_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_FILE_PATH}/sql.log</file>
-        <encoder>
-            <pattern>%d{HH:mm:ss.SSS} %msg%n</pattern>
-            <charset>UTF-8</charset>
-        </encoder>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_FILE_PATH}/sql.%d{yyyy-MM-dd}.log</fileNamePattern>
-            <maxHistory>7</maxHistory>
-        </rollingPolicy>
-    </appender>
-
-    <!-- 应用程序日志 - 只显示重要信息 -->
-    <springProfile name="!no-file-log">
-        <logger name="com.qing.expert" level="INFO" additivity="false">
-            <appender-ref ref="CONSOLE"/>
-            <appender-ref ref="FILE"/>
-            <appender-ref ref="ERROR_FILE"/>
-        </logger>
-
-        <!-- SQL日志 - 已关闭以简化日志输出 -->
-        <logger name="com.qing.expert.mapper" level="OFF" additivity="false"/>
-    </springProfile>
-
-    <!-- 禁用文件日志时的配置 -->
-    <springProfile name="no-file-log">
-        <logger name="com.qing.expert" level="INFO" additivity="false">
-            <appender-ref ref="CONSOLE"/>
-        </logger>
-
-        <!-- SQL日志 - 禁用文件时也不在控制台显示 -->
-        <logger name="com.qing.expert.mapper" level="OFF" additivity="false"/>
-    </springProfile>
+    <!-- SQL日志 - 关闭以简化输出 -->
+    <logger name="com.qing.expert.mapper" level="OFF" additivity="false"/>
 
     <!-- 严格控制框架日志 - 只显示关键错误 -->
     <logger name="org.springframework" level="OFF"/>
@@ -130,20 +72,9 @@
     <logger name="io.swagger" level="OFF"/>
     <logger name="org.springdoc" level="OFF"/>
 
-    <!-- 根日志配置 - 只显示ERROR级别 -->
-    <springProfile name="!no-file-log">
-        <root level="ERROR">
-            <appender-ref ref="CONSOLE"/>
-            <appender-ref ref="FILE"/>
-            <appender-ref ref="ERROR_FILE"/>
-        </root>
-    </springProfile>
-
-    <!-- 禁用文件日志时的根配置 -->
-    <springProfile name="no-file-log">
-        <root level="ERROR">
-            <appender-ref ref="CONSOLE"/>
-        </root>
-    </springProfile>
+    <!-- 根日志配置 -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
 
 </configuration>

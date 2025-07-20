@@ -1,0 +1,20 @@
+密钥：UqAbMkN9xjvHFV1Q6GoLcZz7aO5uhEgJ
+微信支付商户号1722102766
+
+powshell密钥生成器：
+$key = -join ((48..57) + (65..90) + (97..122) | Get-Random -Count 32 | % { [char]$_ })
+Write-Host "生成的安全密钥:" $key
+
+公钥ID：PUB_KEY_ID_0117221027662025071900191853001602
+
+操作密码:536562
+
+
+AppID(小程序ID)	wx52c058048a9d15bb
+
+ AppSecret(小程序密钥)            6fa497c087401f20f3f25bcacaea96ee
+
+
+
+
+

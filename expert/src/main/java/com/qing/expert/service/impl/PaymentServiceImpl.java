@@ -62,8 +62,6 @@ public class PaymentServiceImpl extends ServiceImpl<PaymentRecordMapper, Payment
                 return balancePay(dto);
             case WECHAT_PAY:
                 return wechatPay(dto);
-            case ALIPAY:
-                return alipay(dto);
             default:
                 throw new BusinessException("不支持的支付类型");
         }
@@ -135,27 +133,6 @@ public class PaymentServiceImpl extends ServiceImpl<PaymentRecordMapper, Payment
             log.error("微信支付订单创建失败", e);
             throw new BusinessException("微信支付创建失败：" + e.getMessage());
         }
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public PaymentResultVO alipay(PaymentCreateDTO dto) {
-        // 创建支付记录
-        PaymentRecord paymentRecord = createPaymentRecord(dto);
-        save(paymentRecord);
-
-        // TODO: 调用支付宝支付API
-        log.info("调用支付宝支付API，支付单号：{}", paymentRecord.getPaymentNo());
-
-        // 构建返回结果
-        PaymentResultVO result = new PaymentResultVO();
-        result.setPaymentNo(paymentRecord.getPaymentNo());
-        result.setPaymentStatus(PaymentStatusEnum.PENDING.getCode());
-        result.setPaymentStatusDesc(PaymentStatusEnum.PENDING.getDesc());
-        result.setPaymentAmount(dto.getPaymentAmount());
-        result.setExpireTime(paymentRecord.getExpireTime());
-
-        return result;
     }
 
     /**

@@ -102,7 +102,7 @@ const getBannerImageUrl = (imageUrl: string): string => {
   }
 
   // 构建完整的图片访问URL
-  return `http://localhost:8080/api/static/banner/${imageUrl}`
+  return `http://localhost:3001/static/banner/${imageUrl}`
 }
 
 // 获取公告列表

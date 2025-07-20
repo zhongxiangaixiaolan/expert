@@ -103,11 +103,6 @@ public interface PaymentService extends IService<PaymentRecord> {
     PaymentResultVO wechatPay(PaymentCreateDTO dto);
 
     /**
-     * 支付宝支付
-     */
-    PaymentResultVO alipay(PaymentCreateDTO dto);
-
-    /**
      * 更新支付成功状态
      */
     boolean updatePaymentSuccess(String paymentNo, String thirdPartyNo);

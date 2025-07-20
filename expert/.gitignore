@@ -31,3 +31,24 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### 环境变量配置文件 ###
+.env
+.env.local
+.env.*.local
+
+### 日志文件 ###
+logs/
+*.log
+
+### 上传文件 ###
+src/main/resources/static/uploads/
+uploads/
+
+### 证书文件 ###
+src/main/resources/cert/
+cert/
+
+### 临时文件 ###
+*.tmp
+*.temp

@@ -20,7 +20,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 用户端支付控制器
@@ -126,24 +125,6 @@ public class UserPaymentController {
         } catch (Exception e) {
             log.error("微信支付回调处理异常", e);
             return "{\"code\":\"FAIL\",\"message\":\"处理异常\"}";
-        }
-    }
-
-    @PostMapping("/callback/alipay")
-    @Operation(summary = "支付宝支付回调")
-    public String alipayCallback(@RequestParam Map<String, String> params) {
-        try {
-            // TODO: 解析支付宝回调数据
-            log.info("收到支付宝支付回调：{}", params);
-
-            // 这里需要根据支付宝的回调格式解析数据
-            // PaymentCallbackDTO dto = parseAlipayCallback(params);
-            // boolean success = paymentService.handlePaymentCallback(dto);
-
-            return "success";
-        } catch (Exception e) {
-            log.error("支付宝支付回调处理失败", e);
-            return "fail";
         }
     }
 

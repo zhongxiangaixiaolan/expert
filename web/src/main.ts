@@ -9,6 +9,7 @@ import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import App from './App.vue'
 import router from './router'
 import './assets/main.css'
+import './utils/echarts' // 导入ECharts配置
 
 // 创建应用实例
 const app = createApp(App)

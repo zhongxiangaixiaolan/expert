@@ -30,7 +30,7 @@ public class RechargeRecord extends BaseEntity {
     @TableField("amount")
     private BigDecimal amount;
 
-    @Schema(description = "支付方式：WECHAT,ALIPAY")
+    @Schema(description = "支付方式：WECHAT")
     @TableField("pay_type")
     private String payType;
 

@@ -44,9 +44,16 @@ public class WxMaConfiguration {
             String token = systemConfigService.getConfigValue(ConfigConstant.WeChat.MINIAPP_TOKEN, "");
             String aesKey = systemConfigService.getConfigValue(ConfigConstant.WeChat.MINIAPP_AES_KEY, "");
 
+            log.info("从数据库读取到的微信配置：");
+            log.info("  AppID: {}", StrUtil.isBlank(appId) ? "未配置" : appId);
+            log.info("  AppSecret: {}", StrUtil.isBlank(appSecret) ? "未配置" : "已配置");
+            log.info("  Token: {}", StrUtil.isBlank(token) ? "未配置" : "已配置");
+            log.info("  AESKey: {}", StrUtil.isBlank(aesKey) ? "未配置" : "已配置");
+
             // 验证必要配置
             if (StrUtil.isBlank(appId) || StrUtil.isBlank(appSecret)) {
                 log.warn("微信小程序配置不完整，AppID或AppSecret为空");
+                log.warn("请通过管理后台 -> 系统配置 -> 微信配置 进行设置");
                 throw new BusinessException("微信小程序配置不完整，请在系统配置中设置AppID和AppSecret");
             }
 

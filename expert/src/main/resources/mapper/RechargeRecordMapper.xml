@@ -33,7 +33,6 @@
         END as status_desc,
         CASE rr.pay_type
             WHEN 'WECHAT' THEN '微信支付'
-            WHEN 'ALIPAY' THEN '支付宝'
             WHEN 'BALANCE' THEN '余额支付'
             ELSE '未知'
         END as pay_type_desc

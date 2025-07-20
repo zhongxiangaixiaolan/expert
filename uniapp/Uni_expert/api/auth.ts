@@ -82,7 +82,7 @@ export const bindPhone = (params: {
 export const uploadAvatar = (filePath: string): Promise<{ url: string }> => {
   return new Promise((resolve, reject) => {
     const token = uni.getStorageSync('token')
-    const baseURL = 'http://localhost:8080/api'
+    const baseURL = 'http://localhost:3001/api'
 
     uni.uploadFile({
       url: `${baseURL}/user/upload-avatar`,
