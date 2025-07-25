@@ -20,15 +20,12 @@ public class WechatPayStartupChecker implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        log.info("开始检查微信支付配置...");
-        
         try {
             WechatPayConfigChecker.ConfigCheckResult result = configChecker.checkConfig();
             configChecker.printCheckResult(result);
-            
+
             if (!result.isValid()) {
                 log.warn("微信支付配置不完整，支付功能可能无法正常使用");
-                log.warn("请参考配置指南完成微信支付配置");
             }
         } catch (Exception e) {
             log.error("微信支付配置检查失败", e);

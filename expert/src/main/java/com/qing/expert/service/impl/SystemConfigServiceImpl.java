@@ -27,13 +27,13 @@ public class SystemConfigServiceImpl extends ServiceImpl<SystemConfigMapper, Sys
         implements SystemConfigService {
 
     @Override
-    @Cacheable(value = "config", key = "#configKey")
+    // @Cacheable(value = "config", key = "#configKey") // 临时禁用缓存
     public String getConfigValue(String configKey) {
         return getConfigValue(configKey, null);
     }
 
     @Override
-    @Cacheable(value = "config", key = "#configKey")
+    // @Cacheable(value = "config", key = "#configKey") // 临时禁用缓存
     public String getConfigValue(String configKey, String defaultValue) {
         if (StrUtil.isBlank(configKey)) {
             return defaultValue;
@@ -80,13 +80,13 @@ public class SystemConfigServiceImpl extends ServiceImpl<SystemConfigMapper, Sys
     }
 
     @Override
-    @Cacheable(value = "configGroup", key = "#configGroup")
+    // @Cacheable(value = "configGroup", key = "#configGroup") // 临时禁用缓存
     public List<SystemConfig> getConfigsByGroup(String configGroup) {
         return baseMapper.selectByGroup(configGroup);
     }
 
     @Override
-    @Cacheable(value = "configGroupMap", key = "#configGroup")
+    // @Cacheable(value = "configGroupMap", key = "#configGroup") // 临时禁用缓存
     public Map<String, String> getConfigMapByGroup(String configGroup) {
         List<SystemConfig> configs = getConfigsByGroup(configGroup);
         return configs.stream()

@@ -21,9 +21,6 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // 静态资源现在通过控制器处理，不需要在这里配置
-        log.info("静态资源访问通过控制器处理 (context-path: /api):");
-        log.info("  头像文件: /api/avatars/** -> AvatarController (/avatars)");
-        log.info("  其他文件: /api/files/** -> FileController (/files)");
     }
 
     @Override

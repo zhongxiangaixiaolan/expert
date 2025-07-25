@@ -36,24 +36,15 @@ public class WxMaConfiguration {
     @ConditionalOnMissingBean
     public WxMaConfig wxMaConfig() {
         try {
-            log.info("开始初始化微信小程序配置（从数据库读取）");
-
             // 从数据库获取微信小程序配置
             String appId = systemConfigService.getConfigValue(ConfigConstant.WeChat.MINIAPP_APP_ID);
             String appSecret = systemConfigService.getConfigValue(ConfigConstant.WeChat.MINIAPP_APP_SECRET);
             String token = systemConfigService.getConfigValue(ConfigConstant.WeChat.MINIAPP_TOKEN, "");
             String aesKey = systemConfigService.getConfigValue(ConfigConstant.WeChat.MINIAPP_AES_KEY, "");
 
-            log.info("从数据库读取到的微信配置：");
-            log.info("  AppID: {}", StrUtil.isBlank(appId) ? "未配置" : appId);
-            log.info("  AppSecret: {}", StrUtil.isBlank(appSecret) ? "未配置" : "已配置");
-            log.info("  Token: {}", StrUtil.isBlank(token) ? "未配置" : "已配置");
-            log.info("  AESKey: {}", StrUtil.isBlank(aesKey) ? "未配置" : "已配置");
-
             // 验证必要配置
             if (StrUtil.isBlank(appId) || StrUtil.isBlank(appSecret)) {
-                log.warn("微信小程序配置不完整，AppID或AppSecret为空");
-                log.warn("请通过管理后台 -> 系统配置 -> 微信配置 进行设置");
+                log.error("微信小程序配置不完整，AppID或AppSecret为空，请通过管理后台配置");
                 throw new BusinessException("微信小程序配置不完整，请在系统配置中设置AppID和AppSecret");
             }
 
@@ -75,7 +66,6 @@ public class WxMaConfiguration {
             // 设置消息格式为JSON
             config.setMsgDataFormat("JSON");
 
-            log.info("微信小程序配置初始化成功，AppID：{}", appId);
             return config;
 
         } catch (Exception e) {
@@ -84,7 +74,6 @@ public class WxMaConfiguration {
             WxMaDefaultConfigImpl defaultConfig = new WxMaDefaultConfigImpl();
             defaultConfig.setAppid("DEFAULT_APPID");
             defaultConfig.setSecret("DEFAULT_SECRET");
-            log.warn("使用默认配置，微信小程序功能将不可用");
             return defaultConfig;
         }
     }
@@ -97,15 +86,12 @@ public class WxMaConfiguration {
     @ConditionalOnMissingBean
     public WxMaService wxMaService(WxMaConfig wxMaConfig) {
         try {
-            log.info("创建微信小程序服务");
             WxMaService wxMaService = new WxMaServiceImpl();
             wxMaService.setWxMaConfig(wxMaConfig);
 
             // 验证配置是否有效
             String appId = wxMaConfig.getAppid();
-            if (!"DEFAULT_APPID".equals(appId)) {
-                log.info("微信小程序服务创建成功，AppID：{}", appId);
-            } else {
+            if ("DEFAULT_APPID".equals(appId)) {
                 log.warn("微信小程序服务使用默认配置，功能将不可用");
             }
 

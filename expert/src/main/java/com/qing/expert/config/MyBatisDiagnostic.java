@@ -24,34 +24,16 @@ public class MyBatisDiagnostic {
             try {
                 var configuration = sqlSessionFactory.getConfiguration();
                 var mappedStatements = configuration.getMappedStatements();
-                
-                log.info("=== MyBatis映射文件加载检查 ===");
-                log.info("总共加载的映射语句数量: {}", mappedStatements.size());
-                
-                // 检查ExpertPhotoMapper相关的映射
+
+                // 简化MyBatis检查，只在出现问题时输出
                 boolean hasSelectByExpertId = mappedStatements.stream()
-                    .anyMatch(ms -> ms.getId().equals("com.qing.expert.mapper.ExpertPhotoMapper.selectByExpertId"));
-                
-                log.info("ExpertPhotoMapper.selectByExpertId 映射是否存在: {}", hasSelectByExpertId);
-                
+                        .anyMatch(ms -> ms.getId().equals("com.qing.expert.mapper.ExpertPhotoMapper.selectByExpertId"));
+
                 if (!hasSelectByExpertId) {
                     log.error("❌ ExpertPhotoMapper.selectByExpertId 映射未找到！");
-                    // 列出所有ExpertPhotoMapper相关的映射
-                    log.info("正在列出所有ExpertPhotoMapper相关的映射:");
-                    mappedStatements.stream()
-                        .filter(ms -> ms.getId().contains("ExpertPhotoMapper"))
-                        .forEach(ms -> log.info("  - {}", ms.getId()));
-                        
-                    // 列出所有映射文件以供调试
-                    log.info("所有已加载的映射语句:");
-                    mappedStatements.stream()
-                        .limit(20) // 只显示前20个，避免日志过多
-                        .forEach(ms -> log.info("  - {}", ms.getId()));
-                        
-                } else {
-                    log.info("✅ ExpertPhotoMapper.selectByExpertId 映射加载成功");
+                    log.info("总共加载的映射语句数量: {}", mappedStatements.size());
                 }
-                
+
             } catch (Exception e) {
                 log.error("检查映射文件加载时出错", e);
             }
