@@ -1,8 +1,5 @@
 package com.qing.expert.controller;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
@@ -23,19 +20,9 @@ import java.nio.file.Paths;
 @Slf4j
 @RestController
 @RequestMapping("/avatars")
-@Tag(name = "头像管理", description = "头像文件访问接口")
-public class AvatarController {
-
-    @Value("${expert.file.upload-path:uploads/}")
     private String uploadPath;
 
-    @Operation(summary = "获取头像文件", description = "根据文件名获取头像文件")
-    @GetMapping("/{filename}")
     public ResponseEntity<Resource> getAvatar(
-            @Parameter(description = "文件名") @PathVariable String filename) {
-        try {
-            // 构建文件路径
-            Path filePath = Paths.get(System.getProperty("user.dir"), uploadPath, "avatars", filename);
             File file = filePath.toFile();
 
             // 调试日志 - 已验证路径配置正确，可根据需要启用

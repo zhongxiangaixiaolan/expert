@@ -7,9 +7,6 @@ import com.qing.expert.entity.Expert;
 import com.qing.expert.service.ExpertService;
 import com.qing.expert.service.OrderService;
 import com.qing.expert.vo.ExpertWorkspaceVO;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -29,13 +26,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/expert/workspace")
 @RequiredArgsConstructor
-@Tag(name = "达人工作台", description = "达人工作台数据接口")
-public class ExpertWorkspaceController {
-
-    private final ExpertService expertService;
-    private final OrderService orderService;
-
-    @Operation(summary = "获取工作台数据", description = "获取达人工作台的统计数据")
     @GetMapping("/data")
     public Result<ExpertWorkspaceVO> getWorkspaceData() {
         try {
@@ -75,8 +65,6 @@ public class ExpertWorkspaceController {
         }
     }
 
-    @Operation(summary = "获取今日统计", description = "获取达人今日的详细统计数据")
-    @GetMapping("/today-stats")
     public Result<Map<String, Object>> getTodayStats() {
         try {
             Long currentUserId = SecurityUtil.getCurrentUserId();
@@ -98,12 +86,7 @@ public class ExpertWorkspaceController {
         }
     }
 
-    @Operation(summary = "获取收益统计", description = "获取达人的收益统计数据")
-    @GetMapping("/earnings")
     public Result<Map<String, Object>> getEarningsStats(
-            @Parameter(description = "统计类型：today-今日，week-本周，month-本月") @RequestParam(defaultValue = "today") String type) {
-        try {
-            Long currentUserId = SecurityUtil.getCurrentUserId();
             Expert expert = expertService.getByUserId(currentUserId);
 
             if (expert == null) {

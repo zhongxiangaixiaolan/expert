@@ -7,9 +7,6 @@ import com.qing.expert.dto.favorite.FavoriteQueryDTO;
 import com.qing.expert.service.FavoriteService;
 import com.qing.expert.util.SecurityUtil;
 import com.qing.expert.vo.favorite.FavoriteVO;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -23,12 +20,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/favorite")
 @RequiredArgsConstructor
-@Tag(name = "收藏管理", description = "用户收藏相关接口")
-public class FavoriteController {
-
-    private final FavoriteService favoriteService;
-
-    @Operation(summary = "添加收藏", description = "用户添加收藏（服务或达人）")
     @PostMapping("/add")
     public Result<Void> addFavorite(@Validated @RequestBody FavoriteCreateDTO createDTO) {
         try {
@@ -47,11 +38,7 @@ public class FavoriteController {
         }
     }
 
-    @Operation(summary = "取消收藏", description = "用户取消收藏")
-    @DeleteMapping("/remove")
     public Result<Void> removeFavorite(
-            @Parameter(description = "收藏类型：service-服务，expert-达人") @RequestParam String favoriteType,
-            @Parameter(description = "目标ID") @RequestParam Long targetId) {
         try {
             Long currentUserId = SecurityUtil.getCurrentUserId();
 
@@ -67,11 +54,6 @@ public class FavoriteController {
         }
     }
 
-    @Operation(summary = "删除收藏记录", description = "根据收藏记录ID删除")
-    @DeleteMapping("/{favoriteId}")
-    public Result<Void> deleteFavorite(@Parameter(description = "收藏记录ID") @PathVariable Long favoriteId) {
-        try {
-            Long currentUserId = SecurityUtil.getCurrentUserId();
 
             boolean success = favoriteService.deleteFavorite(favoriteId, currentUserId);
             if (success) {
@@ -85,8 +67,6 @@ public class FavoriteController {
         }
     }
 
-    @Operation(summary = "获取收藏列表", description = "分页获取用户收藏列表")
-    @GetMapping("/list")
     public Result<IPage<FavoriteVO>> getFavoriteList(@Validated FavoriteQueryDTO queryDTO) {
         try {
             Long currentUserId = SecurityUtil.getCurrentUserId();
@@ -100,11 +80,7 @@ public class FavoriteController {
         }
     }
 
-    @Operation(summary = "检查是否已收藏", description = "检查用户是否已收藏指定内容")
-    @GetMapping("/check")
     public Result<Boolean> checkFavorite(
-            @Parameter(description = "收藏类型：service-服务，expert-达人") @RequestParam String favoriteType,
-            @Parameter(description = "目标ID") @RequestParam Long targetId) {
         try {
             Long currentUserId = SecurityUtil.getCurrentUserId();
 
@@ -116,8 +92,6 @@ public class FavoriteController {
         }
     }
 
-    @Operation(summary = "获取收藏统计", description = "获取用户收藏数量统计")
-    @GetMapping("/statistics")
     public Result<Object> getFavoriteStatistics() {
         try {
             Long currentUserId = SecurityUtil.getCurrentUserId();

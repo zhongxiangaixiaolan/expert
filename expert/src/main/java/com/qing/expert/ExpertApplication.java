@@ -18,21 +18,19 @@ public class ExpertApplication {
 
     public static void main(String[] args) {
         try {
-            LogUtil.startup("🚀 达人接单小程序正在启动...");
+            LogUtil.info("达人接单小程序正在启动...");
 
             ConfigurableApplicationContext context = SpringApplication.run(ExpertApplication.class, args);
 
             String port = context.getEnvironment().getProperty("server.port", "8080");
             String contextPath = context.getEnvironment().getProperty("server.servlet.context-path", "");
 
-            LogUtil.startup("✅ 达人接单小程序启动成功！");
-            LogUtil.info("🌐 应用访问地址: http://localhost:{}{}", port, contextPath);
-            LogUtil.info("📚 Swagger文档地址: http://localhost:{}{}/swagger-ui.html", port, contextPath);
-            LogUtil.info("📊 Actuator监控地址: http://localhost:{}{}/actuator", port, contextPath);
-            LogUtil.config("🔧 当前激活的配置文件: {}", String.join(",", context.getEnvironment().getActiveProfiles()));
+            LogUtil.info("达人接单小程序启动成功！");
+            LogUtil.info("应用访问地址: http://localhost:{}{}", port, contextPath);
+            LogUtil.info("当前激活的配置文件: {}", String.join(",", context.getEnvironment().getActiveProfiles()));
 
         } catch (Exception e) {
-            LogUtil.error("❌ 达人接单小程序启动失败", e);
+            LogUtil.error("达人接单小程序启动失败", e);
             System.exit(1);
         }
     }

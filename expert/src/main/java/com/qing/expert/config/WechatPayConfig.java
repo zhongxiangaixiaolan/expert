@@ -4,11 +4,9 @@ import com.wechat.pay.java.core.Config;
 import com.wechat.pay.java.core.RSAAutoCertificateConfig;
 import com.wechat.pay.java.service.payments.jsapi.JsapiService;
 import com.wechat.pay.java.service.payments.jsapi.JsapiServiceExtension;
-import com.qing.expert.common.constant.ConfigConstant;
 import com.qing.expert.common.exception.BusinessException;
-import com.qing.expert.service.SystemConfigService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -21,10 +19,19 @@ import org.springframework.util.StringUtils;
  */
 @Slf4j
 @Configuration
-@RequiredArgsConstructor
 public class WechatPayConfig {
 
-    private final SystemConfigService systemConfigService;
+    @Value("${expert.wechat-pay.mchid:}")
+    private String merchantId;
+
+    @Value("${expert.wechat-pay.private-key-path:}")
+    private String privateKeyPath;
+
+    @Value("${expert.wechat-pay.merchant-serial-number:}")
+    private String merchantSerialNumber;
+
+    @Value("${expert.wechat-pay.api-v3-key:}")
+    private String apiV3Key;
 
     /**
      * 微信支付配置
@@ -36,15 +43,6 @@ public class WechatPayConfig {
     @ConditionalOnProperty(name = "wechat.pay.config.enabled", havingValue = "true", matchIfMissing = false)
     public Config wechatPaySDKConfig() {
         try {
-            log.info("微信支付配置已启用，开始初始化配置");
-
-            // 从数据库获取微信支付配置
-            String merchantId = systemConfigService.getConfigValue(ConfigConstant.WeChat.PAY_MCH_ID, "");
-            String privateKeyPath = systemConfigService.getConfigValue(ConfigConstant.WeChat.PAY_PRIVATE_KEY_PATH, "");
-            String merchantSerialNumber = systemConfigService.getConfigValue(ConfigConstant.WeChat.PAY_CERT_SERIAL_NO,
-                    "");
-            String apiV3Key = systemConfigService.getConfigValue(ConfigConstant.WeChat.PAY_API_V3_KEY, "");
-
             // 验证必要配置
             validateConfig(merchantId, privateKeyPath, merchantSerialNumber, apiV3Key);
 
@@ -56,7 +54,6 @@ public class WechatPayConfig {
                     .apiV3Key(apiV3Key)
                     .build();
 
-            log.info("微信支付配置初始化成功，商户号：{}", merchantId);
             return config;
 
         } catch (Exception e) {
@@ -73,7 +70,6 @@ public class WechatPayConfig {
     @ConditionalOnMissingBean
     @ConditionalOnProperty(name = "wechat.pay.config.enabled", havingValue = "true", matchIfMissing = false)
     public JsapiService jsapiService(Config wechatPaySDKConfig) {
-        log.info("创建JSAPI支付服务");
         return new JsapiService.Builder().config(wechatPaySDKConfig).build();
     }
 
@@ -86,7 +82,6 @@ public class WechatPayConfig {
     @ConditionalOnMissingBean
     @ConditionalOnProperty(name = "wechat.pay.config.enabled", havingValue = "true", matchIfMissing = false)
     public JsapiServiceExtension jsapiServiceExtension(Config wechatPaySDKConfig) {
-        log.info("创建JSAPI支付扩展服务");
         return new JsapiServiceExtension.Builder().config(wechatPaySDKConfig).build();
     }
 

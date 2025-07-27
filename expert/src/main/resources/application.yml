@@ -60,7 +60,7 @@ mybatis-plus:
     cache-enabled: false
     call-setters-on-nulls: true
     jdbc-type-for-null: "null"
-    # log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # SQL日志已关闭，如需调试可取消注释
+    # log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # SQL日志已关闭
   global-config:
     db-config:
       id-type: ASSIGN_ID
@@ -71,15 +71,7 @@ mybatis-plus:
     - classpath:mapper/**/*Mapper.xml
   type-aliases-package: com.qing.expert.entity
 
-# Swagger配置
-springdoc:
-  api-docs:
-    path: /v3/api-docs
-  swagger-ui:
-    path: /swagger-ui.html
-    tags-sorter: alpha
-    operations-sorter: alpha
-  packages-to-scan: com.qing.expert.controller
+
 
 
 

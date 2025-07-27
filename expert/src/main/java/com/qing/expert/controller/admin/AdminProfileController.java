@@ -6,9 +6,6 @@ import com.qing.expert.dto.AdminProfileUpdateDTO;
 import com.qing.expert.service.AdminService;
 import com.qing.expert.util.SecurityUtil;
 import com.qing.expert.vo.AdminProfileVO;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -25,12 +22,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/admin/profile")
 @RequiredArgsConstructor
-@Tag(name = "管理员个人中心", description = "管理员个人信息管理相关接口")
-public class AdminProfileController {
-
-    private final AdminService adminService;
-
-    @Operation(summary = "获取个人信息", description = "获取当前管理员的个人信息")
     @GetMapping
     public Result<AdminProfileVO> getProfile() {
         try {
@@ -47,9 +38,6 @@ public class AdminProfileController {
         }
     }
 
-    @Operation(summary = "更新个人信息", description = "更新管理员个人信息")
-    @PutMapping
-    public Result<Void> updateProfile(@Validated @RequestBody AdminProfileUpdateDTO updateDTO) {
         try {
             Long currentAdminId = SecurityUtil.getCurrentUserId();
             if (currentAdminId == null) {
@@ -68,8 +56,6 @@ public class AdminProfileController {
         }
     }
 
-    @Operation(summary = "修改密码", description = "修改管理员登录密码")
-    @PutMapping("/password")
     public Result<Void> updatePassword(@Validated @RequestBody AdminPasswordUpdateDTO passwordDTO) {
         try {
             Long currentAdminId = SecurityUtil.getCurrentUserId();
@@ -89,12 +75,7 @@ public class AdminProfileController {
         }
     }
 
-    @Operation(summary = "上传头像", description = "上传管理员头像")
-    @PostMapping("/avatar")
     public Result<Map<String, Object>> uploadAvatar(
-            @Parameter(description = "头像文件") @RequestParam("file") MultipartFile file) {
-        try {
-            Long currentAdminId = SecurityUtil.getCurrentUserId();
             if (currentAdminId == null) {
                 return Result.error("未找到当前登录管理员信息");
             }

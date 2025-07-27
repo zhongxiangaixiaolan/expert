@@ -126,7 +126,6 @@ public class PaymentServiceImpl extends ServiceImpl<PaymentRecordMapper, Payment
             // 设置微信支付参数
             result.setPaymentParams(wechatPayVO);
 
-            log.info("微信支付订单创建成功，支付单号：{}", wechatPayVO.getPaymentNo());
             return result;
 
         } catch (Exception e) {

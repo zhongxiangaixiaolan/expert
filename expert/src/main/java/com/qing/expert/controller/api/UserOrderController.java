@@ -7,9 +7,6 @@ import com.qing.expert.dto.order.OrderQueryDTO;
 import com.qing.expert.service.OrderService;
 import com.qing.expert.util.SecurityUtil;
 import com.qing.expert.vo.order.OrderVO;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -23,12 +20,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
-@Tag(name = "用户端订单管理", description = "用户订单相关接口")
-public class UserOrderController {
-
-    private final OrderService orderService;
-
-    @Operation(summary = "获取用户订单列表", description = "分页获取当前用户的订单列表")
     @GetMapping("/orders")
     public Result<IPage<OrderVO>> getUserOrders(@Validated OrderQueryDTO queryDTO) {
         try {
@@ -48,8 +39,6 @@ public class UserOrderController {
         }
     }
 
-    @Operation(summary = "获取用户订单统计", description = "获取用户各状态订单数量统计")
-    @GetMapping("/orders/statistics")
     public Result<Object> getUserOrderStatistics() {
         try {
             Long currentUserId = SecurityUtil.getCurrentUserId();
@@ -61,8 +50,6 @@ public class UserOrderController {
         }
     }
 
-    @Operation(summary = "创建订单", description = "用户创建新订单")
-    @PostMapping("/orders")
     public Result<Long> createOrder(@Validated @RequestBody OrderCreateDTO createDTO) {
         try {
             Long currentUserId = SecurityUtil.getCurrentUserId();
@@ -74,11 +61,7 @@ public class UserOrderController {
         }
     }
 
-    @Operation(summary = "取消订单", description = "用户取消订单")
-    @PutMapping("/orders/{orderId}/cancel")
     public Result<Void> cancelOrder(
-            @Parameter(description = "订单ID") @PathVariable Long orderId,
-            @RequestBody(required = false) String reason) {
         try {
             Long currentUserId = SecurityUtil.getCurrentUserId();
             boolean success = orderService.cancelOrder(orderId, currentUserId, reason);
@@ -93,11 +76,6 @@ public class UserOrderController {
         }
     }
 
-    @Operation(summary = "确认订单", description = "用户确认订单完成")
-    @PutMapping("/orders/{orderId}/confirm")
-    public Result<Void> confirmOrder(@Parameter(description = "订单ID") @PathVariable Long orderId) {
-        try {
-            Long currentUserId = SecurityUtil.getCurrentUserId();
             boolean success = orderService.confirmOrder(orderId, currentUserId);
             if (success) {
                 return Result.success("确认成功");
@@ -110,11 +88,7 @@ public class UserOrderController {
         }
     }
 
-    @Operation(summary = "申请售后", description = "用户申请订单售后")
-    @PostMapping("/orders/{orderId}/after-sale")
     public Result<Void> applyAfterSale(
-            @Parameter(description = "订单ID") @PathVariable Long orderId,
-            @RequestBody String reason) {
         try {
             Long currentUserId = SecurityUtil.getCurrentUserId();
             boolean success = orderService.applyAfterSale(orderId, currentUserId, reason);

@@ -30,7 +30,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     @ResponseStatus(HttpStatus.OK)
     public Result<Void> handleBusinessException(BusinessException e) {
-        LogUtil.warning("业务异常: {}", e.getMessage());
+        LogUtil.warn("业务异常: {}", e.getMessage());
         return Result.error(e.getCode(), e.getMessage());
     }
 

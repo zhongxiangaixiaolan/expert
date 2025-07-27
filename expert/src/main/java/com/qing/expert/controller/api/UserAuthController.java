@@ -7,9 +7,6 @@ import com.qing.expert.entity.User;
 import com.qing.expert.service.UserService;
 import com.qing.expert.util.SecurityUtil;
 import com.qing.expert.vo.user.UserLoginVO;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -24,12 +21,6 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
-@Tag(name = "用户端认证", description = "用户登录、注册、信息管理等接口")
-public class UserAuthController {
-
-    private final UserService userService;
-
-    @Operation(summary = "微信登录", description = "用户通过微信授权登录")
     @PostMapping("/login")
     public Result<UserLoginVO> wechatLogin(@Validated @RequestBody UserLoginDTO loginDTO) {
         try {
@@ -41,8 +32,6 @@ public class UserAuthController {
         }
     }
 
-    @Operation(summary = "获取用户信息", description = "获取当前登录用户的详细信息")
-    @GetMapping("/profile")
     public Result<User> getUserProfile() {
         try {
             Long currentUserId = SecurityUtil.getCurrentUserId();
@@ -57,8 +46,6 @@ public class UserAuthController {
         }
     }
 
-    @Operation(summary = "更新用户信息", description = "更新当前用户的基本信息")
-    @PutMapping("/profile")
     public Result<Void> updateUserProfile(@Validated @RequestBody UserUpdateDTO updateDTO) {
         try {
             Long currentUserId = SecurityUtil.getCurrentUserId();
@@ -76,8 +63,6 @@ public class UserAuthController {
         }
     }
 
-    @Operation(summary = "绑定手机号", description = "绑定用户手机号")
-    @PostMapping("/bind-phone")
     public Result<Void> bindPhone(@RequestBody UserUpdateDTO updateDTO) {
         try {
             Long currentUserId = SecurityUtil.getCurrentUserId();
@@ -95,11 +80,6 @@ public class UserAuthController {
         }
     }
 
-    @Operation(summary = "上传头像", description = "上传用户头像")
-    @PostMapping("/upload-avatar")
-    public Result<String> uploadAvatar(@Parameter(description = "头像文件") @RequestParam("file") MultipartFile file) {
-        try {
-            Long currentUserId = SecurityUtil.getCurrentUserId();
             String avatarUrl = userService.uploadAvatar(currentUserId, file);
             return Result.success("上传成功", avatarUrl);
         } catch (Exception e) {
@@ -108,8 +88,6 @@ public class UserAuthController {
         }
     }
 
-    @Operation(summary = "退出登录", description = "用户退出登录")
-    @PostMapping("/logout")
     public Result<Void> logout() {
         try {
             // TODO: 实现登出逻辑（如果需要黑名单机制）
@@ -120,8 +98,6 @@ public class UserAuthController {
         }
     }
 
-    @Operation(summary = "检查登录状态", description = "检查用户是否已登录")
-    @GetMapping("/check-login")
     public Result<Boolean> checkLogin() {
         try {
             Long currentUserId = SecurityUtil.getCurrentUserId();

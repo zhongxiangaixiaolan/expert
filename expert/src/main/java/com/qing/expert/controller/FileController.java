@@ -2,9 +2,6 @@ package com.qing.expert.controller;
 
 import com.qing.expert.common.result.Result;
 import com.qing.expert.util.FileUploadUtil;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,22 +27,12 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/files")
-@Tag(name = "文件管理", description = "文件上传下载接口")
-public class FileController {
-
-    @Value("${expert.file.upload-path:uploads/}")
     private String uploadPath;
 
     @Autowired
     private FileUploadUtil fileUploadUtil;
 
-    @Operation(summary = "获取头像文件", description = "根据文件名获取头像文件")
-    @GetMapping("/avatars/{filename}")
     public ResponseEntity<Resource> getAvatar(
-            @Parameter(description = "文件名") @PathVariable String filename) {
-        try {
-            // 构建文件路径
-            Path filePath = Paths.get(System.getProperty("user.dir"), uploadPath, "avatars", filename);
             File file = filePath.toFile();
 
             log.debug("请求头像文件: {}, 完整路径: {}", filename, filePath.toAbsolutePath());
@@ -72,8 +59,6 @@ public class FileController {
         }
     }
 
-    @Operation(summary = "获取文件", description = "根据路径获取文件")
-    @GetMapping("/**")
     public ResponseEntity<Resource> getFile(HttpServletRequest request) {
         try {
             // 获取请求路径 - 由于控制器路径已改为 /files，这里需要相应调整
@@ -115,12 +100,7 @@ public class FileController {
         }
     }
 
-    @Operation(summary = "上传头像", description = "上传头像文件")
-    @PostMapping("/upload/avatar")
     public Result<Map<String, Object>> uploadAvatar(
-            @Parameter(description = "头像文件") @RequestParam("file") MultipartFile file) {
-        try {
-            String filePath = fileUploadUtil.uploadAvatar(file);
 
             Map<String, Object> result = new HashMap<>();
             result.put("url", filePath);
@@ -134,12 +114,7 @@ public class FileController {
         }
     }
 
-    @Operation(summary = "上传截图", description = "上传完成截图")
-    @PostMapping("/upload/screenshot")
     public Result<Map<String, Object>> uploadScreenshot(
-            @Parameter(description = "截图文件") @RequestParam("file") MultipartFile file) {
-        try {
-            String filePath = fileUploadUtil.uploadImage(file);
 
             Map<String, Object> result = new HashMap<>();
             result.put("url", filePath);
@@ -153,12 +128,7 @@ public class FileController {
         }
     }
 
-    @Operation(summary = "上传轮播图", description = "上传轮播图文件")
-    @PostMapping("/upload/banner")
     public Result<Map<String, Object>> uploadBanner(
-            @Parameter(description = "轮播图文件") @RequestParam("file") MultipartFile file) {
-        try {
-            String filePath = fileUploadUtil.uploadBannerFile(file);
 
             Map<String, Object> result = new HashMap<>();
             result.put("url", filePath);
@@ -172,11 +142,7 @@ public class FileController {
         }
     }
 
-    @Operation(summary = "上传通用文件", description = "上传通用文件")
-    @PostMapping("/upload/{type}")
     public Result<Map<String, Object>> uploadFile(
-            @Parameter(description = "文件类型") @PathVariable String type,
-            @Parameter(description = "文件") @RequestParam("file") MultipartFile file) {
         try {
             String filePath;
             switch (type.toLowerCase()) {

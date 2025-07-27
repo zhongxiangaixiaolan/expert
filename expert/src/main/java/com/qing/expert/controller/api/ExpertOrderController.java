@@ -8,9 +8,6 @@ import com.qing.expert.service.ExpertService;
 import com.qing.expert.service.OrderService;
 import com.qing.expert.util.SecurityUtil;
 import com.qing.expert.vo.order.OrderVO;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -26,13 +23,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/expert")
 @RequiredArgsConstructor
-@Tag(name = "达人端订单管理", description = "达人订单相关接口")
-public class ExpertOrderController {
-
-    private final OrderService orderService;
-    private final ExpertService expertService;
-
-    @Operation(summary = "获取达人订单列表", description = "分页获取当前达人的订单列表")
     @GetMapping("/orders")
     public Result<IPage<OrderVO>> getExpertOrders(@Validated OrderQueryDTO queryDTO) {
         try {
@@ -52,8 +42,6 @@ public class ExpertOrderController {
         }
     }
 
-    @Operation(summary = "获取待接单列表", description = "获取可接单的订单列表")
-    @GetMapping("/orders/pending")
     public Result<IPage<OrderVO>> getPendingOrders(@Validated OrderQueryDTO queryDTO) {
         try {
             Long currentUserId = SecurityUtil.getCurrentUserId();
@@ -76,8 +64,6 @@ public class ExpertOrderController {
         }
     }
 
-    @Operation(summary = "获取达人订单统计", description = "获取达人各状态订单数量统计")
-    @GetMapping("/orders/statistics")
     public Result<Map<String, Object>> getExpertOrderStatistics() {
         try {
             Long currentUserId = SecurityUtil.getCurrentUserId();
@@ -95,11 +81,6 @@ public class ExpertOrderController {
         }
     }
 
-    @Operation(summary = "接单", description = "达人接受订单")
-    @PutMapping("/orders/{orderId}/accept")
-    public Result<Void> acceptOrder(@Parameter(description = "订单ID") @PathVariable Long orderId) {
-        try {
-            Long currentUserId = SecurityUtil.getCurrentUserId();
             Expert expert = expertService.getByUserId(currentUserId);
 
             if (expert == null) {
@@ -127,11 +108,6 @@ public class ExpertOrderController {
         }
     }
 
-    @Operation(summary = "开始服务", description = "达人开始服务")
-    @PutMapping("/orders/{orderId}/start")
-    public Result<Void> startService(@Parameter(description = "订单ID") @PathVariable Long orderId) {
-        try {
-            Long currentUserId = SecurityUtil.getCurrentUserId();
             Expert expert = expertService.getByUserId(currentUserId);
 
             if (expert == null) {
@@ -150,11 +126,7 @@ public class ExpertOrderController {
         }
     }
 
-    @Operation(summary = "完成订单", description = "达人完成订单")
-    @PutMapping("/orders/{orderId}/complete")
     public Result<Void> completeOrder(
-            @Parameter(description = "订单ID") @PathVariable Long orderId,
-            @RequestBody(required = false) Map<String, Object> data) {
         try {
             Long currentUserId = SecurityUtil.getCurrentUserId();
             Expert expert = expertService.getByUserId(currentUserId);

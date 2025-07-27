@@ -6,9 +6,6 @@ import com.qing.expert.entity.Expert;
 import com.qing.expert.service.ExpertService;
 import com.qing.expert.vo.ExpertDetailVO;
 import com.qing.expert.util.SecurityUtil;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -22,12 +19,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/expert")
 @RequiredArgsConstructor
-@Tag(name = "达人端接口", description = "达人申请、资料管理等接口")
-public class ExpertController {
-
-    private final ExpertService expertService;
-
-    @Operation(summary = "申请成为达人", description = "用户申请成为达人")
     @PostMapping("/apply")
     public Result<Void> applyExpert(@Validated @RequestBody ExpertSaveDTO saveDTO) {
         try {
@@ -56,8 +47,6 @@ public class ExpertController {
         }
     }
 
-    @Operation(summary = "获取当前达人信息", description = "获取当前登录用户的达人信息")
-    @GetMapping("/profile")
     public Result<ExpertDetailVO> getExpertProfile() {
         try {
             Long currentUserId = SecurityUtil.getCurrentUserId();
@@ -75,8 +64,6 @@ public class ExpertController {
         }
     }
 
-    @Operation(summary = "更新达人资料", description = "更新当前达人的资料信息")
-    @PutMapping("/profile")
     public Result<Void> updateExpertProfile(@Validated @RequestBody ExpertSaveDTO saveDTO) {
         try {
             Long currentUserId = SecurityUtil.getCurrentUserId();
@@ -102,8 +89,6 @@ public class ExpertController {
         }
     }
 
-    @Operation(summary = "检查用户是否为达人", description = "检查当前用户是否已经是达人")
-    @GetMapping("/check")
     public Result<Boolean> checkIsExpert() {
         try {
             Long currentUserId = SecurityUtil.getCurrentUserId();
@@ -115,11 +100,6 @@ public class ExpertController {
         }
     }
 
-    @Operation(summary = "更新达人在线状态", description = "更新达人的在线状态（接单开关）")
-    @PutMapping("/status")
-    public Result<Void> updateExpertStatus(@Parameter(description = "状态：0-下线，1-在线，2-忙碌") @RequestParam Integer status) {
-        try {
-            Long currentUserId = SecurityUtil.getCurrentUserId();
             Expert expert = expertService.getByUserId(currentUserId);
 
             if (expert == null) {

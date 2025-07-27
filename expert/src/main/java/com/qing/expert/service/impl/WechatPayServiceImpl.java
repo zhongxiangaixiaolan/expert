@@ -74,15 +74,13 @@ public class WechatPayServiceImpl implements WechatPayService {
             payVO.setPrepayId(prepayId);
             payVO.setPaymentAmount(dto.getPaymentAmount());
 
-            log.info("微信小程序支付订单创建成功，支付单号：{}，prepay_id：{}", paymentNo, prepayId);
-
             return payVO;
 
         } catch (HttpException e) {
             log.error("微信支付HTTP请求失败", e);
             throw new BusinessException("微信支付网络请求失败：" + e.getMessage());
         } catch (ServiceException e) {
-            log.error("微信支付API调用失败，错误码：{}，错误信息：{}", e.getErrorCode(), e.getErrorMessage(), e);
+            log.error("微信支付API调用失败，错误码：{}，错误信息：{}", e.getErrorCode(), e.getErrorMessage());
             throw new BusinessException("微信支付创建失败：" + e.getErrorMessage());
         } catch (ValidationException e) {
             log.error("微信支付签名验证失败", e);
@@ -101,7 +99,6 @@ public class WechatPayServiceImpl implements WechatPayService {
         // TODO: 实现APIv3的回调处理逻辑
         // APIv3使用JSON格式而不是XML格式
         // 需要验证回调签名并解析JSON数据
-        log.warn("微信支付回调处理功能待实现，当前使用查询接口验证支付状态");
         return false;
     }
 
@@ -110,7 +107,6 @@ public class WechatPayServiceImpl implements WechatPayService {
         try {
             // 检查微信支付是否可用
             if (!isWechatPayAvailable()) {
-                log.warn("微信支付服务未配置，无法查询支付状态：{}", paymentNo);
                 return new PaymentStatusResult(false, "UNAVAILABLE", null, "微信支付服务未配置");
             }
 

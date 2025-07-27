@@ -1,0 +1,196 @@
+version: '3.8'
+
+services:
+  # MySQL 数据库服务
+  mysql:
+    image: mysql:8.0
+    container_name: expert-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: Kp9mN2xR8vQ4wE7t
+      MYSQL_DATABASE: expert_db
+      MYSQL_USER: expert_user
+      MYSQL_PASSWORD: Zx3cV6bN9mQ2wE5r
+      TZ: Asia/Shanghai
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./expert/src/main/resources/sql:/docker-entrypoint-initdb.d:ro
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_0900_ai_ci
+      --default-time-zone=+08:00
+      --innodb_buffer_pool_size=1G
+      --innodb_log_buffer_size=64M
+      --innodb_flush_log_at_trx_commit=2
+      --max_connections=200
+      --max_connect_errors=1000
+      --wait_timeout=28800
+      --interactive_timeout=28800
+      --tmp_table_size=128M
+      --max_heap_table_size=128M
+      --log-bin=mysql-bin
+      --binlog_format=ROW
+      --binlog_expire_logs_seconds=604800
+      --max_binlog_size=100M
+      --slow_query_log=1
+      --long_query_time=2
+      --skip-name-resolve
+      --sql_mode=STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO
+    networks:
+      - expert-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pKp9mN2xR8vQ4wE7t"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # Redis 缓存服务
+  redis:
+    image: redis:7.0-alpine
+    container_name: expert-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: >
+      redis-server
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+      --timeout 300
+      --tcp-keepalive 60
+      --databases 16
+      --save 900 1
+      --save 300 10
+      --save 60 10000
+      --rdbcompression yes
+      --rdbchecksum yes
+      --stop-writes-on-bgsave-error yes
+    networks:
+      - expert-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # 后端应用服务
+  expert-backend:
+    build:
+      context: ./expert
+      dockerfile: Dockerfile
+    container_name: expert-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      # 服务器配置
+      SERVER_PORT: 9090
+      SERVER_CONTEXT_PATH: /api
+      APP_NAME: expert
+      
+      # 数据库配置
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: expert_db
+      DB_USERNAME: expert_user
+      DB_PASSWORD: Zx3cV6bN9mQ2wE5r
+      
+      # Redis配置
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ""
+      REDIS_DATABASE: 0
+      
+      # 日志配置
+      LOG_LEVEL: info
+      LOG_FILE_ENABLED: "true"
+      LOG_FILE_PATH: /app/logs/
+      LOG_SQL_ENABLED: "false"
+      LOG_ERROR_FILE_ENABLED: "true"
+      LOG_MAX_FILE_SIZE: 100MB
+      LOG_MAX_HISTORY: 30
+      LOG_TOTAL_SIZE_CAP: 3GB
+      
+      # JWT配置 (请在生产环境中更改)
+      JWT_SECRET: ${JWT_SECRET:-Lm8nB5vC2xZ9qW4eR7tY1uI6oP3aS0dF}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+      JWT_HEADER: Authorization
+      JWT_PREFIX: "Bearer "
+      
+      # 文件存储配置
+      UPLOAD_PATH: /app/uploads/
+      UPLOAD_MAX_SIZE: 10485760
+      UPLOAD_ALLOWED_TYPES: jpg,jpeg,png,gif,pdf,doc,docx
+      
+      # 微信支付配置 (生产环境需要配置)
+      WECHAT_PAY_MCHID: ${WECHAT_PAY_MCHID:-}
+      WECHAT_PAY_PRIVATE_KEY_PATH: ${WECHAT_PAY_PRIVATE_KEY_PATH:-}
+      WECHAT_PAY_MERCHANT_SERIAL_NUMBER: ${WECHAT_PAY_MERCHANT_SERIAL_NUMBER:-}
+      WECHAT_PAY_API_V3_KEY: ${WECHAT_PAY_API_V3_KEY:-}
+      
+      # 阿里云OSS配置 (可选)
+      OSS_ENDPOINT: ${OSS_ENDPOINT:-}
+      OSS_ACCESS_KEY_ID: ${OSS_ACCESS_KEY_ID:-}
+      OSS_ACCESS_KEY_SECRET: ${OSS_ACCESS_KEY_SECRET:-}
+      OSS_BUCKET_NAME: ${OSS_BUCKET_NAME:-}
+      OSS_DOMAIN: ${OSS_DOMAIN:-}
+      
+      # 微信支付配置
+      WECHAT_PAY_MCHID: ${WECHAT_PAY_MCHID:-}
+      WECHAT_PAY_PRIVATE_KEY_PATH: ${WECHAT_PAY_PRIVATE_KEY_PATH:-}
+      WECHAT_PAY_MERCHANT_SERIAL_NUMBER: ${WECHAT_PAY_MERCHANT_SERIAL_NUMBER:-}
+      WECHAT_PAY_API_V3_KEY: ${WECHAT_PAY_API_V3_KEY:-}
+      WECHAT_PAY_NOTIFY_URL: ${WECHAT_PAY_NOTIFY_URL:-https://yourdomain.com/api/user/payment/callback/wechat}
+      WECHAT_PAY_CONFIG_ENABLED: ${WECHAT_PAY_CONFIG_ENABLED:-false}
+
+      # 邮件配置 (可选)
+      MAIL_HOST: ${MAIL_HOST:-}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_FROM: ${MAIL_FROM:-}
+
+      # 短信配置 (可选)
+      SMS_ACCESS_KEY_ID: ${SMS_ACCESS_KEY_ID:-}
+      SMS_ACCESS_KEY_SECRET: ${SMS_ACCESS_KEY_SECRET:-}
+      SMS_SIGN_NAME: ${SMS_SIGN_NAME:-}
+      SMS_TEMPLATE_CODE: ${SMS_TEMPLATE_CODE:-}
+    ports:
+      - "9090:9090"
+    volumes:
+      - backend_uploads:/app/uploads
+      - backend_logs:/app/logs
+    networks:
+      - expert-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9090/api/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+
+# 网络配置
+networks:
+  expert-network:
+    driver: bridge
+
+# 数据卷配置
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+  backend_uploads:
+    driver: local
+  backend_logs:
+    driver: local
