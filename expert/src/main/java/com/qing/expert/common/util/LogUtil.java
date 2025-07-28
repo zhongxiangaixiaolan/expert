@@ -35,6 +35,20 @@ public class LogUtil {
     }
 
     /**
+     * 与 warn 含义相同的别名，兼容旧代码
+     */
+    public static void warning(String message, Object... args) {
+        warn(message, args);
+    }
+
+    /**
+     * 配置阶段日志，等价于 info
+     */
+    public static void config(String message, Object... args) {
+        log.info(message, args);
+    }
+
+    /**
      * 错误日志
      */
     public static void error(String message, Object... args) {
