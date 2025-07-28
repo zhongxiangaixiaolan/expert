@@ -24,7 +24,19 @@ import java.util.List;
 @RequestMapping("/api/admin/recommend-services")
 @RequiredArgsConstructor
 @Validated
+public class AdminRecommendServiceController {
 
+    private final RecommendServiceService recommendServiceService;
+
+    @GetMapping
+    public Result<IPage<RecommendServiceVO>> getRecommendServicePage(
+            @RequestParam(defaultValue = "1") Long current,
+            @RequestParam(defaultValue = "10") Long size,
+            @RequestParam(required = false) Long serviceId,
+            @RequestParam(required = false) String recommendType,
+            @RequestParam(required = false) Integer status,
+            @RequestParam(required = false) String expertName,
+            @RequestParam(required = false) String serviceName) {
         Page<RecommendServiceVO> page = new Page<>(current, size);
         IPage<RecommendServiceVO> result = recommendServiceService.getRecommendServicePage(
                 page, serviceId, recommendType, status, expertName, serviceName);

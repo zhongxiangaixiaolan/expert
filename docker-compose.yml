@@ -22,8 +22,8 @@ services:
       --character-set-server=utf8mb4
       --collation-server=utf8mb4_0900_ai_ci
       --default-time-zone=+08:00
-      --innodb_buffer_pool_size=1G
-      --innodb_log_buffer_size=64M
+      --innodb_buffer_pool_size=512M
+      --innodb_log_buffer_size=32M
       --innodb_flush_log_at_trx_commit=2
       --max_connections=200
       --max_connect_errors=1000
@@ -61,7 +61,7 @@ services:
       redis-server
       --appendonly yes
       --appendfsync everysec
-      --maxmemory 512mb
+      --maxmemory 256mb
       --maxmemory-policy allkeys-lru
       --timeout 300
       --tcp-keepalive 60
@@ -173,7 +173,7 @@ services:
     networks:
       - expert-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9090/api/actuator/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/api/v3/api-docs"]
       interval: 30s
       timeout: 10s
       retries: 5

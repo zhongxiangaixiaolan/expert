@@ -22,6 +22,10 @@ import java.util.Map;
 @RestController
 @RequestMapping("/admin/profile")
 @RequiredArgsConstructor
+public class AdminProfileController {
+
+    private final AdminService adminService;
+
     @GetMapping
     public Result<AdminProfileVO> getProfile() {
         try {
@@ -38,6 +42,8 @@ import java.util.Map;
         }
     }
 
+    @PutMapping
+    public Result<Void> updateProfile(@Validated @RequestBody AdminProfileUpdateDTO updateDTO) {
         try {
             Long currentAdminId = SecurityUtil.getCurrentUserId();
             if (currentAdminId == null) {
@@ -56,6 +62,7 @@ import java.util.Map;
         }
     }
 
+    @PutMapping("/password")
     public Result<Void> updatePassword(@Validated @RequestBody AdminPasswordUpdateDTO passwordDTO) {
         try {
             Long currentAdminId = SecurityUtil.getCurrentUserId();
@@ -75,7 +82,10 @@ import java.util.Map;
         }
     }
 
-    public Result<Map<String, Object>> uploadAvatar(
+    @PostMapping("/avatar")
+    public Result<Map<String, Object>> uploadAvatar(@RequestParam("file") MultipartFile file) {
+        try {
+            Long currentAdminId = SecurityUtil.getCurrentUserId();
             if (currentAdminId == null) {
                 return Result.error("未找到当前登录管理员信息");
             }

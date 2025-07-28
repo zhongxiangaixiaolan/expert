@@ -27,6 +27,9 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/files")
+public class FileController {
+
+    @Value("${expert.file.upload-path}")
     private String uploadPath;
 
     @Autowired
